@@ -617,6 +617,19 @@ function renderPreviewContent() {
 // INIT
 // =============================================
 load();
+
+// One-time migration: fix away team L↔R positions from old data
+if (!state._migratedLR) {
+  const LR_SWAP = { LH:'RH', RH:'LH', LB:'RB', RB:'LB', LM:'RM', RM:'LM', LS:'RS', RS:'LS' };
+  state.matchups.forEach(m => {
+    m.away.players.forEach(p => {
+      if (LR_SWAP[p.pos]) p.pos = LR_SWAP[p.pos];
+    });
+  });
+  state._migratedLR = true;
+  save();
+}
+
 if (state.ui.view) showView(state.ui.view);
 else showView('list');
 
