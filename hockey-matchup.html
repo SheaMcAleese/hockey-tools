@@ -36,93 +36,93 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
 .section { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
 
-/* MATCHUP LIST */
 .match-card { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 14px; margin-bottom: 8px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
 .match-card:hover { border-color: #d4a843; }
 .match-card .info h4 { color: #fff; font-size: 14px; margin-bottom: 2px; }
 .match-card .info small { color: #889; font-size: 12px; }
 
-/* EDITOR LAYOUT */
 .editor-layout { display: flex; gap: 16px; align-items: flex-start; }
 .editor-main { flex: 1; min-width: 0; }
 .editor-sidebar { width: 220px; flex-shrink: 0; }
 
-/* POSITION CATEGORY BARS */
-.pos-bar { display: flex; height: 36px; border-radius: 4px; overflow: hidden; }
+.pos-bar { display: flex; min-height: 36px; border-radius: 4px; overflow: hidden; }
 .pos-bar.top { margin-bottom: 0; border-radius: 4px 4px 0 0; }
 .pos-bar.bottom { margin-top: 0; border-radius: 0 0 4px 4px; }
-.pos-bar .pos-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; letter-spacing: 1px; border-right: 1px solid rgba(0,0,0,.2); cursor: pointer; transition: opacity .15s; }
+.pos-bar .pos-seg { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; letter-spacing: 1px; border-right: 1px solid rgba(0,0,0,.2); cursor: pointer; transition: opacity .15s; padding: 3px 2px; line-height: 1.2; }
 .pos-bar .pos-seg:hover { opacity: .7; }
 .pos-bar .pos-seg:last-child { border-right: none; }
+.pos-bar .pos-seg .seg-name { font-size: 8px; font-weight: 600; opacity: .8; margin-top: 1px; }
 
-/* HOCKEY FIELD */
 .field-wrap { position: relative; width: 100%; aspect-ratio: 1.5 / 1; background: #4a8c3f; overflow: hidden; border-left: 3px solid #2d6627; border-right: 3px solid #2d6627; }
 .field-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
-/* PLAYER CHIPS ON FIELD */
 .mu-player { position: absolute; transform: translate(-50%, -50%); cursor: grab; user-select: none; z-index: 10; transition: box-shadow .15s; }
 .mu-player:active { cursor: grabbing; z-index: 100; }
 .mu-player:hover { z-index: 50; }
 .mu-player .mu-label { font-size: 12px; font-weight: 700; padding: 5px 14px; border-radius: 3px; white-space: nowrap; text-align: center; min-width: 60px; box-shadow: 0 2px 6px rgba(0,0,0,.3); border: 2px solid; line-height: 1.3; }
 .mu-player .mu-label .mu-name { font-size: 9px; font-weight: 600; opacity: .75; display: block; }
 
-/* SIDEBAR */
 .sidebar-section { margin-bottom: 16px; }
 .sidebar-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #d4a843; text-transform: uppercase; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #334; }
 .sidebar-player { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 4px; user-select: none; font-size: 12px; margin-bottom: 2px; }
 .sidebar-player:hover { background: #1a2a4a; }
 .sidebar-player .sp-pos { font-weight: 700; color: #889; width: 28px; font-size: 10px; }
 
-/* TEAM CONFIG */
 .team-config { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; flex-wrap: wrap; }
 .team-config .tc-group { display: flex; flex-direction: column; }
 .team-config .tc-group label { font-size: 11px; }
 .team-config .tc-group input:not([type="color"]) { width: 140px; }
 
-/* PRESET FORMATIONS */
 .formation-presets { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
 .formation-presets button { padding: 3px 8px; font-size: 11px; background: #0d1b2a; border: 1px solid #334; color: #aaa; border-radius: 3px; cursor: pointer; }
 .formation-presets button:hover { border-color: #d4a843; color: #fff; }
 
-/* COUNTRY PRESET BUTTONS */
 .country-presets { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
 .country-presets button { padding: 3px 8px; font-size: 10px; border: 1px solid #334; border-radius: 3px; cursor: pointer; font-weight: 600; transition: all .15s; }
 .country-presets button:hover { transform: scale(1.05); }
 
-/* ROSTER */
-.roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
 .roster-cat { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 14px; }
 .roster-cat h3 { font-size: 14px; color: #d4a843; margin-bottom: 10px; }
 .roster-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; border-radius: 4px; font-size: 13px; margin-bottom: 3px; }
 .roster-item:hover { background: #1a2a4a; }
 .roster-item .ri-pos { font-size: 10px; font-weight: 700; color: #889; margin-right: 6px; }
-.roster-add { display: flex; gap: 4px; margin-top: 8px; }
-.roster-add input { flex: 1; }
+.roster-item .ri-country { font-size: 9px; color: #667; margin-left: 4px; }
+.roster-add { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.roster-add input { flex: 1; min-width: 80px; }
 .roster-add select { width: 60px; }
 
-/* ROSTER PICKER IN EDITOR */
 .roster-picker { margin-top: 6px; }
-.roster-picker select { width: 100%; margin-bottom: 4px; }
 
-/* OUTPUT PREVIEW */
+.color-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 8px; }
+.color-row .cg { display: flex; flex-direction: column; }
+.color-row .cg label { font-size: 10px; color: #667; }
+
+/* Toggle switch */
+.toggle-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.toggle-row label { margin: 0; font-size: 13px; cursor: pointer; }
+.toggle { position: relative; width: 42px; height: 22px; background: #334; border-radius: 11px; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+.toggle.on { background: #d4a843; }
+.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: left .2s; }
+.toggle.on::after { left: 22px; }
+
 .output-wrap { background: #fff; max-width: 1000px; margin: 0 auto 30px; overflow: hidden; }
 .output-field { position: relative; width: 100%; aspect-ratio: 1.5 / 1; background: #4a8c3f; overflow: hidden; }
 .output-field .field-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .out-player { position: absolute; transform: translate(-50%, -50%); }
 .out-player .out-label { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 3px; white-space: nowrap; text-align: center; min-width: 55px; border: 2px solid; box-shadow: 0 1px 4px rgba(0,0,0,.3); line-height: 1.3; }
 .out-player .out-label .out-name { font-size: 8px; font-weight: 600; opacity: .75; display: block; }
-.out-pos-bar { display: flex; height: 32px; }
-.out-pos-bar .pos-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; letter-spacing: 1px; border-right: 1px solid rgba(0,0,0,.2); }
+.out-pos-bar { display: flex; min-height: 32px; }
+.out-pos-bar .pos-seg { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; letter-spacing: 1px; border-right: 1px solid rgba(0,0,0,.2); padding: 2px; line-height: 1.2; }
 .out-pos-bar .pos-seg:last-child { border-right: none; }
+.out-pos-bar .pos-seg .seg-name { font-size: 7px; font-weight: 600; opacity: .8; margin-top: 1px; }
 .output-title { text-align: center; padding: 10px; background: #1a1a1a; }
 .output-title h3 { font-size: 16px; font-weight: 900; color: #d4a843 !important; letter-spacing: 2px; }
 
-/* COLOR ROW */
-.color-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 8px; }
-.color-row .cg { display: flex; flex-direction: column; }
-.color-row .cg label { font-size: 10px; color: #667; }
+/* Roster country filter */
+.roster-filter { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.roster-filter select { width: 180px; }
 
-/* PRINT */
 @media print {
   body { background: #fff; }
   nav, .view:not(#view-preview), .no-print { display: none !important; }
@@ -153,42 +153,37 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 const STORE_KEY = 'hockeyMatchup';
 const POSITIONS = ['GK','LB','RB','LH','RH','CB','CM','LM','RM','LS','CS','RS'];
 const POS_CATS = ['GK','D','MF','S'];
-const POS_CAT_POSITIONS = {
-  GK: ['GK'],
-  D: ['LB','RB','LH','RH','CB'],
-  MF: ['CM','LM','RM'],
-  S: ['LS','CS','RS']
-};
-const POS_TO_CAT = { GK:'GK', LB:'D', RB:'D', LH:'D', RH:'D', CB:'D', FM:'D', FD:'D', WH:'D', CM:'MF', LM:'MF', RM:'MF', LS:'S', CS:'S', RS:'S' };
+const POS_CAT_POSITIONS = { GK:['GK'], D:['LB','RB','LH','RH','CB'], MF:['CM','LM','RM'], S:['LS','CS','RS'] };
+const POS_TO_CAT = { GK:'GK', LB:'D', RB:'D', LH:'D', RH:'D', CB:'D', CM:'MF', LM:'MF', RM:'MF', LS:'S', CS:'S', RS:'S' };
+const LR_SWAP = { LH:'RH', RH:'LH', LB:'RB', RB:'LB', LM:'RM', RM:'LM', LS:'RS', RS:'LS' };
+const COUNTRY_NAMES = ['New Zealand','Australia','Netherlands','Belgium','India','Germany','England','Argentina','Spain','South Korea','Malaysia','France','Japan','Ireland','South Africa','Pakistan','Great Britain','Canada','Chile','USA'];
 
-// International hockey team colour presets
 const TEAM_COLORS = {
-  'New Zealand':    { chipBg:'#000000', chipText:'#ffffff', chipBorder:'#333333', barBg:'#000000', barText:'#ffffff' },
-  'Australia':      { chipBg:'#FFD700', chipText:'#004225', chipBorder:'#C9A800', barBg:'#004225', barText:'#FFD700' },
-  'Netherlands':    { chipBg:'#FF6600', chipText:'#ffffff', chipBorder:'#CC5200', barBg:'#FF6600', barText:'#ffffff' },
-  'Belgium':        { chipBg:'#E30613', chipText:'#FFD700', chipBorder:'#B0040F', barBg:'#E30613', barText:'#FFD700' },
-  'India':          { chipBg:'#0066CC', chipText:'#ffffff', chipBorder:'#004C99', barBg:'#0066CC', barText:'#ffffff' },
-  'Germany':        { chipBg:'#ffffff', chipText:'#000000', chipBorder:'#cccccc', barBg:'#000000', barText:'#ffffff' },
-  'England':        { chipBg:'#ffffff', chipText:'#002B5C', chipBorder:'#cccccc', barBg:'#002B5C', barText:'#ffffff' },
-  'Argentina':      { chipBg:'#75AADB', chipText:'#ffffff', chipBorder:'#5A8BB8', barBg:'#75AADB', barText:'#ffffff' },
-  'Spain':          { chipBg:'#AA151B', chipText:'#F1BF00', chipBorder:'#880E13', barBg:'#AA151B', barText:'#F1BF00' },
-  'South Korea':    { chipBg:'#ffffff', chipText:'#003478', chipBorder:'#cccccc', barBg:'#003478', barText:'#ffffff' },
-  'Malaysia':       { chipBg:'#010066', chipText:'#FFD700', chipBorder:'#000044', barBg:'#FFD700', barText:'#010066' },
-  'France':         { chipBg:'#002395', chipText:'#ffffff', chipBorder:'#001A6E', barBg:'#002395', barText:'#ffffff' },
-  'Japan':          { chipBg:'#ffffff', chipText:'#BC002D', chipBorder:'#cccccc', barBg:'#BC002D', barText:'#ffffff' },
-  'Ireland':        { chipBg:'#009A49', chipText:'#ffffff', chipBorder:'#007A3A', barBg:'#009A49', barText:'#ffffff' },
-  'South Africa':   { chipBg:'#007749', chipText:'#FFB612', chipBorder:'#005C38', barBg:'#007749', barText:'#FFB612' },
-  'Pakistan':       { chipBg:'#01411C', chipText:'#ffffff', chipBorder:'#002E13', barBg:'#01411C', barText:'#ffffff' },
+  'New Zealand':   { chipBg:'#000000', chipText:'#ffffff', chipBorder:'#333333', barBg:'#000000', barText:'#ffffff' },
+  'Australia':     { chipBg:'#FFD700', chipText:'#004225', chipBorder:'#C9A800', barBg:'#004225', barText:'#FFD700' },
+  'Netherlands':   { chipBg:'#FF6600', chipText:'#ffffff', chipBorder:'#CC5200', barBg:'#FF6600', barText:'#ffffff' },
+  'Belgium':       { chipBg:'#E30613', chipText:'#FFD700', chipBorder:'#B0040F', barBg:'#E30613', barText:'#FFD700' },
+  'India':         { chipBg:'#0066CC', chipText:'#ffffff', chipBorder:'#004C99', barBg:'#0066CC', barText:'#ffffff' },
+  'Germany':       { chipBg:'#ffffff', chipText:'#000000', chipBorder:'#cccccc', barBg:'#000000', barText:'#ffffff' },
+  'England':       { chipBg:'#ffffff', chipText:'#002B5C', chipBorder:'#cccccc', barBg:'#002B5C', barText:'#ffffff' },
+  'Argentina':     { chipBg:'#75AADB', chipText:'#ffffff', chipBorder:'#5A8BB8', barBg:'#75AADB', barText:'#ffffff' },
+  'Spain':         { chipBg:'#AA151B', chipText:'#F1BF00', chipBorder:'#880E13', barBg:'#AA151B', barText:'#F1BF00' },
+  'South Korea':   { chipBg:'#ffffff', chipText:'#003478', chipBorder:'#cccccc', barBg:'#003478', barText:'#ffffff' },
+  'Malaysia':      { chipBg:'#010066', chipText:'#FFD700', chipBorder:'#000044', barBg:'#FFD700', barText:'#010066' },
+  'France':        { chipBg:'#002395', chipText:'#ffffff', chipBorder:'#001A6E', barBg:'#002395', barText:'#ffffff' },
+  'Japan':         { chipBg:'#ffffff', chipText:'#BC002D', chipBorder:'#cccccc', barBg:'#BC002D', barText:'#ffffff' },
+  'Ireland':       { chipBg:'#009A49', chipText:'#ffffff', chipBorder:'#007A3A', barBg:'#009A49', barText:'#ffffff' },
+  'South Africa':  { chipBg:'#007749', chipText:'#FFB612', chipBorder:'#005C38', barBg:'#007749', barText:'#FFB612' },
+  'Pakistan':      { chipBg:'#01411C', chipText:'#ffffff', chipBorder:'#002E13', barBg:'#01411C', barText:'#ffffff' },
   'Great Britain':  { chipBg:'#012169', chipText:'#ffffff', chipBorder:'#001244', barBg:'#012169', barText:'#ffffff' },
-  'Canada':         { chipBg:'#FF0000', chipText:'#ffffff', chipBorder:'#CC0000', barBg:'#FF0000', barText:'#ffffff' },
-  'Chile':          { chipBg:'#D52B1E', chipText:'#ffffff', chipBorder:'#A82218', barBg:'#D52B1E', barText:'#ffffff' },
-  'USA':            { chipBg:'#002868', chipText:'#ffffff', chipBorder:'#001A44', barBg:'#002868', barText:'#ffffff' }
+  'Canada':        { chipBg:'#FF0000', chipText:'#ffffff', chipBorder:'#CC0000', barBg:'#FF0000', barText:'#ffffff' },
+  'Chile':         { chipBg:'#D52B1E', chipText:'#ffffff', chipBorder:'#A82218', barBg:'#D52B1E', barText:'#ffffff' },
+  'USA':           { chipBg:'#002868', chipText:'#ffffff', chipBorder:'#001A44', barBg:'#002868', barText:'#ffffff' }
 };
 
-const DEFAULT_HOME_COLORS = { chipBg:'#ffffff', chipText:'#111111', chipBorder:'#cccccc', barBg:'#c9a94e', barText:'#000000' };
-const DEFAULT_AWAY_COLORS = { chipBg:'#c87533', chipText:'#ffffff', chipBorder:'#a05a20', barBg:'#111111', barText:'#ffffff' };
+const DEFAULT_HOME = { chipBg:'#ffffff', chipText:'#111111', chipBorder:'#cccccc', barBg:'#c9a94e', barText:'#000000' };
+const DEFAULT_AWAY = { chipBg:'#c87533', chipText:'#ffffff', chipBorder:'#a05a20', barBg:'#111111', barText:'#ffffff' };
 
-// Default formation positions (x%, y%) for a team attacking RIGHT
 const FORMATION_PRESETS = {
   '1-4-3-3': [
     { pos:'GK', x:5, y:50 },
@@ -218,22 +213,20 @@ const FORMATION_PRESETS = {
 };
 
 let state = { matchups: [], roster: [], ui: { view: 'list', currentId: null } };
-let dragState = { playerId: null, team: null };
+let dragState = { team: null, index: undefined };
 
 function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
 function load() { try { const r = localStorage.getItem(STORE_KEY); if (r) { const d = JSON.parse(r); Object.assign(state, d); if (!state.roster) state.roster = []; } } catch(e) {} }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function getTeamColors(m, team) {
-  const t = m[team];
-  return {
-    chipBg: t.chipBg || (team === 'home' ? DEFAULT_HOME_COLORS.chipBg : DEFAULT_AWAY_COLORS.chipBg),
-    chipText: t.chipText || (team === 'home' ? DEFAULT_HOME_COLORS.chipText : DEFAULT_AWAY_COLORS.chipText),
-    chipBorder: t.chipBorder || (team === 'home' ? DEFAULT_HOME_COLORS.chipBorder : DEFAULT_AWAY_COLORS.chipBorder),
-    barBg: t.barBg || (team === 'home' ? DEFAULT_HOME_COLORS.barBg : DEFAULT_AWAY_COLORS.barBg),
-    barText: t.barText || (team === 'home' ? DEFAULT_HOME_COLORS.barText : DEFAULT_AWAY_COLORS.barText)
-  };
+// Ensure pos bar segment is object format
+function seg(s) { return typeof s === 'string' ? { label: s, name: '' } : s; }
+function ensurePosBar(bar) { return (bar || []).map(seg); }
+
+function tc(m, team) {
+  const t = m[team], d = team === 'home' ? DEFAULT_HOME : DEFAULT_AWAY;
+  return { chipBg: t.chipBg||d.chipBg, chipText: t.chipText||d.chipText, chipBorder: t.chipBorder||d.chipBorder, barBg: t.barBg||d.barBg, barText: t.barText||d.barText };
 }
 
 function fieldSVG() {
@@ -251,11 +244,19 @@ function fieldSVG() {
   </svg>`;
 }
 
+// Get roster players filtered by country (case-insensitive partial match)
+function rosterForTeam(teamName) {
+  if (!teamName) return state.roster;
+  const tn = teamName.toLowerCase();
+  const matched = state.roster.filter(p => p.country && p.country.toLowerCase() === tn);
+  return matched.length > 0 ? matched : state.roster;
+}
+
 function showView(v) {
   state.ui.view = v;
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  const views = { list: 0, editor: 1, roster: 2, preview: 3 };
+  const views = { list:0, editor:1, roster:2, preview:3 };
   const viewEl = document.getElementById('view-' + v);
   if (viewEl) viewEl.classList.add('active');
   const navBtns = document.querySelectorAll('nav button');
@@ -275,14 +276,15 @@ function renderList() {
   let html = `<h2>Match Lineups</h2>
     <div class="toolbar">
       <button class="btn btn-primary" onclick="createMatchup()">+ New Matchup</button>
+      <button class="btn btn-secondary" onclick="createSingleTeam()">+ Single Team</button>
     </div>`;
-
   if (state.matchups.length === 0) {
     html += `<p style="color:#889; text-align:center; padding:40px;">No matchups yet.</p>`;
   }
   state.matchups.forEach(m => {
+    const label = m.singleTeam ? esc(m.home.name) + ' (single)' : esc(m.home.name) + ' vs ' + esc(m.away.name);
     html += `<div class="match-card" onclick="openMatchup('${m.id}')">
-      <div class="info"><h4>${esc(m.title)}</h4><small>${esc(m.home.name)} vs ${esc(m.away.name)}</small></div>
+      <div class="info"><h4>${esc(m.title)}</h4><small>${label}</small></div>
       <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
         <button class="btn btn-secondary btn-sm" onclick="dupMatchup('${m.id}')">Dup</button>
         <button class="btn btn-danger btn-sm" onclick="delMatchup('${m.id}')">×</button>
@@ -294,107 +296,120 @@ function renderList() {
 
 function createMatchup() {
   const m = {
-    id: uid(),
-    title: 'Match Lineup',
-    home: { name: 'NZ', players: [], ...DEFAULT_HOME_COLORS },
-    away: { name: 'Opposition', players: [], ...DEFAULT_AWAY_COLORS },
-    homePosBar: ['GK','D','D','D','D','MF','MF','MF','S','S','S'],
-    awayPosBar: ['S','S','S','MF','MF','MF','D','D','D','D','GK']
+    id: uid(), title: 'Match Lineup', singleTeam: false,
+    home: { name: 'NZ', players: [], ...DEFAULT_HOME },
+    away: { name: 'Opposition', players: [], ...DEFAULT_AWAY },
+    homePosBar: ['GK','D','D','D','D','MF','MF','MF','S','S','S'].map(l => ({label:l, name:''})),
+    awayPosBar: ['S','S','S','MF','MF','MF','D','D','D','D','GK'].map(l => ({label:l, name:''}))
   };
-  state.matchups.push(m);
-  state.ui.currentId = m.id;
-  save();
-  showView('editor');
+  state.matchups.push(m); state.ui.currentId = m.id; save(); showView('editor');
+}
+
+function createSingleTeam() {
+  const m = {
+    id: uid(), title: 'Team Lineup', singleTeam: true,
+    home: { name: 'NZ', players: [], ...DEFAULT_HOME },
+    away: { name: '', players: [], ...DEFAULT_AWAY },
+    homePosBar: ['GK','D','D','D','D','MF','MF','MF','S','S','S'].map(l => ({label:l, name:''})),
+    awayPosBar: []
+  };
+  state.matchups.push(m); state.ui.currentId = m.id; save(); showView('editor');
 }
 
 function openMatchup(id) { state.ui.currentId = id; save(); showView('editor'); }
-function dupMatchup(id) {
-  const o = state.matchups.find(m=>m.id===id); if (!o) return;
-  const c = JSON.parse(JSON.stringify(o)); c.id = uid(); c.title += ' (copy)';
-  state.matchups.push(c); save(); renderList();
-}
-function delMatchup(id) {
-  if (!confirm('Delete?')) return;
-  state.matchups = state.matchups.filter(m=>m.id!==id);
-  if (state.ui.currentId===id) state.ui.currentId = null;
-  save(); renderList();
-}
+function dupMatchup(id) { const o = state.matchups.find(m=>m.id===id); if (!o) return; const c = JSON.parse(JSON.stringify(o)); c.id = uid(); c.title += ' (copy)'; state.matchups.push(c); save(); renderList(); }
+function delMatchup(id) { if (!confirm('Delete?')) return; state.matchups = state.matchups.filter(m=>m.id!==id); if (state.ui.currentId===id) state.ui.currentId = null; save(); renderList(); }
 
 // =============================================
 // ROSTER VIEW
 // =============================================
+let rosterCountryFilter = '';
+
 function renderRoster() {
   const el = document.getElementById('view-roster');
+  const countries = [...new Set(state.roster.map(p => p.country).filter(Boolean))].sort();
+
   let html = `<h2>Player Roster</h2>
-    <p style="color:#889; font-size:13px; margin-bottom:16px;">Add players here once, then quickly select them when building lineups.</p>`;
+    <p style="color:#889; font-size:13px; margin-bottom:16px;">Add players with their country. They auto-filter when building lineups against that country.</p>`;
+
+  if (countries.length > 0) {
+    html += `<div class="roster-filter">
+      <label style="margin:0;font-size:12px;">Filter by country:</label>
+      <select onchange="rosterCountryFilter=this.value;renderRoster();">
+        <option value="">All countries</option>
+        ${countries.map(c => `<option value="${esc(c)}" ${rosterCountryFilter===c?'selected':''}>${esc(c)}</option>`).join('')}
+      </select>
+      <span style="font-size:11px;color:#667;">${state.roster.length} total players</span>
+    </div>`;
+  }
+
+  html += `<datalist id="country-list">${COUNTRY_NAMES.map(c => `<option value="${esc(c)}">`).join('')}</datalist>`;
 
   html += `<div class="roster-grid">`;
   POS_CATS.forEach(cat => {
     const catName = { GK:'Goalkeepers', D:'Defenders', MF:'Midfielders', S:'Strikers' }[cat];
     const positions = POS_CAT_POSITIONS[cat];
-    const players = state.roster.filter(p => POS_TO_CAT[p.pos] === cat);
+    let players = state.roster.filter(p => POS_TO_CAT[p.pos] === cat);
+    if (rosterCountryFilter) players = players.filter(p => p.country === rosterCountryFilter);
 
-    html += `<div class="roster-cat">
-      <h3>${catName}</h3>`;
-
-    players.forEach((p, i) => {
+    html += `<div class="roster-cat"><h3>${catName} (${players.length})</h3>`;
+    players.forEach(p => {
       const ri = state.roster.indexOf(p);
       html += `<div class="roster-item">
-        <span><span class="ri-pos">${esc(p.pos)}</span> ${esc(p.name)}</span>
+        <span><span class="ri-pos">${esc(p.pos)}</span> ${esc(p.name)}${p.country ? `<span class="ri-country">[${esc(p.country)}]</span>` : ''}</span>
         <button class="btn btn-danger btn-sm" style="padding:2px 6px;font-size:10px;" onclick="removeRosterPlayer(${ri})">×</button>
       </div>`;
     });
 
     html += `<div class="roster-add">
-      <select id="roster-pos-${cat}">
-        ${positions.map(p => `<option value="${p}">${p}</option>`).join('')}
-      </select>
-      <input id="roster-name-${cat}" placeholder="Player name" onkeydown="if(event.key==='Enter')addRosterPlayer('${cat}')">
+      <select id="roster-pos-${cat}">${positions.map(p => `<option value="${p}">${p}</option>`).join('')}</select>
+      <input id="roster-name-${cat}" placeholder="Name" onkeydown="if(event.key==='Enter')addRosterPlayer('${cat}')">
+      <input id="roster-country-${cat}" placeholder="Country" list="country-list" style="width:100px;" value="${esc(rosterCountryFilter)}">
       <button class="btn btn-primary btn-sm" onclick="addRosterPlayer('${cat}')">+</button>
-    </div>`;
-
-    html += `</div>`;
+    </div></div>`;
   });
   html += `</div>`;
-
   el.innerHTML = html;
 }
 
 function addRosterPlayer(cat) {
-  const posEl = document.getElementById('roster-pos-' + cat);
+  const pos = document.getElementById('roster-pos-' + cat).value;
   const nameEl = document.getElementById('roster-name-' + cat);
-  const pos = posEl.value;
+  const countryEl = document.getElementById('roster-country-' + cat);
   const name = nameEl.value.trim();
   if (!name) return;
-  state.roster.push({ id: uid(), pos, name: name.toUpperCase() });
-  nameEl.value = '';
-  nameEl.focus();
-  save();
-  renderRoster();
+  state.roster.push({ id: uid(), pos, name: name.toUpperCase(), country: countryEl.value.trim() || '' });
+  nameEl.value = ''; nameEl.focus(); save(); renderRoster();
 }
 
-function removeRosterPlayer(index) {
-  state.roster.splice(index, 1);
-  save();
-  renderRoster();
-}
+function removeRosterPlayer(index) { state.roster.splice(index, 1); save(); renderRoster(); }
 
 // =============================================
 // EDITOR VIEW
 // =============================================
 function getCurrent() { return state.matchups.find(m=>m.id===state.ui.currentId); }
 
+function renderPosBarHtml(bar, team, colors) {
+  return ensurePosBar(bar).map((s, i) => {
+    const nameHtml = s.name ? `<span class="seg-name">${esc(s.name)}</span>` : '';
+    return `<div class="pos-seg" style="background:${esc(colors.barBg)};color:${esc(colors.barText)};" onclick="pickPosBarPlayer('${team}',${i})">${esc(s.label)}${nameHtml}</div>`;
+  }).join('');
+}
+
 function renderEditor() {
   const el = document.getElementById('view-editor');
   const m = getCurrent();
   if (!m) {
     if (state.matchups.length > 0) { state.ui.currentId = state.matchups[0].id; save(); renderEditor(); return; }
-    el.innerHTML = `<p style="color:#889;">Create a matchup first.</p>`;
-    return;
+    el.innerHTML = `<p style="color:#889;">Create a matchup first.</p>`; return;
   }
+  // Ensure pos bars are object format
+  m.homePosBar = ensurePosBar(m.homePosBar);
+  if (!m.singleTeam) m.awayPosBar = ensurePosBar(m.awayPosBar);
 
-  const hc = getTeamColors(m, 'home');
-  const ac = getTeamColors(m, 'away');
+  const hc = tc(m, 'home');
+  const ac = tc(m, 'away');
+  const single = m.singleTeam;
 
   let html = `<div class="toolbar">
     <button class="btn btn-secondary btn-sm" onclick="showView('list')">← Back</button>
@@ -402,133 +417,71 @@ function renderEditor() {
     <button class="btn btn-primary btn-sm" onclick="showView('preview')">Preview / Print →</button>
   </div>`;
 
-  // ---- HOME TEAM CONFIG ----
+  // Single team toggle
+  html += `<div class="toggle-row">
+    <div class="toggle ${single?'on':''}" onclick="toggleSingleTeam()"></div>
+    <label onclick="toggleSingleTeam()">Single team mode ${single ? '(showing one team across full pitch)' : '(showing two teams)'}</label>
+  </div>`;
+
+  // ---- HOME TEAM ----
   html += `<div class="section">
-    <h3 style="font-size:14px; margin-bottom:10px;"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${esc(hc.chipBg)};border:1px solid ${esc(hc.chipBorder)};vertical-align:middle;margin-right:6px;"></span> Home Team (attacks right)</h3>
+    <h3 style="font-size:14px; margin-bottom:10px;"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${esc(hc.chipBg)};border:1px solid ${esc(hc.chipBorder)};vertical-align:middle;margin-right:6px;"></span> ${single ? 'Team' : 'Home Team (attacks right)'}</h3>
     <div class="team-config">
       <div class="tc-group"><label>Team Name</label><input value="${esc(m.home.name)}" onchange="getCurrent().home.name=this.value;save();renderEditor();"></div>
-    </div>`;
-
-  // Country colour presets
-  html += `<div style="font-size:11px; color:#667; margin-bottom:4px;">Team colour preset:</div>
-    <div class="country-presets">
-      ${Object.entries(TEAM_COLORS).map(([name, c]) =>
-        `<button style="background:${c.chipBg};color:${c.chipText};border-color:${c.chipBorder};" onclick="applyTeamColor('home','${esc(name)}')">${esc(name)}</button>`
-      ).join('')}
-    </div>`;
-
-  // Custom colour pickers
-  html += `<div class="color-row">
+    </div>
+    <div style="font-size:11px; color:#667; margin-bottom:4px;">Team colour preset:</div>
+    <div class="country-presets">${Object.entries(TEAM_COLORS).map(([name, c]) =>
+      `<button style="background:${c.chipBg};color:${c.chipText};border-color:${c.chipBorder};" onclick="applyTeamColor('home','${esc(name)}')">${esc(name)}</button>`
+    ).join('')}</div>
+    <div class="color-row">
       <div class="cg"><label>Chip</label><input type="color" value="${esc(hc.chipBg)}" onchange="getCurrent().home.chipBg=this.value;save();renderEditor();"></div>
       <div class="cg"><label>Text</label><input type="color" value="${esc(hc.chipText)}" onchange="getCurrent().home.chipText=this.value;save();renderEditor();"></div>
       <div class="cg"><label>Border</label><input type="color" value="${esc(hc.chipBorder)}" onchange="getCurrent().home.chipBorder=this.value;save();renderEditor();"></div>
       <div class="cg"><label>Bar</label><input type="color" value="${esc(hc.barBg)}" onchange="getCurrent().home.barBg=this.value;save();renderEditor();"></div>
       <div class="cg"><label>Bar Text</label><input type="color" value="${esc(hc.barText)}" onchange="getCurrent().home.barText=this.value;save();renderEditor();"></div>
     </div>`;
-
-  // Add player (manual + roster)
-  html += `<div class="team-config">
-      <div class="tc-group"><label>Add Player (manual)</label>
-        <div style="display:flex;gap:4px;">
-          <input id="home-new-pos" placeholder="POS" style="width:50px;" value="CM">
-          <input id="home-new-name" placeholder="Name" style="width:120px;" onkeydown="if(event.key==='Enter')addPlayer('home')">
-          <button class="btn btn-primary btn-sm" onclick="addPlayer('home')">+</button>
-        </div>
-      </div>
-    </div>`;
-
-  // Roster picker
-  if (state.roster.length > 0) {
-    html += `<div class="roster-picker">
-      <label style="font-size:11px;">Add from roster:</label>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;">`;
-    POS_CATS.forEach(cat => {
-      const players = state.roster.filter(p => POS_TO_CAT[p.pos] === cat);
-      if (players.length === 0) return;
-      html += `<select onchange="addFromRoster('home',this.value);this.selectedIndex=0;" style="width:auto;font-size:11px;">
-        <option value="">${cat}</option>
-        ${players.map(p => `<option value="${esc(p.id)}">${esc(p.pos)} ${esc(p.name)}</option>`).join('')}
-      </select>`;
-    });
-    html += `</div></div>`;
-  }
-
-  // Formation presets
+  html += renderRosterPicker('home', m.home.name);
   html += `<div class="formation-presets" style="margin-top:8px;">
       <span style="font-size:11px;color:#889;margin-right:4px;">Formation:</span>
       ${Object.keys(FORMATION_PRESETS).map(f => `<button onclick="applyPreset('home','${f}')">${f}</button>`).join('')}
     </div>
-    <div style="font-size:11px; color:#667; margin-bottom:4px;">Position bar (comma-separated):</div>
-    <input value="${m.homePosBar.join(',')}" onchange="getCurrent().homePosBar=this.value.split(',').map(s=>s.trim());save();renderEditor();" style="width:300px; font-size:12px;">
   </div>`;
 
-  // ---- AWAY TEAM CONFIG ----
-  html += `<div class="section">
-    <h3 style="font-size:14px; margin-bottom:10px;"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${esc(ac.chipBg)};border:1px solid ${esc(ac.chipBorder)};vertical-align:middle;margin-right:6px;"></span> Away Team (attacks left)</h3>
-    <div class="team-config">
-      <div class="tc-group"><label>Team Name</label><input value="${esc(m.away.name)}" onchange="getCurrent().away.name=this.value;save();renderEditor();"></div>
-    </div>`;
-
-  html += `<div style="font-size:11px; color:#667; margin-bottom:4px;">Team colour preset:</div>
-    <div class="country-presets">
-      ${Object.entries(TEAM_COLORS).map(([name, c]) =>
+  // ---- AWAY TEAM (hidden in single mode) ----
+  if (!single) {
+    html += `<div class="section">
+      <h3 style="font-size:14px; margin-bottom:10px;"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${esc(ac.chipBg)};border:1px solid ${esc(ac.chipBorder)};vertical-align:middle;margin-right:6px;"></span> Away Team (attacks left)</h3>
+      <div class="team-config">
+        <div class="tc-group"><label>Team Name</label><input value="${esc(m.away.name)}" onchange="getCurrent().away.name=this.value;save();renderEditor();"></div>
+      </div>
+      <div style="font-size:11px; color:#667; margin-bottom:4px;">Team colour preset:</div>
+      <div class="country-presets">${Object.entries(TEAM_COLORS).map(([name, c]) =>
         `<button style="background:${c.chipBg};color:${c.chipText};border-color:${c.chipBorder};" onclick="applyTeamColor('away','${esc(name)}')">${esc(name)}</button>`
-      ).join('')}
-    </div>`;
-
-  html += `<div class="color-row">
-      <div class="cg"><label>Chip</label><input type="color" value="${esc(ac.chipBg)}" onchange="getCurrent().away.chipBg=this.value;save();renderEditor();"></div>
-      <div class="cg"><label>Text</label><input type="color" value="${esc(ac.chipText)}" onchange="getCurrent().away.chipText=this.value;save();renderEditor();"></div>
-      <div class="cg"><label>Border</label><input type="color" value="${esc(ac.chipBorder)}" onchange="getCurrent().away.chipBorder=this.value;save();renderEditor();"></div>
-      <div class="cg"><label>Bar</label><input type="color" value="${esc(ac.barBg)}" onchange="getCurrent().away.barBg=this.value;save();renderEditor();"></div>
-      <div class="cg"><label>Bar Text</label><input type="color" value="${esc(ac.barText)}" onchange="getCurrent().away.barText=this.value;save();renderEditor();"></div>
-    </div>`;
-
-  html += `<div class="team-config">
-      <div class="tc-group"><label>Add Player (manual)</label>
-        <div style="display:flex;gap:4px;">
-          <input id="away-new-pos" placeholder="POS" style="width:50px;" value="CM">
-          <input id="away-new-name" placeholder="Name" style="width:120px;" onkeydown="if(event.key==='Enter')addPlayer('away')">
-          <button class="btn btn-primary btn-sm" onclick="addPlayer('away')">+</button>
-        </div>
+      ).join('')}</div>
+      <div class="color-row">
+        <div class="cg"><label>Chip</label><input type="color" value="${esc(ac.chipBg)}" onchange="getCurrent().away.chipBg=this.value;save();renderEditor();"></div>
+        <div class="cg"><label>Text</label><input type="color" value="${esc(ac.chipText)}" onchange="getCurrent().away.chipText=this.value;save();renderEditor();"></div>
+        <div class="cg"><label>Border</label><input type="color" value="${esc(ac.chipBorder)}" onchange="getCurrent().away.chipBorder=this.value;save();renderEditor();"></div>
+        <div class="cg"><label>Bar</label><input type="color" value="${esc(ac.barBg)}" onchange="getCurrent().away.barBg=this.value;save();renderEditor();"></div>
+        <div class="cg"><label>Bar Text</label><input type="color" value="${esc(ac.barText)}" onchange="getCurrent().away.barText=this.value;save();renderEditor();"></div>
+      </div>`;
+    html += renderRosterPicker('away', m.away.name);
+    html += `<div class="formation-presets" style="margin-top:8px;">
+        <span style="font-size:11px;color:#889;margin-right:4px;">Formation:</span>
+        ${Object.keys(FORMATION_PRESETS).map(f => `<button onclick="applyPreset('away','${f}')">${f}</button>`).join('')}
       </div>
     </div>`;
-
-  if (state.roster.length > 0) {
-    html += `<div class="roster-picker">
-      <label style="font-size:11px;">Add from roster:</label>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;">`;
-    POS_CATS.forEach(cat => {
-      const players = state.roster.filter(p => POS_TO_CAT[p.pos] === cat);
-      if (players.length === 0) return;
-      html += `<select onchange="addFromRoster('away',this.value);this.selectedIndex=0;" style="width:auto;font-size:11px;">
-        <option value="">${cat}</option>
-        ${players.map(p => `<option value="${esc(p.id)}">${esc(p.pos)} ${esc(p.name)}</option>`).join('')}
-      </select>`;
-    });
-    html += `</div></div>`;
   }
 
-  html += `<div class="formation-presets" style="margin-top:8px;">
-      <span style="font-size:11px;color:#889;margin-right:4px;">Formation:</span>
-      ${Object.keys(FORMATION_PRESETS).map(f => `<button onclick="applyPreset('away','${f}')">${f}</button>`).join('')}
-    </div>
-    <div style="font-size:11px; color:#667; margin-bottom:4px;">Position bar (comma-separated):</div>
-    <input value="${m.awayPosBar.join(',')}" onchange="getCurrent().awayPosBar=this.value.split(',').map(s=>s.trim());save();renderEditor();" style="width:300px; font-size:12px;">
-  </div>`;
-
   // ---- FIELD + SIDEBAR ----
-  html += `<div class="editor-layout">
-    <div class="editor-main">`;
+  html += `<div class="editor-layout"><div class="editor-main">`;
 
   // Home pos bar (top)
-  html += `<div class="pos-bar top">${m.homePosBar.map((s, i) => `<div class="pos-seg" style="background:${esc(hc.barBg)};color:${esc(hc.barText)};" onclick="renamePosBarSeg('home',${i})">${esc(s)}</div>`).join('')}</div>`;
+  html += `<div class="pos-bar top">${renderPosBarHtml(m.homePosBar, 'home', hc)}</div>`;
 
   // Field
-  html += `<div class="field-wrap" id="field-drop" ondragover="event.preventDefault()" ondrop="dropOnField(event)">
-    ${fieldSVG()}`;
+  html += `<div class="field-wrap" id="field-drop" ondragover="event.preventDefault()" ondrop="dropOnField(event)">${fieldSVG()}`;
 
-  // Home players
   m.home.players.forEach((p, i) => {
     const nameHtml = p.name ? `<span class="mu-name">${esc(p.name)}</span>` : '';
     html += `<div class="mu-player" style="left:${p.x}%;top:${p.y}%;" draggable="true" ondragstart="startDrag(event,'home',${i})" ondblclick="renamePlayer('home',${i})">
@@ -536,58 +489,105 @@ function renderEditor() {
     </div>`;
   });
 
-  // Away players
-  m.away.players.forEach((p, i) => {
-    const nameHtml = p.name ? `<span class="mu-name">${esc(p.name)}</span>` : '';
-    html += `<div class="mu-player" style="left:${p.x}%;top:${p.y}%;" draggable="true" ondragstart="startDrag(event,'away',${i})" ondblclick="renamePlayer('away',${i})">
-      <div class="mu-label" style="background:${esc(ac.chipBg)};color:${esc(ac.chipText)};border-color:${esc(ac.chipBorder)};">${esc(p.pos)}${nameHtml}</div>
-    </div>`;
-  });
+  if (!single) {
+    m.away.players.forEach((p, i) => {
+      const nameHtml = p.name ? `<span class="mu-name">${esc(p.name)}</span>` : '';
+      html += `<div class="mu-player" style="left:${p.x}%;top:${p.y}%;" draggable="true" ondragstart="startDrag(event,'away',${i})" ondblclick="renamePlayer('away',${i})">
+        <div class="mu-label" style="background:${esc(ac.chipBg)};color:${esc(ac.chipText)};border-color:${esc(ac.chipBorder)};">${esc(p.pos)}${nameHtml}</div>
+      </div>`;
+    });
+  }
 
   html += `</div>`;
 
-  // Away pos bar (bottom)
-  html += `<div class="pos-bar bottom">${m.awayPosBar.map((s, i) => `<div class="pos-seg" style="background:${esc(ac.barBg)};color:${esc(ac.barText)};" onclick="renamePosBarSeg('away',${i})">${esc(s)}</div>`).join('')}</div>`;
+  // Away pos bar (bottom) — only in two-team mode
+  if (!single) {
+    html += `<div class="pos-bar bottom">${renderPosBarHtml(m.awayPosBar, 'away', ac)}</div>`;
+  }
 
   html += `</div>`; // end editor-main
 
-  // Sidebar: player lists
+  // Sidebar
   html += `<div class="editor-sidebar">
     <div class="sidebar-section">
-      <div class="sidebar-title">Home - ${esc(m.home.name)} (${m.home.players.length})</div>`;
+      <div class="sidebar-title">${single ? '' : 'Home - '}${esc(m.home.name)} (${m.home.players.length})</div>`;
   m.home.players.forEach((p, i) => {
     html += `<div class="sidebar-player" style="justify-content:space-between;">
       <span style="cursor:pointer;" onclick="renamePlayer('home',${i})"><span class="sp-pos">${esc(p.pos)}</span> ${esc(p.name||'(tap to name)')}</span>
       <button class="btn btn-danger btn-sm" style="padding:2px 5px;font-size:10px;" onclick="removePlayer('home',${i})">×</button>
     </div>`;
   });
-  html += `</div>
-    <div class="sidebar-section">
-      <div class="sidebar-title" style="color:${esc(ac.chipBg === '#ffffff' || ac.chipBg === '#FFFFFF' ? '#c87533' : ac.chipBg)};">Away - ${esc(m.away.name)} (${m.away.players.length})</div>`;
-  m.away.players.forEach((p, i) => {
-    html += `<div class="sidebar-player" style="justify-content:space-between;">
-      <span style="cursor:pointer;" onclick="renamePlayer('away',${i})"><span class="sp-pos">${esc(p.pos)}</span> ${esc(p.name||'(tap to name)')}</span>
-      <button class="btn btn-danger btn-sm" style="padding:2px 5px;font-size:10px;" onclick="removePlayer('away',${i})">×</button>
-    </div>`;
-  });
-  html += `</div></div>`; // end sidebar
+  html += `</div>`;
 
-  html += `</div>`; // end editor-layout
+  if (!single) {
+    html += `<div class="sidebar-section">
+      <div class="sidebar-title" style="color:${esc(ac.chipBg === '#ffffff' || ac.chipBg === '#FFFFFF' ? '#c87533' : ac.chipBg)};">Away - ${esc(m.away.name)} (${m.away.players.length})</div>`;
+    m.away.players.forEach((p, i) => {
+      html += `<div class="sidebar-player" style="justify-content:space-between;">
+        <span style="cursor:pointer;" onclick="renamePlayer('away',${i})"><span class="sp-pos">${esc(p.pos)}</span> ${esc(p.name||'(tap to name)')}</span>
+        <button class="btn btn-danger btn-sm" style="padding:2px 5px;font-size:10px;" onclick="removePlayer('away',${i})">×</button>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div></div>`; // end sidebar + editor-layout
   el.innerHTML = html;
   setupTouchDrag();
 }
 
-function applyTeamColor(team, countryName) {
+function renderRosterPicker(team, teamName) {
+  const roster = rosterForTeam(teamName);
+  let html = `<div class="team-config">
+    <div class="tc-group"><label>Add Player (manual)</label>
+      <div style="display:flex;gap:4px;">
+        <input id="${team}-new-pos" placeholder="POS" style="width:50px;" value="CM">
+        <input id="${team}-new-name" placeholder="Name" style="width:120px;" onkeydown="if(event.key==='Enter')addPlayer('${team}')">
+        <button class="btn btn-primary btn-sm" onclick="addPlayer('${team}')">+</button>
+      </div>
+    </div>
+  </div>`;
+
+  if (roster.length > 0) {
+    const hasCountryPlayers = state.roster.some(p => p.country && p.country.toLowerCase() === (teamName||'').toLowerCase());
+    const filterLabel = hasCountryPlayers ? `Add from ${esc(teamName)} roster:` : 'Add from roster:';
+    html += `<div class="roster-picker"><label style="font-size:11px;">${filterLabel}</label>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">`;
+    POS_CATS.forEach(cat => {
+      const players = roster.filter(p => POS_TO_CAT[p.pos] === cat);
+      if (players.length === 0) return;
+      html += `<select onchange="addFromRoster('${team}',this.value);this.selectedIndex=0;" style="width:auto;font-size:11px;">
+        <option value="">${cat} (${players.length})</option>
+        ${players.map(p => `<option value="${esc(p.id)}">${esc(p.pos)} ${esc(p.name)}</option>`).join('')}
+      </select>`;
+    });
+    html += `</div></div>`;
+  }
+  return html;
+}
+
+function toggleSingleTeam() {
   const m = getCurrent(); if (!m) return;
-  const colors = TEAM_COLORS[countryName]; if (!colors) return;
-  m[team].chipBg = colors.chipBg;
-  m[team].chipText = colors.chipText;
-  m[team].chipBorder = colors.chipBorder;
-  m[team].barBg = colors.barBg;
-  m[team].barText = colors.barText;
-  m[team].name = countryName;
-  save();
-  renderEditor();
+  m.singleTeam = !m.singleTeam;
+  if (m.singleTeam) {
+    // Spread home players across full pitch
+    m.home.players.forEach(p => { p.x = Math.min(95, p.x * 1.8); });
+  } else {
+    // Compress home players to left half
+    m.home.players.forEach(p => { p.x = Math.min(48, p.x / 1.8); });
+    if (!m.awayPosBar || m.awayPosBar.length === 0) {
+      m.awayPosBar = ['S','S','S','MF','MF','MF','D','D','D','D','GK'].map(l => ({label:l, name:''}));
+    }
+  }
+  save(); renderEditor();
+}
+
+function applyTeamColor(team, name) {
+  const m = getCurrent(); if (!m) return;
+  const c = TEAM_COLORS[name]; if (!c) return;
+  Object.assign(m[team], c);
+  m[team].name = name;
+  save(); renderEditor();
 }
 
 function addFromRoster(team, rosterId) {
@@ -595,203 +595,169 @@ function addFromRoster(team, rosterId) {
   const m = getCurrent(); if (!m) return;
   const rp = state.roster.find(r => r.id === rosterId);
   if (!rp) return;
-
-  let x, y;
+  const single = m.singleTeam;
+  let x, y, pos = rp.pos;
   if (team === 'home') {
-    x = 15 + Math.random() * 30;
+    x = single ? (10 + Math.random() * 80) : (15 + Math.random() * 30);
     y = 15 + Math.random() * 70;
   } else {
-    x = 55 + Math.random() * 30;
-    y = 15 + Math.random() * 70;
-  }
-
-  // For away team, swap L↔R in position name
-  let pos = rp.pos;
-  if (team === 'away') {
-    const LR_SWAP = { LH:'RH', RH:'LH', LB:'RB', RB:'LB', LM:'RM', RM:'LM', LS:'RS', RS:'LS' };
+    x = 55 + Math.random() * 30; y = 15 + Math.random() * 70;
     pos = LR_SWAP[pos] || pos;
   }
-
-  m[team].players.push({ id: uid(), pos, name: rp.name, x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)) });
-  save();
-  renderEditor();
+  m[team].players.push({ id: uid(), pos, name: rp.name, x: +x.toFixed(1), y: +y.toFixed(1) });
+  save(); renderEditor();
 }
 
 function addPlayer(team) {
   const m = getCurrent(); if (!m) return;
-  const posInput = document.getElementById(team + '-new-pos');
-  const nameInput = document.getElementById(team + '-new-name');
-  const pos = (posInput.value || 'CM').toUpperCase().trim();
-  const name = nameInput.value.trim();
-
+  const pos = (document.getElementById(team+'-new-pos').value||'CM').toUpperCase().trim();
+  const nameEl = document.getElementById(team+'-new-name');
+  const name = nameEl.value.trim();
+  const single = m.singleTeam;
   let x, y;
-  if (team === 'home') {
-    x = 15 + Math.random() * 30;
-    y = 15 + Math.random() * 70;
-  } else {
-    x = 55 + Math.random() * 30;
-    y = 15 + Math.random() * 70;
-  }
-
-  m[team].players.push({ id: uid(), pos, name: name.toUpperCase(), x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)) });
-  nameInput.value = '';
-  nameInput.focus();
-  save();
-  renderEditor();
+  if (team === 'home') { x = single ? (10+Math.random()*80) : (15+Math.random()*30); y = 15+Math.random()*70; }
+  else { x = 55+Math.random()*30; y = 15+Math.random()*70; }
+  m[team].players.push({ id: uid(), pos, name: name.toUpperCase(), x: +x.toFixed(1), y: +y.toFixed(1) });
+  nameEl.value = ''; nameEl.focus(); save(); renderEditor();
 }
 
-function removePlayer(team, index) {
-  const m = getCurrent(); if (!m) return;
-  m[team].players.splice(index, 1);
-  save();
-  renderEditor();
-}
+function removePlayer(team, i) { const m = getCurrent(); if (!m) return; m[team].players.splice(i,1); save(); renderEditor(); }
 
-function renamePlayer(team, index) {
+function renamePlayer(team, i) {
   const m = getCurrent(); if (!m) return;
-  const p = m[team].players[index]; if (!p) return;
+  const p = m[team].players[i]; if (!p) return;
   const name = prompt(`Name for ${p.pos}:`, p.name || '');
   if (name === null) return;
-  p.name = name.trim().toUpperCase();
-  save();
-  renderEditor();
+  p.name = name.trim().toUpperCase(); save(); renderEditor();
 }
 
-function renamePosBarSeg(team, index) {
+// Position bar segment picker — pick from roster or type manually
+function pickPosBarPlayer(team, index) {
   const m = getCurrent(); if (!m) return;
   const bar = team === 'home' ? m.homePosBar : m.awayPosBar;
-  const current = bar[index] || '';
-  const newName = prompt('Rename segment:', current);
-  if (newName === null) return;
-  bar[index] = newName.trim().toUpperCase();
-  save();
-  renderEditor();
+  const s = seg(bar[index]);
+  const catLabel = s.label;
+
+  // Find roster players matching this category
+  const teamName = m[team].name;
+  const roster = rosterForTeam(teamName);
+  const catPlayers = roster.filter(p => {
+    const cat = POS_TO_CAT[p.pos] || '';
+    return cat === catLabel || catLabel === 'GK' && cat === 'GK' || catLabel === 'D' && cat === 'D' || catLabel === 'MF' && cat === 'MF' || catLabel === 'S' && cat === 'S';
+  });
+
+  if (catPlayers.length > 0) {
+    // Build a native select picker
+    const sel = document.createElement('select');
+    sel.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;font-size:16px;padding:10px;min-width:200px;';
+    sel.innerHTML = `<option value="">-- ${catLabel}: Pick player or cancel --</option>
+      <option value="__clear__">Clear name</option>
+      <option value="__manual__">Type manually...</option>
+      ${catPlayers.map(p => `<option value="${esc(p.id)}">${esc(p.pos)} ${esc(p.name)}</option>`).join('')}`;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;';
+    overlay.onclick = () => { overlay.remove(); sel.remove(); };
+    document.body.appendChild(overlay);
+    document.body.appendChild(sel);
+    sel.focus();
+    // Open native picker on mobile
+    try { sel.click(); } catch(e) {}
+    sel.onchange = () => {
+      const v = sel.value;
+      overlay.remove(); sel.remove();
+      if (!v) return;
+      if (v === '__clear__') { bar[index] = { label: catLabel, name: '' }; }
+      else if (v === '__manual__') {
+        const name = prompt(`Name for ${catLabel} sub:`, s.name || '');
+        if (name !== null) bar[index] = { label: catLabel, name: name.trim().toUpperCase() };
+      } else {
+        const rp = state.roster.find(r => r.id === v);
+        if (rp) bar[index] = { label: catLabel, name: rp.name };
+      }
+      save(); renderEditor();
+    };
+    sel.onblur = () => { setTimeout(() => { overlay.remove(); sel.remove(); }, 200); };
+  } else {
+    // No roster players — just prompt
+    const name = prompt(`Name for ${catLabel} sub:`, s.name || '');
+    if (name === null) return;
+    bar[index] = { label: catLabel, name: name.trim().toUpperCase() };
+    save(); renderEditor();
+  }
 }
 
 function applyPreset(team, presetName) {
   const m = getCurrent(); if (!m) return;
-  const preset = FORMATION_PRESETS[presetName];
-  if (!preset) return;
-
-  const LR_SWAP = { LH:'RH', RH:'LH', LB:'RB', RB:'LB', LM:'RM', RM:'LM', LS:'RS', RS:'LS' };
-
-  // Try to keep existing player names by matching position
+  const preset = FORMATION_PRESETS[presetName]; if (!preset) return;
+  const single = m.singleTeam;
   const oldPlayers = [...m[team].players];
 
   const players = preset.map(p => {
     let x = p.x, y = p.y, pos = p.pos;
-    if (team === 'away') {
-      x = 100 - p.x;
-      pos = LR_SWAP[pos] || pos;
-    }
-
-    // Try to find an existing player with matching position to keep their name
+    if (team === 'away') { x = 100 - p.x; pos = LR_SWAP[pos] || pos; }
+    else if (single) { x = Math.min(95, p.x * 1.7); } // spread across full pitch
     let name = '';
-    const existingIdx = oldPlayers.findIndex(op => op.pos === pos && op.name);
-    if (existingIdx >= 0) {
-      name = oldPlayers[existingIdx].name;
-      oldPlayers.splice(existingIdx, 1); // don't reuse
-    }
-
-    return { id: uid(), pos, name, x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)) };
+    const ei = oldPlayers.findIndex(op => op.pos === pos && op.name);
+    if (ei >= 0) { name = oldPlayers[ei].name; oldPlayers.splice(ei, 1); }
+    return { id: uid(), pos, name, x: +x.toFixed(1), y: +y.toFixed(1) };
   });
 
   m[team].players = players;
-
-  const cats = [];
-  const catOrder = { GK: 0, D: 1, MF: 2, S: 3 };
-  players.forEach(p => {
-    const cat = POS_TO_CAT[p.pos] || 'MF';
-    cats.push(cat);
-  });
-  cats.sort((a, b) => (catOrder[a]||0) - (catOrder[b]||0));
-
-  if (team === 'home') m.homePosBar = cats;
-  else m.awayPosBar = [...cats].reverse();
-
-  save();
-  renderEditor();
+  const cats = players.map(p => POS_TO_CAT[p.pos] || 'MF');
+  const catOrder = { GK:0, D:1, MF:2, S:3 };
+  cats.sort((a,b) => (catOrder[a]||0) - (catOrder[b]||0));
+  const barSegs = cats.map(l => ({label:l, name:''}));
+  if (team === 'home') m.homePosBar = barSegs;
+  else m.awayPosBar = [...barSegs].reverse();
+  save(); renderEditor();
 }
 
 // Drag and drop
-function startDrag(e, team, index) {
-  dragState.team = team;
-  dragState.index = index;
-  e.dataTransfer.setData('text/plain', team + ':' + index);
-  e.dataTransfer.effectAllowed = 'move';
-}
+function startDrag(e, team, i) { dragState.team = team; dragState.index = i; e.dataTransfer.setData('text/plain', team+':'+i); e.dataTransfer.effectAllowed = 'move'; }
 
 function dropOnField(e) {
   e.preventDefault();
   const m = getCurrent(); if (!m) return;
   const rect = document.getElementById('field-drop').getBoundingClientRect();
-  const x = ((e.clientX - rect.left) / rect.width * 100);
-  const y = ((e.clientY - rect.top) / rect.height * 100);
-  let cx = parseFloat(x.toFixed(1));
-  let cy = Math.max(3, Math.min(97, parseFloat(y.toFixed(1))));
-
-  if (dragState.team === 'home') {
-    cx = Math.max(2, Math.min(50, cx));
-  } else if (dragState.team === 'away') {
-    cx = Math.max(50, Math.min(98, cx));
-  } else {
-    cx = Math.max(2, Math.min(98, cx));
-  }
-
+  let cx = +((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+  let cy = Math.max(3, Math.min(97, +((e.clientY - rect.top) / rect.height * 100).toFixed(1)));
+  const single = m.singleTeam;
+  if (dragState.team === 'home') { cx = Math.max(2, Math.min(single ? 98 : 50, cx)); }
+  else if (dragState.team === 'away') { cx = Math.max(50, Math.min(98, cx)); }
   if (dragState.team && dragState.index !== undefined) {
     const p = m[dragState.team].players[dragState.index];
     if (p) { p.x = cx; p.y = cy; }
   }
-  dragState.team = null;
-  dragState.index = undefined;
-  save();
-  renderEditor();
+  dragState.team = null; dragState.index = undefined; save(); renderEditor();
 }
 
 function setupTouchDrag() {
   let ghost = null;
-
   document.querySelectorAll('.mu-player').forEach(el => {
     el.addEventListener('touchstart', function(e) {
-      const ds = el.getAttribute('ondragstart');
-      if (!ds) return;
-      const match = ds.match(/startDrag\(event,'(\w+)',(\d+)\)/);
-      if (!match) return;
-      dragState.team = match[1];
-      dragState.index = parseInt(match[2]);
+      const ds = el.getAttribute('ondragstart'); if (!ds) return;
+      const match = ds.match(/startDrag\(event,'(\w+)',(\d+)\)/); if (!match) return;
+      dragState.team = match[1]; dragState.index = parseInt(match[2]);
       ghost = el.cloneNode(true);
-      ghost.style.position = 'fixed';
-      ghost.style.pointerEvents = 'none';
-      ghost.style.zIndex = '10000';
-      ghost.style.opacity = '0.8';
-      document.body.appendChild(ghost);
-      e.preventDefault();
+      ghost.style.cssText = 'position:fixed;pointer-events:none;z-index:10000;opacity:0.8;';
+      document.body.appendChild(ghost); e.preventDefault();
     }, { passive: false });
   });
-
   document.addEventListener('touchmove', function(e) {
     if (!ghost) return;
-    const t = e.touches[0];
-    ghost.style.left = (t.clientX - 30) + 'px';
-    ghost.style.top = (t.clientY - 15) + 'px';
-    e.preventDefault();
+    const t = e.touches[0]; ghost.style.left = (t.clientX-30)+'px'; ghost.style.top = (t.clientY-15)+'px'; e.preventDefault();
   }, { passive: false });
-
   document.addEventListener('touchend', function(e) {
     if (!ghost) return;
-    const t = e.changedTouches[0];
-    ghost.remove();
-    ghost = null;
+    const t = e.changedTouches[0]; ghost.remove(); ghost = null;
     const fieldEl = document.getElementById('field-drop');
     if (fieldEl) {
       const rect = fieldEl.getBoundingClientRect();
       if (t.clientX >= rect.left && t.clientX <= rect.right && t.clientY >= rect.top && t.clientY <= rect.bottom) {
-        dropOnField({ preventDefault:()=>{}, clientX: t.clientX, clientY: t.clientY });
-        return;
+        dropOnField({ preventDefault:()=>{}, clientX: t.clientX, clientY: t.clientY }); return;
       }
     }
-    dragState.team = null;
-    dragState.index = undefined;
+    dragState.team = null; dragState.index = undefined;
   });
 }
 
@@ -803,11 +769,13 @@ function renderPreview() {
   let html = `<div class="no-print" style="margin-bottom:16px; display:flex; gap:8px; align-items:center;">
     <select id="preview-select" onchange="renderPreviewContent()">
       <option value="">Select matchup...</option>
-      ${state.matchups.map(m => `<option value="${m.id}" ${m.id===state.ui.currentId?'selected':''}>${esc(m.title)} - ${esc(m.home.name)} vs ${esc(m.away.name)}</option>`).join('')}
+      ${state.matchups.map(m => {
+        const label = m.singleTeam ? m.home.name : m.home.name + ' vs ' + m.away.name;
+        return `<option value="${m.id}" ${m.id===state.ui.currentId?'selected':''}>${esc(m.title)} - ${esc(label)}</option>`;
+      }).join('')}
     </select>
     <button class="btn btn-primary" onclick="window.print()">Print</button>
-  </div>
-  <div id="preview-content"></div>`;
+  </div><div id="preview-content"></div>`;
   el.innerHTML = html;
   renderPreviewContent();
 }
@@ -818,36 +786,43 @@ function renderPreviewContent() {
   const content = document.getElementById('preview-content');
   if (!m) { content.innerHTML = '<p style="color:#889;">Select a matchup to preview.</p>'; return; }
 
-  const hc = getTeamColors(m, 'home');
-  const ac = getTeamColors(m, 'away');
+  const hc = tc(m, 'home'); const ac = tc(m, 'away');
+  const single = m.singleTeam;
+  const titleText = single ? esc(m.home.name) : `${esc(m.home.name)} vs ${esc(m.away.name)}`;
 
   let html = `<div class="output-wrap">
-    <div class="output-title"><h3>${esc(m.home.name)} vs ${esc(m.away.name)}</h3></div>`;
+    <div class="output-title"><h3>${titleText}</h3></div>`;
 
-  // Home pos bar (top)
-  html += `<div class="out-pos-bar">${m.homePosBar.map(s => `<div class="pos-seg" style="background:${esc(hc.barBg)};color:${esc(hc.barText)};">${esc(s)}</div>`).join('')}</div>`;
+  // Home pos bar
+  const hBar = ensurePosBar(m.homePosBar);
+  html += `<div class="out-pos-bar">${hBar.map(s => {
+    const nameHtml = s.name ? `<span class="seg-name">${esc(s.name)}</span>` : '';
+    return `<div class="pos-seg" style="background:${esc(hc.barBg)};color:${esc(hc.barText)};">${esc(s.label)}${nameHtml}</div>`;
+  }).join('')}</div>`;
 
-  // Field
   html += `<div class="output-field">${fieldSVG()}`;
 
   m.home.players.forEach(p => {
     const nameHtml = p.name ? `<span class="out-name">${esc(p.name)}</span>` : '';
-    html += `<div class="out-player" style="left:${p.x}%;top:${p.y}%;">
-      <div class="out-label" style="background:${esc(hc.chipBg)};color:${esc(hc.chipText)};border-color:${esc(hc.chipBorder)};">${esc(p.pos)}${nameHtml}</div>
-    </div>`;
+    html += `<div class="out-player" style="left:${p.x}%;top:${p.y}%;"><div class="out-label" style="background:${esc(hc.chipBg)};color:${esc(hc.chipText)};border-color:${esc(hc.chipBorder)};">${esc(p.pos)}${nameHtml}</div></div>`;
   });
 
-  m.away.players.forEach(p => {
-    const nameHtml = p.name ? `<span class="out-name">${esc(p.name)}</span>` : '';
-    html += `<div class="out-player" style="left:${p.x}%;top:${p.y}%;">
-      <div class="out-label" style="background:${esc(ac.chipBg)};color:${esc(ac.chipText)};border-color:${esc(ac.chipBorder)};">${esc(p.pos)}${nameHtml}</div>
-    </div>`;
-  });
+  if (!single) {
+    m.away.players.forEach(p => {
+      const nameHtml = p.name ? `<span class="out-name">${esc(p.name)}</span>` : '';
+      html += `<div class="out-player" style="left:${p.x}%;top:${p.y}%;"><div class="out-label" style="background:${esc(ac.chipBg)};color:${esc(ac.chipText)};border-color:${esc(ac.chipBorder)};">${esc(p.pos)}${nameHtml}</div></div>`;
+    });
+  }
 
   html += `</div>`;
 
-  // Away pos bar (bottom)
-  html += `<div class="out-pos-bar">${m.awayPosBar.map(s => `<div class="pos-seg" style="background:${esc(ac.barBg)};color:${esc(ac.barText)};">${esc(s)}</div>`).join('')}</div>`;
+  if (!single) {
+    const aBar = ensurePosBar(m.awayPosBar);
+    html += `<div class="out-pos-bar">${aBar.map(s => {
+      const nameHtml = s.name ? `<span class="seg-name">${esc(s.name)}</span>` : '';
+      return `<div class="pos-seg" style="background:${esc(ac.barBg)};color:${esc(ac.barText)};">${esc(s.label)}${nameHtml}</div>`;
+    }).join('')}</div>`;
+  }
 
   html += `</div>`;
   content.innerHTML = html;
@@ -858,17 +833,23 @@ function renderPreviewContent() {
 // =============================================
 load();
 
-// One-time migration: fix away team L↔R positions from old data
+// Migrations
 if (!state._migratedLR) {
-  const LR_SWAP = { LH:'RH', RH:'LH', LB:'RB', RB:'LB', LM:'RM', RM:'LM', LS:'RS', RS:'LS' };
-  state.matchups.forEach(m => {
-    m.away.players.forEach(p => {
-      if (LR_SWAP[p.pos]) p.pos = LR_SWAP[p.pos];
-    });
-  });
-  state._migratedLR = true;
-  save();
+  state.matchups.forEach(m => { m.away.players.forEach(p => { if (LR_SWAP[p.pos]) p.pos = LR_SWAP[p.pos]; }); });
+  state._migratedLR = true; save();
 }
+// Migrate pos bars from string to object format
+state.matchups.forEach(m => {
+  if (m.homePosBar && m.homePosBar.length > 0 && typeof m.homePosBar[0] === 'string') {
+    m.homePosBar = m.homePosBar.map(s => ({label:s, name:''}));
+  }
+  if (m.awayPosBar && m.awayPosBar.length > 0 && typeof m.awayPosBar[0] === 'string') {
+    m.awayPosBar = m.awayPosBar.map(s => ({label:s, name:''}));
+  }
+});
+// Ensure roster has country field
+state.roster.forEach(p => { if (!p.country) p.country = ''; });
+save();
 
 if (state.ui.view) showView(state.ui.view);
 else showView('list');
