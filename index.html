@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#d4a843">
+<link rel="manifest" href="manifest.json">
+<title>Hockey Tools</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', -apple-system, Arial, sans-serif; background: #111; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+h1 { font-size: 28px; font-weight: 900; color: #d4a843; letter-spacing: 2px; margin-bottom: 8px; }
+p { font-size: 14px; color: #888; margin-bottom: 40px; }
+.cards { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 400px; }
+a.card { display: block; text-decoration: none; background: #1a1a1a; border: 2px solid #333; border-radius: 12px; padding: 24px; transition: all .2s; }
+a.card:hover { border-color: #d4a843; transform: translateY(-2px); }
+a.card h2 { font-size: 18px; color: #fff; margin-bottom: 4px; }
+a.card small { font-size: 13px; color: #888; }
+.card-icon { font-size: 32px; margin-bottom: 12px; }
+.status { margin-top: 40px; font-size: 11px; color: #444; text-align: center; }
+.status.online { color: #4a8c3f; }
+.status.offline { color: #e74c3c; }
+</style>
+</head>
+<body>
+<h1>HOCKEY TOOLS</h1>
+<p>Squad management & session timing</p>
+<div class="cards">
+  <a class="card" href="hockey-squad-selection.html">
+    <div class="card-icon">&#9917;</div>
+    <h2>Squad Selection</h2>
+    <small>Squad management, match selection, formations & team sheets</small>
+  </a>
+  <a class="card" href="hockey-session-timer.html">
+    <div class="card-icon">&#9201;</div>
+    <h2>Session Timer</h2>
+    <small>Training & pre-match warmup timers with audio alerts</small>
+  </a>
+</div>
+<div class="status" id="status"></div>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(() => {
+    document.getElementById('status').textContent = 'Offline ready';
+    document.getElementById('status').className = 'status online';
+  });
+}
+window.addEventListener('online', () => { document.getElementById('status').textContent = 'Online'; document.getElementById('status').className = 'status online'; });
+window.addEventListener('offline', () => { document.getElementById('status').textContent = 'Offline mode'; document.getElementById('status').className = 'status offline'; });
+</script>
+</body>
+</html>

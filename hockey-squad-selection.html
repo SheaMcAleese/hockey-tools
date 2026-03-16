@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Squad Selection Sheet</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#d4a843">
+<link rel="manifest" href="manifest.json">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; }
+
+nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; }
+nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #d4a843; letter-spacing: 1px; }
+nav button { background: none; border: none; color: #8899aa; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+nav button:hover { color: #fff; }
+nav button.active { color: #fff; border-bottom-color: #d4a843; }
+
+.view { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+.view.active { display: block; }
+
+h2 { font-size: 22px; margin-bottom: 16px; color: #d4a843; }
+h3 { font-size: 16px; margin-bottom: 10px; color: #ccc; }
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
+.btn-primary { background: #d4a843; color: #000; }
+.btn-primary:hover { background: #e6bc5a; }
+.btn-secondary { background: #0f3460; color: #fff; }
+.btn-secondary:hover { background: #1a4a8a; }
+.btn-danger { background: #722; color: #fff; }
+.btn-danger:hover { background: #933; }
+.btn-success { background: #2a7a3a; color: #fff; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+input, select, textarea { padding: 6px 10px; border: 1px solid #334; border-radius: 4px; background: #0d1b2a; color: #fff; font-size: 13px; }
+input:focus, select:focus { outline: none; border-color: #d4a843; }
+label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: flex-end; }
+.form-group { display: flex; flex-direction: column; }
+.section { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+.section h3 { color: #d4a843; margin-bottom: 12px; }
+
+/* SQUAD TABLE */
+.squad-table { width: 100%; border-collapse: collapse; }
+.squad-table th { background: #0f3460; padding: 8px 10px; text-align: left; font-size: 12px; color: #8cf; }
+.squad-table td { padding: 6px 10px; border-bottom: 1px solid #1a2a4a; font-size: 13px; }
+.squad-table tr:hover { background: #1a2a4a; }
+.squad-table td input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; padding: 4px 6px; font-size: 13px; }
+.squad-table td input:focus { border-color: #d4a843; background: #0d1b2a; }
+.squad-table td img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; vertical-align: middle; }
+.squad-table td .initials { width: 32px; height: 32px; border-radius: 50%; background: #1f3864; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #d4a843; vertical-align: middle; }
+
+/* MATCH CARDS */
+.match-card { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 14px; margin-bottom: 8px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
+.match-card:hover { border-color: #d4a843; }
+.match-card .info h4 { color: #fff; font-size: 14px; margin-bottom: 2px; }
+.match-card .info small { color: #889; font-size: 12px; }
+
+/* SELECTION GRID */
+.selection-group { margin-bottom: 16px; }
+.selection-group h4 { font-size: 13px; color: #d4a843; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; padding-bottom: 4px; border-bottom: 1px solid #334; }
+.selection-row { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 4px; margin-bottom: 3px; transition: all .15s; cursor: pointer; }
+.selection-row:hover { background: #1a2a4a; }
+.selection-row.selected { background: #1a3a2a; border-left: 3px solid #4a8c3f; }
+.selection-row .sel-check { width: 22px; height: 22px; border: 2px solid #445; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #4a8c3f; flex-shrink: 0; }
+.selection-row.selected .sel-check { border-color: #4a8c3f; background: #2a5a2a; }
+.selection-row .sel-jersey { font-size: 14px; font-weight: 700; color: #d4a843; width: 30px; text-align: center; }
+.selection-row .sel-name { font-size: 13px; flex: 1; }
+.selection-row .sel-pos { font-size: 12px; color: #889; width: 80px; }
+.selection-row .sel-role { width: 120px; }
+.selection-row .sel-role select { width: 100%; font-size: 11px; padding: 3px 4px; }
+.selection-count { font-size: 13px; color: #889; margin-bottom: 12px; }
+.selection-count span { color: #d4a843; font-weight: 700; }
+
+/* ======================== */
+/* OUTPUT / TEAM SHEET      */
+/* ======================== */
+.ts-output { background: #1e1e1e; color: #c8c8c8; font-family: 'Segoe UI', Arial, sans-serif; width: 100%; max-width: 960px; margin: 0 auto 30px; overflow: hidden; }
+.ts-output * { color: #c8c8c8; }
+
+.ts-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #1a1a1a; border-bottom: 3px solid #d4a843; }
+.ts-header .team-name { font-size: 16px; font-weight: 900; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; }
+.ts-header .doc-type { font-size: 12px; letter-spacing: 3px; color: #888 !important; text-transform: uppercase; }
+
+.ts-match-info { display: flex; padding: 16px 24px; gap: 0; background: #1e1e1e; border-bottom: 1px solid #333; }
+.ts-match-info .info-item { flex: 1; padding: 0 16px; border-right: 1px solid #333; }
+.ts-match-info .info-item:last-child { border-right: none; }
+.ts-match-info .info-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 4px; }
+.ts-match-info .info-value { font-size: 15px; color: #fff !important; font-weight: 600; }
+
+.ts-body { padding: 20px 24px; }
+.ts-section-title { font-size: 12px; font-weight: 700; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #d4a843; }
+
+/* Starting XI table */
+.ts-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.ts-table th { background: #2a2a2a; padding: 8px 12px; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #d4a843 !important; text-transform: uppercase; text-align: left; border-bottom: 1px solid #444; }
+.ts-table td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #2a2a2a; }
+.ts-table tr:nth-child(even) { background: #222; }
+.ts-table .jersey-num { font-weight: 800; font-size: 16px; color: #d4a843 !important; width: 50px; text-align: center; }
+.ts-table .player-name { font-weight: 600; color: #fff !important; }
+.ts-table .player-pos { color: #888 !important; font-size: 13px; }
+.ts-table .player-role { font-size: 12px; color: #aaa !important; font-style: italic; }
+.ts-table .cap-num { font-size: 12px; color: #666 !important; text-align: center; width: 60px; }
+
+/* Position group headers in table */
+.ts-table .group-header td { background: #1a1a1a; padding: 6px 12px; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #4a8c3f !important; text-transform: uppercase; border-bottom: 1px solid #333; }
+
+/* Interchange section */
+.ts-interchange-title { font-size: 12px; font-weight: 700; letter-spacing: 4px; color: #c0392b !important; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #c0392b; }
+
+.ts-table .interchange-row td { }
+.ts-table .interchange-row .jersey-num { color: #c0392b !important; }
+
+/* Notes */
+.ts-notes { margin-top: 20px; padding: 16px; border: 1px solid #333; border-top: 2px solid #d4a843; }
+.ts-notes .notes-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 8px; }
+.ts-notes .notes-text { font-size: 13px; font-style: italic; color: #aaa !important; line-height: 1.6; white-space: pre-wrap; }
+
+.ts-footer { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid #333; }
+.ts-footer .values { font-size: 11px; color: #555 !important; letter-spacing: 1px; }
+.ts-footer .brand { font-size: 11px; color: #555 !important; letter-spacing: 2px; text-transform: uppercase; }
+
+/* ======================== */
+/* FORMATION VIEW           */
+/* ======================== */
+.formation-container { display: flex; gap: 20px; align-items: flex-start; }
+.formation-main { flex: 1; min-width: 0; }
+.formation-sidebar { width: 220px; flex-shrink: 0; }
+
+/* Quarter tabs */
+.quarter-tabs { display: flex; gap: 0; margin-bottom: 16px; background: #0d1b2a; border-radius: 6px; overflow: hidden; border: 1px solid #334; }
+.quarter-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #667; transition: all .2s; letter-spacing: 1px; }
+.quarter-tab:hover { color: #aaa; background: #16213e; }
+.quarter-tab.active { background: #d4a843; color: #000; }
+.quarter-tab + .quarter-tab { border-left: 1px solid #334; }
+
+/* Formation label */
+.formation-label { font-size: 20px; font-weight: 900; color: #fff; background: #0d1b2a; border: 2px solid #334; display: inline-block; padding: 6px 16px; border-radius: 4px; margin-bottom: 12px; letter-spacing: 2px; }
+
+/* Hockey field */
+.field-wrapper { position: relative; width: 100%; aspect-ratio: 1.45 / 1; background: #4a8c3f; border-radius: 4px; overflow: hidden; border: 3px solid #2d6627; }
+
+/* Field markings via SVG overlay */
+.field-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* Drop zones on field */
+.field-drop { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Player chip on field */
+.field-player { position: absolute; transform: translate(-50%, -50%); cursor: grab; user-select: none; z-index: 10; transition: box-shadow .15s; }
+.field-player:active { cursor: grabbing; z-index: 100; }
+.field-player:hover { z-index: 50; }
+.field-player .fp-label { background: #fff; color: #111; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 3px; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.4); text-align: center; min-width: 70px; border: 2px solid #fff; }
+.field-player.status-bench .fp-label { background: #111; color: #fff; border-color: #333; }
+.field-player.status-injured .fp-label { background: #d4644a; color: #fff; border-color: #c0392b; }
+
+/* Bench bar */
+.bench-bar { display: flex; gap: 4px; padding: 8px; background: #111; border-radius: 0 0 4px 4px; border: 2px solid #333; border-top: none; min-height: 44px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.bench-bar .fp-label { background: #111; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: grab; user-select: none; white-space: nowrap; border: 1px solid #444; transition: all .15s; }
+.bench-bar .fp-label:hover { border-color: #888; }
+
+/* Injured bar */
+.injured-bar { display: flex; gap: 4px; padding: 8px; background: rgba(192,57,43,.15); border-radius: 4px 4px 0 0; border: 2px solid #c0392b; border-bottom: none; min-height: 44px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 0; }
+.injured-bar .fp-label { background: #d4644a; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: grab; user-select: none; white-space: nowrap; border: 1px solid #c0392b; transition: all .15s; }
+.injured-bar .fp-label:hover { border-color: #ff7675; }
+
+/* Empty state labels */
+.bar-empty { font-size: 11px; color: #666; font-style: italic; letter-spacing: 1px; }
+
+/* Sidebar player pool */
+.pool-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #d4a843; text-transform: uppercase; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #334; }
+.pool-group-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #667; text-transform: uppercase; margin: 10px 0 4px; }
+.pool-player { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 4px; cursor: grab; user-select: none; font-size: 12px; transition: all .15s; margin-bottom: 2px; }
+.pool-player:hover { background: #1a2a4a; }
+.pool-player .pp-jersey { font-weight: 700; color: #d4a843; width: 24px; text-align: center; font-size: 11px; }
+.pool-player .pp-name { flex: 1; font-weight: 600; }
+.pool-player .pp-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pool-player .pp-status.on-field { background: #4a8c3f; }
+.pool-player .pp-status.on-bench { background: #555; }
+.pool-player .pp-status.is-injured { background: #c0392b; }
+.pool-player .pp-status.unassigned { background: transparent; border: 1px solid #445; }
+
+/* Copy quarter button */
+.copy-quarter-menu { position: relative; display: inline-block; }
+.copy-quarter-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #16213e; border: 1px solid #334; border-radius: 4px; padding: 4px; z-index: 100; min-width: 140px; }
+.copy-quarter-dropdown.show { display: block; }
+.copy-quarter-dropdown button { display: block; width: 100%; text-align: left; padding: 6px 10px; background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; border-radius: 3px; }
+.copy-quarter-dropdown button:hover { background: #0f3460; color: #fff; }
+
+/* ======================== */
+/* FORMATION OUTPUT (PRINT) */
+/* ======================== */
+.fo-field { position: relative; width: 100%; aspect-ratio: 1.45 / 1; background: #4a8c3f; overflow: hidden; margin-bottom: 0; }
+.fo-field .field-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fo-player { position: absolute; transform: translate(-50%, -50%); }
+.fo-player .fo-label { background: #fff; color: #111; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 3px; white-space: nowrap; text-align: center; min-width: 60px; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.fo-bench-bar { display: flex; gap: 3px; padding: 6px 8px; background: #111; flex-wrap: wrap; justify-content: center; }
+.fo-bench-bar .fo-label { background: #111; color: #fff; font-size: 10px; font-weight: 700; padding: 5px 12px; border-radius: 3px; white-space: nowrap; border: 1px solid #444; }
+.fo-injured-bar { display: flex; gap: 3px; padding: 6px 8px; background: rgba(192,57,43,.15); flex-wrap: wrap; justify-content: center; border-bottom: 2px solid #c0392b; }
+.fo-injured-bar .fo-label { background: #d4644a; color: #fff; font-size: 10px; font-weight: 700; padding: 5px 12px; border-radius: 3px; white-space: nowrap; border: 1px solid #c0392b; }
+.fo-quarter-label { position: absolute; top: 8px; left: 12px; font-size: 16px; font-weight: 900; color: #fff; background: rgba(0,0,0,.5); padding: 4px 12px; border-radius: 3px; z-index: 5; border: 2px solid rgba(255,255,255,.3); }
+
+/* PRINT */
+@media print {
+  body { background: #1e1e1e; }
+  nav, .view:not(#view-preview), .no-print { display: none !important; }
+  #view-preview { display: block !important; padding: 0; max-width: none; }
+  .ts-output { page-break-after: always; margin: 0; box-shadow: none; }
+  .ts-output:last-child { page-break-after: avoid; }
+  .fo-page { page-break-after: always; }
+  .fo-page:last-child { page-break-after: avoid; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { margin: 8mm; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">SQUAD SELECTION</span>
+  <button class="active" onclick="switchView('squad')">Squad</button>
+  <button onclick="switchView('matches')">Matches</button>
+  <button onclick="switchView('formation')">Formation</button>
+  <button onclick="switchView('preview')">Preview / Print</button>
+</nav>
+
+<div id="view-squad" class="view active"></div>
+<div id="view-matches" class="view"></div>
+<div id="view-formation" class="view"></div>
+<div id="view-preview" class="view"></div>
+
+<script>
+const STORAGE_KEY = 'hockeySquadSelection';
+const POS_ORDER = ['GK','DEF','MID','STR'];
+const POS_GROUPS = { GK: 'Goalkeepers', DEF: 'Defenders', MID: 'Midfielders', STR: 'Strikers' };
+const QUARTER_LABELS = ['1st Quarter', '2nd Quarter', '3rd Quarter', '4th Quarter'];
+
+let state = {
+  squad: [],
+  matches: [],
+  ui: { currentView: 'squad', currentMatchId: null, currentQuarter: 0 }
+};
+
+// Drag state (not persisted)
+let dragState = { playerId: null, originZone: null };
+
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) { try { Object.assign(state, JSON.parse(raw)); } catch(e) {} }
+  if (state.ui.currentQuarter === undefined) state.ui.currentQuarter = 0;
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+function switchView(v) {
+  state.ui.currentView = v;
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => {
+    const t = b.textContent.toLowerCase();
+    if ((v==='squad' && t==='squad') || (v==='matches' && t==='matches') || (v==='formation' && t==='formation') || (v==='preview' && t.includes('preview'))) b.classList.add('active');
+  });
+  if (v==='squad') renderSquad();
+  else if (v==='matches') renderMatches();
+  else if (v==='formation') renderFormation();
+  else if (v==='preview') renderPreview();
+  saveState();
+}
+
+// =============================================
+// FIELD SVG (hockey pitch markings)
+// =============================================
+function fieldSVG(idPrefix) {
+  // Full hockey field, left = our goal, right = opposition
+  return `<svg class="field-svg" viewBox="0 0 1000 690" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outline -->
+    <rect x="2" y="2" width="996" height="686" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="3" rx="2"/>
+    <!-- Centre line -->
+    <line x1="500" y1="2" x2="500" y2="688" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+    <!-- 25-yard lines -->
+    <line x1="250" y1="2" x2="250" y2="688" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-dasharray="10,8"/>
+    <line x1="750" y1="2" x2="750" y2="688" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-dasharray="10,8"/>
+    <!-- Left shooting circle (D) - large arc -->
+    <path d="M 2 140 Q 220 345 2 550" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
+    <!-- Left goal -->
+    <rect x="0" y="315" width="8" height="60" fill="rgba(255,255,255,.7)" rx="1"/>
+    <!-- Right shooting circle (D) - large arc -->
+    <path d="M 998 140 Q 780 345 998 550" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
+    <!-- Right goal -->
+    <rect x="992" y="315" width="8" height="60" fill="rgba(255,255,255,.7)" rx="1"/>
+    <!-- Penalty spots -->
+    <circle cx="80" cy="345" r="4" fill="rgba(255,255,255,.5)"/>
+    <circle cx="920" cy="345" r="4" fill="rgba(255,255,255,.5)"/>
+  </svg>`;
+}
+
+// =============================================
+// SQUAD
+// =============================================
+function renderSquad() {
+  const el = document.getElementById('view-squad');
+  let html = `<h2>Wider Squad</h2>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="addPlayer()">+ Add Player</button>
+      <button class="btn btn-secondary" onclick="addMultiplePlayers()">+ Bulk Add</button>
+      <button class="btn btn-secondary" onclick="exportData()">Export</button>
+      <button class="btn btn-secondary" onclick="importData()">Import</button>
+    </div>
+    <div class="section">
+      <table class="squad-table">
+        <thead><tr>
+          <th style="width:40px;">Photo</th>
+          <th style="width:60px;">Jersey</th>
+          <th>Name</th>
+          <th style="width:100px;">Position</th>
+          <th style="width:80px;">Caps</th>
+          <th style="width:40px;"></th>
+        </tr></thead>
+        <tbody>`;
+
+  const sorted = [...state.squad].sort((a,b) => {
+    const ai = POS_ORDER.indexOf(a.posGroup || 'STR');
+    const bi = POS_ORDER.indexOf(b.posGroup || 'STR');
+    if (ai !== bi) return ai - bi;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  sorted.forEach((p, si) => {
+    const initials = (p.name||'??').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    html += `<tr>
+      <td style="cursor:pointer;" onclick="uploadPhotoById('${p.id}')">${p.photo ? `<img src="${esc(p.photo)}">` : `<span class="initials">${initials}</span>`}</td>
+      <td><input value="${esc(p.jersey)}" onchange="updatePlayer('${p.id}','jersey',this.value)" style="width:50px; text-align:center; font-weight:700;"></td>
+      <td><input value="${esc(p.name)}" onchange="updatePlayer('${p.id}','name',this.value)" style="font-weight:600;"></td>
+      <td><select onchange="updatePlayer('${p.id}','posGroup',this.value);renderSquad();">
+        ${POS_ORDER.map(g => `<option value="${g}" ${p.posGroup===g?'selected':''}>${POS_GROUPS[g]}</option>`).join('')}
+      </select></td>
+      <td><input value="${esc(p.caps)}" onchange="updatePlayer('${p.id}','caps',this.value)" style="width:60px; text-align:center;"></td>
+      <td><button class="btn btn-danger btn-sm" onclick="removePlayerById('${p.id}')">×</button></td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  el.innerHTML = html;
+}
+
+function addPlayer() {
+  state.squad.push({ id: uid(), name: '', jersey: '', posGroup: 'MID', caps: '', photo: '' });
+  saveState(); renderSquad();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.squad-table td input');
+    if (inputs.length > 0) inputs[inputs.length - 4].focus();
+  }, 50);
+}
+
+function addMultiplePlayers() {
+  const text = prompt('Paste player names (one per line):');
+  if (!text) return;
+  text.split('\n').forEach(line => {
+    const name = line.trim();
+    if (name) state.squad.push({ id: uid(), name, jersey: '', posGroup: 'MID', caps: '', photo: '' });
+  });
+  saveState(); renderSquad();
+}
+
+function updatePlayer(id, field, value) {
+  const p = state.squad.find(pl => pl.id === id);
+  if (p) { p[field] = value; saveState(); }
+}
+
+function removePlayerById(id) {
+  const p = state.squad.find(pl => pl.id === id);
+  if (!p) return;
+  if (!confirm('Remove ' + (p.name || 'this player') + '?')) return;
+  state.squad = state.squad.filter(pl => pl.id !== id);
+  saveState(); renderSquad();
+}
+
+function uploadPhotoById(id) {
+  const p = state.squad.find(pl => pl.id === id);
+  if (!p) return;
+  const input = document.createElement('input'); input.type='file'; input.accept='image/*';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    // Resize to keep localStorage manageable
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = ev => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 128;
+        let w = img.width, h = img.height;
+        if (w > h) { h = h * maxSize / w; w = maxSize; }
+        else { w = w * maxSize / h; h = maxSize; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        p.photo = canvas.toDataURL('image/jpeg', 0.7);
+        saveState(); renderSquad();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'squad-selection-data.json'; a.click();
+}
+
+function importData() {
+  const input = document.createElement('input'); input.type='file'; input.accept='.json';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (imported.squad) { state.squad = imported.squad; state.matches = imported.matches || []; }
+        else if (Array.isArray(imported)) { state.squad = [...state.squad, ...imported]; }
+        saveState(); renderSquad();
+      } catch(e) { alert('Invalid JSON'); }
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+  input.click();
+}
+
+// =============================================
+// MATCHES / SELECTION
+// =============================================
+function renderMatches() {
+  const el = document.getElementById('view-matches');
+  if (state.ui.currentMatchId) { renderSelection(); return; }
+
+  let html = `<h2>Match Selections</h2>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="createMatch()">+ New Match</button>
+    </div>`;
+
+  state.matches.forEach(m => {
+    const selected = (m.selected || []).length;
+    html += `<div class="match-card" onclick="openMatch('${m.id}')">
+      <div class="info"><h4>${esc(m.title)}</h4><small>${esc(m.date)} · ${esc(m.venue)} · ${selected} selected</small></div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();dupMatch('${m.id}')">Dup</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();delMatch('${m.id}')">×</button>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function createMatch() {
+  if (state.squad.length === 0) { alert('Add players to your squad first.'); return; }
+  const m = {
+    id: uid(),
+    title: 'NZ vs ',
+    date: new Date().toLocaleDateString('en-GB'),
+    time: '',
+    venue: '',
+    competition: '',
+    teamName: 'BLACK STICKS MEN',
+    notes: '',
+    selected: [],
+    roles: {},
+    formations: [{},{},{},{}] // per-quarter: { playerId: { x, y, zone } }
+  };
+  state.matches.push(m);
+  state.ui.currentMatchId = m.id;
+  saveState(); renderSelection();
+}
+
+function openMatch(id) { state.ui.currentMatchId = id; saveState(); renderSelection(); }
+function dupMatch(id) {
+  const orig = state.matches.find(m=>m.id===id); if (!orig) return;
+  const copy = JSON.parse(JSON.stringify(orig)); copy.id = uid(); copy.title += ' (copy)';
+  state.matches.push(copy); saveState(); renderMatches();
+}
+function delMatch(id) {
+  if (!confirm('Delete?')) return;
+  state.matches = state.matches.filter(m=>m.id!==id);
+  if (state.ui.currentMatchId===id) state.ui.currentMatchId = null;
+  saveState(); renderMatches();
+}
+
+function getMatch() { return state.matches.find(m=>m.id===state.ui.currentMatchId); }
+
+function renderSelection() {
+  const el = document.getElementById('view-matches');
+  const match = getMatch();
+  if (!match) { renderMatches(); return; }
+
+  const selected = new Set(match.selected || []);
+  const roles = match.roles || {};
+
+  let html = `<div class="toolbar">
+    <button class="btn btn-secondary btn-sm" onclick="state.ui.currentMatchId=null;saveState();renderMatches();">← Back</button>
+    <button class="btn btn-success btn-sm" onclick="switchView('formation')">Formation →</button>
+    <button class="btn btn-success btn-sm" onclick="switchView('preview')">Preview / Print →</button>
+  </div>
+  <div class="section">
+    <h3>Match Details</h3>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Match Title</label><input value="${esc(match.title)}" onchange="getMatch().title=this.value;saveState();"></div>
+      <div class="form-group"><label>Date</label><input value="${esc(match.date)}" onchange="getMatch().date=this.value;saveState();"></div>
+      <div class="form-group"><label>Time</label><input value="${esc(match.time)}" onchange="getMatch().time=this.value;saveState();" placeholder="19:00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Venue</label><input value="${esc(match.venue)}" onchange="getMatch().venue=this.value;saveState();"></div>
+      <div class="form-group" style="flex:1;"><label>Competition</label><input value="${esc(match.competition)}" onchange="getMatch().competition=this.value;saveState();" placeholder="Pro League"></div>
+      <div class="form-group" style="flex:1;"><label>Team Name</label><input value="${esc(match.teamName)}" onchange="getMatch().teamName=this.value;saveState();"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Notes (captain, vice-captain, etc.)</label><textarea rows="2" onchange="getMatch().notes=this.value;saveState();" style="width:100%;">${esc(match.notes)}</textarea></div>
+    </div>
+  </div>`;
+
+  const starters = [...selected].filter(id => roles[id] === 'starter' || !roles[id]);
+  const interchange = [...selected].filter(id => roles[id] === 'interchange');
+  const starterCount = selected.size - interchange.length;
+
+  html += `<div class="section">
+    <h3>Select Players</h3>
+    <div class="selection-count">Selected: <span>${selected.size}</span> / ${state.squad.length} &nbsp;|&nbsp; Starting: <span>${starterCount}</span> &nbsp;|&nbsp; Interchange: <span>${interchange.length}</span></div>`;
+
+  POS_ORDER.forEach(group => {
+    const players = state.squad.filter(p => p.posGroup === group);
+    if (players.length === 0) return;
+    html += `<div class="selection-group"><h4>${POS_GROUPS[group]}</h4>`;
+    players.forEach(p => {
+      const isSel = selected.has(p.id);
+      const role = roles[p.id] || 'starter';
+      html += `<div class="selection-row ${isSel?'selected':''}" onclick="toggleSelect('${p.id}')">
+        <div class="sel-check">${isSel ? '✓' : ''}</div>
+        <div class="sel-jersey">${esc(p.jersey)}</div>
+        <div class="sel-name">${esc(p.name)}</div>
+        <div class="sel-pos">${esc(POS_GROUPS[p.posGroup])}</div>
+        ${isSel ? `<div class="sel-role" onclick="event.stopPropagation();">
+          <select onchange="getMatch().roles['${p.id}']=this.value;saveState();renderSelection();">
+            <option value="starter" ${role==='starter'?'selected':''}>Starter</option>
+            <option value="interchange" ${role==='interchange'?'selected':''}>Interchange</option>
+          </select>
+        </div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function toggleSelect(playerId) {
+  const match = getMatch(); if (!match) return;
+  if (!match.selected) match.selected = [];
+  if (!match.roles) match.roles = {};
+  const idx = match.selected.indexOf(playerId);
+  if (idx >= 0) {
+    match.selected.splice(idx, 1);
+    delete match.roles[playerId];
+  } else {
+    match.selected.push(playerId);
+    match.roles[playerId] = 'starter';
+  }
+  saveState(); renderSelection();
+}
+
+// =============================================
+// FORMATION VIEW
+// =============================================
+function ensureFormations(match) {
+  if (!match.formations) match.formations = [{},{},{},{}];
+  while (match.formations.length < 4) match.formations.push({});
+}
+
+function getQuarterData(match, q) {
+  ensureFormations(match);
+  return match.formations[q] || {};
+}
+
+function getFormationCounts(match, q) {
+  const qd = getQuarterData(match, q);
+  const selected = match.selected || [];
+  let field = 0, bench = 0, injured = 0;
+  selected.forEach(pid => {
+    const pd = qd[pid];
+    if (pd && pd.zone === 'injured') injured++;
+    else if (pd && pd.zone === 'bench') bench++;
+    else if (pd && pd.zone === 'field') field++;
+    else {
+      // Auto-assign based on role
+      const role = (match.roles || {})[pid];
+      if (role === 'interchange') bench++;
+      else field++;
+    }
+  });
+  return { field, bench, injured };
+}
+
+function getFormationString(match, q) {
+  const qd = getQuarterData(match, q);
+  const selected = match.selected || [];
+  const roles = match.roles || {};
+  // Count field players by position group
+  const counts = { DEF: 0, MID: 0, STR: 0 };
+  selected.forEach(pid => {
+    const pd = qd[pid];
+    const zone = pd ? pd.zone : (roles[pid] === 'interchange' ? 'bench' : 'field');
+    if (zone === 'field') {
+      const player = state.squad.find(p => p.id === pid);
+      if (player && player.posGroup !== 'GK') {
+        counts[player.posGroup] = (counts[player.posGroup] || 0) + 1;
+      }
+    }
+  });
+  return `${counts.DEF}-${counts.MID}-${counts.STR}`;
+}
+
+function renderFormation() {
+  const el = document.getElementById('view-formation');
+  const match = getMatch();
+
+  if (!match) {
+    // Show match selector
+    let html = `<h2>Formation Layout</h2>`;
+    if (state.matches.length === 0) {
+      html += `<p style="color:#889;">Create a match first in the Matches tab.</p>`;
+    } else {
+      html += `<div class="toolbar"><select id="formation-match-select" onchange="selectFormationMatch(this.value)" style="padding:8px 12px;">
+        <option value="">Select match...</option>
+        ${state.matches.map(m => `<option value="${m.id}">${esc(m.title)} - ${esc(m.date)}</option>`).join('')}
+      </select></div>`;
+    }
+    el.innerHTML = html;
+    return;
+  }
+
+  ensureFormations(match);
+  const q = state.ui.currentQuarter || 0;
+  const qd = getQuarterData(match, q);
+  const selected = match.selected || [];
+  const roles = match.roles || {};
+  const formStr = getFormationString(match, q);
+  const counts = getFormationCounts(match, q);
+
+  // Categorize players for this quarter
+  const fieldPlayers = [];
+  const benchPlayers = [];
+  const injuredPlayers = [];
+  const unassigned = [];
+
+  selected.forEach(pid => {
+    const player = state.squad.find(p => p.id === pid);
+    if (!player) return;
+    const pd = qd[pid];
+    if (pd && pd.zone === 'field') fieldPlayers.push({ ...player, x: pd.x, y: pd.y });
+    else if (pd && pd.zone === 'bench') benchPlayers.push(player);
+    else if (pd && pd.zone === 'injured') injuredPlayers.push(player);
+    else unassigned.push(player);
+  });
+
+  let html = `<div class="toolbar">
+    <button class="btn btn-secondary btn-sm" onclick="state.ui.currentMatchId=null;saveState();renderFormation();">← Back</button>
+    <span style="color:#d4a843; font-weight:700; font-size:14px; margin: 0 8px;">${esc(match.title)}</span>
+    <button class="btn btn-success btn-sm" onclick="switchView('preview')">Preview / Print →</button>
+  </div>`;
+
+  // Quarter tabs
+  html += `<div class="quarter-tabs">`;
+  for (let i = 0; i < 4; i++) {
+    html += `<button class="quarter-tab ${i===q?'active':''}" onclick="state.ui.currentQuarter=${i};saveState();renderFormation();">${QUARTER_LABELS[i]}</button>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="toolbar" style="margin-bottom:8px;">
+    <div class="formation-label">${QUARTER_LABELS[q]} = ${formStr}</div>
+    <div style="margin-left:auto; display:flex; gap:6px; align-items:center;">
+      <button class="btn btn-secondary btn-sm" onclick="autoPlaceAll()">Auto-Place</button>
+      <div class="copy-quarter-menu">
+        <button class="btn btn-secondary btn-sm" onclick="toggleCopyMenu(event)">Copy From...</button>
+        <div class="copy-quarter-dropdown" id="copy-quarter-dd">
+          ${[0,1,2,3].filter(i=>i!==q).map(i => `<button onclick="copyQuarter(${i},${q});this.parentElement.classList.remove('show');">← ${QUARTER_LABELS[i]}</button>`).join('')}
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="clearQuarter(${q})">Clear</button>
+    </div>
+  </div>`;
+
+  html += `<div class="formation-container">
+    <div class="formation-main">`;
+
+  // Injured bar (top)
+  html += `<div class="injured-bar" id="injured-drop" ondragover="allowDrop(event)" ondrop="dropToZone(event,'injured')">`;
+  if (injuredPlayers.length === 0) html += `<span class="bar-empty">INJURED — drag players here</span>`;
+  injuredPlayers.forEach(p => {
+    const surname = getDisplayName(p);
+    html += `<span class="fp-label" draggable="true" ondragstart="startDrag(event,'${p.id}','injured')">${esc(surname)}</span>`;
+  });
+  html += `</div>`;
+
+  // Field
+  html += `<div class="field-wrapper" id="field-drop" ondragover="allowDrop(event)" ondrop="dropToField(event)">
+    ${fieldSVG('fm')}
+    <div class="field-drop">`;
+
+  fieldPlayers.forEach(p => {
+    const surname = getDisplayName(p);
+    html += `<div class="field-player" style="left:${p.x}%;top:${p.y}%;" draggable="true" ondragstart="startDrag(event,'${p.id}','field')" id="fp-${p.id}">
+      <div class="fp-label">${esc(surname)}</div>
+    </div>`;
+  });
+
+  html += `</div></div>`;
+
+  // Bench bar (bottom)
+  html += `<div class="bench-bar" id="bench-drop" ondragover="allowDrop(event)" ondrop="dropToZone(event,'bench')">`;
+  if (benchPlayers.length === 0 && unassigned.length === 0) html += `<span class="bar-empty">BENCH — drag players here</span>`;
+  benchPlayers.forEach(p => {
+    const surname = getDisplayName(p);
+    html += `<span class="fp-label" draggable="true" ondragstart="startDrag(event,'${p.id}','bench')">${esc(surname)}</span>`;
+  });
+  html += `</div>`;
+
+  html += `</div>`; // end formation-main
+
+  // Sidebar: player pool
+  html += `<div class="formation-sidebar">
+    <div class="pool-title">Squad (${selected.length} selected)</div>
+    <div style="font-size:11px; color:#667; margin-bottom:8px;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4a8c3f;vertical-align:middle;"></span> Field &nbsp;
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#555;vertical-align:middle;"></span> Bench &nbsp;
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c0392b;vertical-align:middle;"></span> Injured &nbsp;
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;border:1px solid #445;vertical-align:middle;"></span> Unplaced
+    </div>`;
+
+  POS_ORDER.forEach(group => {
+    const players = state.squad.filter(p => p.posGroup === group && selected.includes(p.id));
+    if (players.length === 0) return;
+    html += `<div class="pool-group-title">${POS_GROUPS[group]}</div>`;
+    players.forEach(p => {
+      const pd = qd[p.id];
+      let statusClass = 'unassigned';
+      if (pd) {
+        if (pd.zone === 'field') statusClass = 'on-field';
+        else if (pd.zone === 'bench') statusClass = 'on-bench';
+        else if (pd.zone === 'injured') statusClass = 'is-injured';
+      }
+      const surname = getDisplayName(p);
+      html += `<div class="pool-player" draggable="true" ondragstart="startDrag(event,'${p.id}','pool')">
+        <span class="pp-jersey">${esc(p.jersey)}</span>
+        <span class="pp-name">${esc(surname)}</span>
+        <span class="pp-status ${statusClass}"></span>
+      </div>`;
+    });
+  });
+
+  // Unselected players
+  const unselectedPlayers = state.squad.filter(p => !selected.includes(p.id));
+  if (unselectedPlayers.length > 0) {
+    html += `<div class="pool-group-title" style="margin-top:16px; color:#c0392b;">Not Selected</div>`;
+    unselectedPlayers.forEach(p => {
+      const surname = getDisplayName(p);
+      html += `<div class="pool-player" style="opacity:.4;">
+        <span class="pp-jersey">${esc(p.jersey)}</span>
+        <span class="pp-name">${esc(surname)}</span>
+      </div>`;
+    });
+  }
+
+  html += `</div></div>`; // end sidebar + container
+
+  // Unassigned players info
+  if (unassigned.length > 0) {
+    html += `<div style="margin-top:12px; padding:10px 14px; background:#1a2a4a; border-radius:4px; border-left:3px solid #d4a843;">
+      <span style="font-size:12px; color:#d4a843; font-weight:700;">UNPLACED (${unassigned.length}):</span>
+      <span style="font-size:12px; color:#aaa;"> ${unassigned.map(p => esc(getDisplayName(p))).join(', ')} — drag them to the field, bench, or injured bar</span>
+    </div>`;
+  }
+
+  el.innerHTML = html;
+
+  // Setup touch drag for mobile
+  setupTouchDrag();
+}
+
+function getDisplayName(player) {
+  const name = player.name || '';
+  const parts = name.trim().split(' ');
+  if (parts.length <= 1) return name;
+  // Use last name, but if there are duplicates we need initial
+  const lastName = parts[parts.length - 1];
+  const dupes = state.squad.filter(p => {
+    const pp = (p.name || '').trim().split(' ');
+    return pp.length > 0 && pp[pp.length - 1] === lastName && p.id !== player.id;
+  });
+  if (dupes.length > 0) {
+    return lastName + ' ' + parts[0][0];
+  }
+  return lastName;
+}
+
+function selectFormationMatch(id) {
+  if (!id) return;
+  state.ui.currentMatchId = id;
+  saveState();
+  renderFormation();
+}
+
+// Drag and drop
+function startDrag(e, playerId, originZone) {
+  dragState.playerId = playerId;
+  dragState.originZone = originZone;
+  e.dataTransfer.setData('text/plain', playerId);
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function allowDrop(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function dropToField(e) {
+  e.preventDefault();
+  const match = getMatch();
+  if (!match || !dragState.playerId) return;
+  const q = state.ui.currentQuarter || 0;
+  ensureFormations(match);
+
+  const rect = document.getElementById('field-drop').getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+  const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+
+  // Clamp
+  const cx = Math.max(2, Math.min(98, parseFloat(x)));
+  const cy = Math.max(3, Math.min(97, parseFloat(y)));
+
+  match.formations[q][dragState.playerId] = { x: cx, y: cy, zone: 'field' };
+  dragState.playerId = null;
+  saveState();
+  renderFormation();
+}
+
+function dropToZone(e, zone) {
+  e.preventDefault();
+  const match = getMatch();
+  if (!match || !dragState.playerId) return;
+  const q = state.ui.currentQuarter || 0;
+  ensureFormations(match);
+
+  match.formations[q][dragState.playerId] = { x: 50, y: 50, zone: zone };
+  dragState.playerId = null;
+  saveState();
+  renderFormation();
+}
+
+function toggleCopyMenu(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('copy-quarter-dd');
+  dd.classList.toggle('show');
+  // Close on next click
+  setTimeout(() => {
+    document.addEventListener('click', function handler() {
+      dd.classList.remove('show');
+      document.removeEventListener('click', handler);
+    });
+  }, 10);
+}
+
+function copyQuarter(from, to) {
+  const match = getMatch(); if (!match) return;
+  ensureFormations(match);
+  match.formations[to] = JSON.parse(JSON.stringify(match.formations[from] || {}));
+  saveState();
+  renderFormation();
+}
+
+function clearQuarter(q) {
+  const match = getMatch(); if (!match) return;
+  if (!confirm('Clear all positions for ' + QUARTER_LABELS[q] + '?')) return;
+  ensureFormations(match);
+  match.formations[q] = {};
+  saveState();
+  renderFormation();
+}
+
+function autoPlaceAll() {
+  const match = getMatch(); if (!match) return;
+  const q = state.ui.currentQuarter || 0;
+  ensureFormations(match);
+  const selected = match.selected || [];
+  const roles = match.roles || {};
+  const qd = match.formations[q];
+
+  // Place starters on field, interchange on bench
+  // Auto-position by position group
+  const starters = selected.filter(pid => roles[pid] !== 'interchange');
+  const interchangers = selected.filter(pid => roles[pid] === 'interchange');
+
+  // Group starters by position
+  const groups = { GK: [], DEF: [], MID: [], STR: [] };
+  starters.forEach(pid => {
+    const p = state.squad.find(pl => pl.id === pid);
+    if (p) groups[p.posGroup || 'MID'].push(pid);
+  });
+
+  // Auto-position: GK near left, DEF left-center, MID center, STR right-center
+  const xZones = { GK: 6, DEF: 25, MID: 45, STR: 65 };
+
+  Object.keys(groups).forEach(g => {
+    const pids = groups[g];
+    const count = pids.length;
+    const baseX = xZones[g];
+    pids.forEach((pid, i) => {
+      // Spread vertically
+      const ySpacing = 80 / (count + 1);
+      const y = 10 + ySpacing * (i + 1);
+      // Slight x variation for visual interest
+      const xOff = count > 1 ? (i % 2 === 0 ? -4 : 4) : 0;
+      // Keep existing position if already on field
+      if (qd[pid] && qd[pid].zone === 'field') return;
+      qd[pid] = { x: baseX + xOff, y: y, zone: 'field' };
+    });
+  });
+
+  // Place interchange on bench
+  interchangers.forEach(pid => {
+    if (qd[pid] && qd[pid].zone === 'bench') return;
+    qd[pid] = { x: 50, y: 50, zone: 'bench' };
+  });
+
+  saveState();
+  renderFormation();
+}
+
+// Touch drag support for mobile
+function setupTouchDrag() {
+  let touchTarget = null;
+  let touchGhost = null;
+  let touchPlayerId = null;
+
+  document.querySelectorAll('[draggable="true"]').forEach(el => {
+    el.addEventListener('touchstart', function(e) {
+      const dragstartEvent = el.getAttribute('ondragstart');
+      if (!dragstartEvent) return;
+      const match = dragstartEvent.match(/startDrag\(event,'([^']+)','([^']+)'\)/);
+      if (!match) return;
+
+      touchPlayerId = match[1];
+      dragState.playerId = touchPlayerId;
+      dragState.originZone = match[2];
+
+      // Create ghost element
+      touchGhost = el.cloneNode(true);
+      touchGhost.style.position = 'fixed';
+      touchGhost.style.pointerEvents = 'none';
+      touchGhost.style.zIndex = '10000';
+      touchGhost.style.opacity = '0.8';
+      touchGhost.style.transform = 'scale(1.1)';
+      document.body.appendChild(touchGhost);
+
+      touchTarget = el;
+      e.preventDefault();
+    }, { passive: false });
+  });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!touchGhost) return;
+    const touch = e.touches[0];
+    touchGhost.style.left = (touch.clientX - 40) + 'px';
+    touchGhost.style.top = (touch.clientY - 15) + 'px';
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', function(e) {
+    if (!touchGhost || !touchPlayerId) return;
+    const touch = e.changedTouches[0];
+    touchGhost.remove();
+    touchGhost = null;
+
+    // Determine drop target
+    const fieldEl = document.getElementById('field-drop');
+    const benchEl = document.getElementById('bench-drop');
+    const injuredEl = document.getElementById('injured-drop');
+
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (fieldEl && (fieldEl.contains(dropTarget) || dropTarget === fieldEl)) {
+      const rect = fieldEl.getBoundingClientRect();
+      const fakeEvent = { preventDefault: ()=>{}, clientX: touch.clientX, clientY: touch.clientY };
+      dropToField(fakeEvent);
+    } else if (benchEl && (benchEl.contains(dropTarget) || dropTarget === benchEl)) {
+      const fakeEvent = { preventDefault: ()=>{} };
+      dropToZone(fakeEvent, 'bench');
+    } else if (injuredEl && (injuredEl.contains(dropTarget) || dropTarget === injuredEl)) {
+      const fakeEvent = { preventDefault: ()=>{} };
+      dropToZone(fakeEvent, 'injured');
+    }
+
+    touchPlayerId = null;
+    dragState.playerId = null;
+  });
+}
+
+// =============================================
+// PREVIEW / PRINT
+// =============================================
+function renderPreview() {
+  const el = document.getElementById('view-preview');
+  let html = `<div class="no-print" style="margin-bottom:16px; display:flex; gap:8px; align-items:center;">
+    <select id="preview-match" onchange="renderPreviewContent()" style="padding:6px 10px; background:#0d1b2a; color:#fff; border:1px solid #334; border-radius:4px;">
+      <option value="">Select match...</option>
+      ${state.matches.map(m => `<option value="${m.id}" ${m.id===state.ui.currentMatchId?'selected':''}>${esc(m.title)} - ${esc(m.date)}</option>`).join('')}
+    </select>
+    <label style="display:flex; align-items:center; gap:4px; margin:0; cursor:pointer;">
+      <input type="checkbox" id="preview-formation" checked onchange="renderPreviewContent()" style="width:auto;"> Formation
+    </label>
+    <label style="display:flex; align-items:center; gap:4px; margin:0; cursor:pointer;">
+      <input type="checkbox" id="preview-teamsheet" checked onchange="renderPreviewContent()" style="width:auto;"> Team Sheet
+    </label>
+    <button class="btn btn-primary" onclick="window.print()">Print</button>
+  </div>
+  <div id="preview-content"></div>`;
+  el.innerHTML = html;
+  renderPreviewContent();
+}
+
+function renderPreviewContent() {
+  const matchId = document.getElementById('preview-match').value;
+  const match = state.matches.find(m => m.id === matchId);
+  const content = document.getElementById('preview-content');
+  if (!match) { content.innerHTML = '<p style="color:#889;">Select a match to preview.</p>'; return; }
+
+  const showFormation = document.getElementById('preview-formation').checked;
+  const showTeamSheet = document.getElementById('preview-teamsheet').checked;
+
+  let html = '';
+
+  // Formation output
+  if (showFormation) {
+    ensureFormations(match);
+    html += `<div class="ts-output fo-page">
+      <div class="ts-header">
+        <span class="team-name">${esc(match.teamName)}</span>
+        <span class="doc-type">FORMATION · ${esc(match.competition).toUpperCase()}</span>
+      </div>
+      <div class="ts-match-info">
+        <div class="info-item"><div class="info-label">Match</div><div class="info-value">${esc(match.title)}</div></div>
+        <div class="info-item"><div class="info-label">Date</div><div class="info-value">${esc(match.date)}</div></div>
+        <div class="info-item"><div class="info-label">Time</div><div class="info-value">${esc(match.time)}</div></div>
+        <div class="info-item"><div class="info-label">Venue</div><div class="info-value">${esc(match.venue)}</div></div>
+      </div>
+      <div style="padding: 16px 24px;">`;
+
+    for (let q = 0; q < 4; q++) {
+      const qd = getQuarterData(match, q);
+      const formStr = getFormationString(match, q);
+      const selected = match.selected || [];
+      const roles = match.roles || {};
+
+      const fieldPs = [];
+      const benchPs = [];
+      const injuredPs = [];
+
+      selected.forEach(pid => {
+        const player = state.squad.find(p => p.id === pid);
+        if (!player) return;
+        const pd = qd[pid];
+        if (pd && pd.zone === 'field') fieldPs.push({ ...player, x: pd.x, y: pd.y });
+        else if (pd && pd.zone === 'bench') benchPs.push(player);
+        else if (pd && pd.zone === 'injured') injuredPs.push(player);
+        else if (roles[pid] === 'interchange') benchPs.push(player);
+        else fieldPs.push({ ...player, x: 50, y: 50 });
+      });
+
+      html += `<div style="margin-bottom: ${q<3 ? '20px' : '0'};">`;
+
+      // Injured bar
+      if (injuredPs.length > 0) {
+        html += `<div class="fo-injured-bar">`;
+        injuredPs.forEach(p => {
+          html += `<span class="fo-label">${esc(getDisplayName(p))}</span>`;
+        });
+        html += `</div>`;
+      }
+
+      // Field
+      html += `<div class="fo-field" style="${injuredPs.length === 0 ? 'border-radius:4px 4px 0 0;' : ''}">
+        ${fieldSVG('fo'+q)}
+        <div class="fo-quarter-label">${QUARTER_LABELS[q]} = ${formStr}</div>`;
+
+      fieldPs.forEach(p => {
+        html += `<div class="fo-player" style="left:${p.x}%;top:${p.y}%;">
+          <div class="fo-label">${esc(getDisplayName(p))}</div>
+        </div>`;
+      });
+
+      html += `</div>`;
+
+      // Bench bar
+      html += `<div class="fo-bench-bar" style="border-radius: 0 0 4px 4px;">`;
+      benchPs.forEach(p => {
+        html += `<span class="fo-label">${esc(getDisplayName(p))}</span>`;
+      });
+      if (benchPs.length === 0) html += `<span style="font-size:10px;color:#555;font-style:italic;">No bench players</span>`;
+      html += `</div>`;
+
+      html += `</div>`;
+    }
+
+    html += `</div>
+      <div class="ts-footer">
+        <span class="values">Accountability · Consistency · Action</span>
+        <span class="brand">CONFIDENTIAL</span>
+      </div>
+    </div>`;
+  }
+
+  // Team sheet output
+  if (showTeamSheet) {
+    const roles = match.roles || {};
+    const selectedPlayers = (match.selected || []).map(id => state.squad.find(p => p.id === id)).filter(Boolean);
+    const starters = selectedPlayers.filter(p => roles[p.id] !== 'interchange');
+    const interchange = selectedPlayers.filter(p => roles[p.id] === 'interchange');
+
+    const starterGroups = {};
+    POS_ORDER.forEach(g => { starterGroups[g] = starters.filter(p => p.posGroup === g); });
+
+    html += `<div class="ts-output">
+      <div class="ts-header">
+        <span class="team-name">${esc(match.teamName)}</span>
+        <span class="doc-type">TEAM SHEET · ${esc(match.competition).toUpperCase()}</span>
+      </div>
+
+      <div class="ts-match-info">
+        <div class="info-item"><div class="info-label">Match</div><div class="info-value">${esc(match.title)}</div></div>
+        <div class="info-item"><div class="info-label">Date</div><div class="info-value">${esc(match.date)}</div></div>
+        <div class="info-item"><div class="info-label">Time</div><div class="info-value">${esc(match.time)}</div></div>
+        <div class="info-item"><div class="info-label">Venue</div><div class="info-value">${esc(match.venue)}</div></div>
+      </div>
+
+      <div class="ts-body">
+        <div class="ts-section-title">STARTING XI</div>
+        <table class="ts-table">
+          <thead><tr>
+            <th style="width:50px; text-align:center;">No.</th>
+            <th>Player</th>
+            <th style="width:120px;">Position</th>
+            <th style="width:60px; text-align:center;">Caps</th>
+          </tr></thead>
+          <tbody>`;
+
+    POS_ORDER.forEach(group => {
+      const players = starterGroups[group];
+      if (players.length === 0) return;
+      html += `<tr class="group-header"><td colspan="4">${POS_GROUPS[group].toUpperCase()}</td></tr>`;
+      players.forEach(p => {
+        html += `<tr>
+          <td class="jersey-num">${esc(p.jersey)}</td>
+          <td class="player-name">${esc(p.name)}</td>
+          <td class="player-pos">${esc(POS_GROUPS[p.posGroup])}</td>
+          <td class="cap-num">${esc(p.caps)}</td>
+        </tr>`;
+      });
+    });
+
+    html += `</tbody></table>`;
+
+    if (interchange.length > 0) {
+      html += `<div class="ts-interchange-title">INTERCHANGE</div>
+        <table class="ts-table">
+          <thead><tr>
+            <th style="width:50px; text-align:center;">No.</th>
+            <th>Player</th>
+            <th style="width:120px;">Position</th>
+            <th style="width:60px; text-align:center;">Caps</th>
+          </tr></thead>
+          <tbody>`;
+      interchange.forEach(p => {
+        html += `<tr class="interchange-row">
+          <td class="jersey-num">${esc(p.jersey)}</td>
+          <td class="player-name">${esc(p.name)}</td>
+          <td class="player-pos">${esc(POS_GROUPS[p.posGroup])}</td>
+          <td class="cap-num">${esc(p.caps)}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+
+    if (match.notes) {
+      html += `<div class="ts-notes">
+        <div class="notes-label">NOTES</div>
+        <div class="notes-text">${escHtml(match.notes)}</div>
+      </div>`;
+    }
+
+    html += `</div>
+      <div class="ts-footer">
+        <span class="values">Accountability · Consistency · Action</span>
+        <span class="brand">CONFIDENTIAL</span>
+      </div>
+    </div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+// =============================================
+// INIT
+// =============================================
+loadState();
+if (state.ui.currentView) switchView(state.ui.currentView);
+else renderSquad();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Session Timer</title>
+<meta name="theme-color" content="#d4a843">
+<link rel="manifest" href="manifest.json">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Segoe UI', -apple-system, Arial, sans-serif; background: #111; color: #fff; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
+
+/* NAV */
+.top-bar { display: flex; align-items: center; padding: 10px 16px; background: #1a1a1a; border-bottom: 2px solid #d4a843; gap: 8px; position: sticky; top: 0; z-index: 100; }
+.top-bar .logo { font-weight: 900; font-size: 15px; color: #d4a843; letter-spacing: 1px; margin-right: auto; }
+.top-bar button { background: #222; border: 1px solid #333; color: #ccc; font-size: 12px; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+.top-bar button:hover { background: #333; }
+.top-bar button.active { background: #d4a843; color: #000; border-color: #d4a843; }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ======================== */
+/* TEMPLATES VIEW           */
+/* ======================== */
+.templates-view { padding: 16px; max-width: 600px; margin: 0 auto; }
+.templates-view h2 { font-size: 20px; color: #d4a843; margin-bottom: 16px; }
+
+.tmpl-card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
+.tmpl-card:hover { border-color: #d4a843; }
+.tmpl-card .info h3 { font-size: 15px; color: #fff; margin-bottom: 2px; }
+.tmpl-card .info small { font-size: 12px; color: #888; }
+.tmpl-card .actions { display: flex; gap: 6px; }
+.tmpl-card .actions button { background: #222; border: 1px solid #444; color: #aaa; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+.tmpl-card .actions button:hover { color: #fff; border-color: #888; }
+.tmpl-card .actions button.del:hover { color: #e74c3c; border-color: #e74c3c; }
+
+.new-tmpl-btns { display: flex; gap: 8px; margin-bottom: 20px; }
+.btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all .15s; }
+.btn-gold { background: #d4a843; color: #000; }
+.btn-gold:hover { background: #e6bc5a; }
+.btn-dark { background: #222; color: #ccc; border: 1px solid #444; }
+.btn-dark:hover { background: #333; }
+.btn-danger { background: #5a1a1a; color: #e74c3c; border: 1px solid #e74c3c; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ======================== */
+/* EDITOR VIEW              */
+/* ======================== */
+.editor-view { padding: 16px; max-width: 700px; margin: 0 auto; }
+.editor-view h2 { font-size: 20px; color: #d4a843; margin-bottom: 16px; }
+
+.ed-field { margin-bottom: 14px; }
+.ed-field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+.ed-field input, .ed-field select { width: 100%; padding: 8px 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px; }
+.ed-field input:focus, .ed-field select:focus { outline: none; border-color: #d4a843; }
+.ed-row { display: flex; gap: 10px; }
+.ed-row .ed-field { flex: 1; }
+
+/* Category colors */
+.cat-connection { background: #d4a0d4 !important; color: #000 !important; }
+.cat-running { background: #8bc34a !important; color: #000 !important; }
+.cat-kitup { background: #81d4fa !important; color: #000 !important; }
+.cat-hockey { background: #ffb300 !important; color: #000 !important; }
+.cat-off-pitch { background: #d4a0d4 !important; color: #000 !important; }
+.cat-other { background: #666 !important; color: #fff !important; }
+
+/* Drill list in editor */
+.drill-list { margin-top: 16px; }
+.drill-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; margin-bottom: 6px; }
+.drill-item .drag-handle { cursor: grab; color: #555; font-size: 16px; padding: 0 4px; user-select: none; }
+.drill-item .drag-handle:active { cursor: grabbing; }
+.drill-item .di-cat { width: 6px; height: 32px; border-radius: 3px; flex-shrink: 0; }
+.drill-item .di-info { flex: 1; min-width: 0; }
+.drill-item .di-name { font-size: 13px; font-weight: 600; }
+.drill-item .di-meta { font-size: 11px; color: #888; }
+.drill-item .di-actions { display: flex; gap: 4px; }
+.drill-item .di-actions button { background: none; border: 1px solid #444; color: #888; font-size: 11px; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
+.drill-item .di-actions button:hover { color: #fff; border-color: #888; }
+
+/* Add drill form */
+.add-drill-form { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 14px; margin-top: 12px; }
+.add-drill-form h4 { font-size: 13px; color: #d4a843; margin-bottom: 10px; }
+
+/* ======================== */
+/* TIMER VIEW               */
+/* ======================== */
+.timer-view { display: flex; flex-direction: column; min-height: calc(100vh - 50px); min-height: calc(100dvh - 50px); }
+
+/* Session header */
+.timer-header { padding: 12px 16px; background: #1a1a1a; border-bottom: 1px solid #333; text-align: center; }
+.timer-header h2 { font-size: 16px; color: #d4a843; font-weight: 800; letter-spacing: 1px; }
+.timer-header small { font-size: 12px; color: #888; }
+
+/* Current drill display */
+.current-drill { flex: 0 0 auto; padding: 20px 16px; text-align: center; background: #111; }
+.current-drill .cd-category { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.current-drill .cd-name { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 4px; line-height: 1.2; }
+.current-drill .cd-time-range { font-size: 14px; color: #888; margin-bottom: 16px; }
+
+/* Big countdown */
+.countdown { font-size: 96px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -2px; margin-bottom: 8px; font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; }
+.countdown.warning { color: #e74c3c; animation: pulse .5s ease-in-out infinite alternate; }
+.countdown.normal { color: #fff; }
+@keyframes pulse { from { opacity: 1; } to { opacity: .6; } }
+
+/* Progress bar */
+.progress-wrap { width: 100%; max-width: 360px; margin: 0 auto 16px; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+.progress-bar { height: 100%; background: #d4a843; border-radius: 3px; transition: width .3s linear; }
+
+/* Next up */
+.next-up { font-size: 13px; color: #666; margin-bottom: 20px; }
+.next-up span { color: #aaa; font-weight: 600; }
+
+/* Controls */
+.timer-controls { display: flex; gap: 12px; justify-content: center; padding: 0 16px 20px; }
+.tc-btn { width: 64px; height: 64px; border-radius: 50%; border: 2px solid #333; background: #1a1a1a; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.tc-btn:hover { border-color: #888; background: #222; }
+.tc-btn.primary { border-color: #d4a843; background: #d4a843; color: #000; width: 80px; height: 80px; font-size: 24px; }
+.tc-btn.primary:hover { background: #e6bc5a; }
+.tc-btn.danger { border-color: #e74c3c; color: #e74c3c; }
+
+/* Drill timeline */
+.drill-timeline { flex: 1; overflow-y: auto; padding: 0 16px 100px; background: #111; }
+.dt-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; margin-bottom: 4px; transition: all .15s; cursor: pointer; }
+.dt-item:hover { background: #1a1a1a; }
+.dt-item.active { background: #1a2a1a; border: 1px solid #4a8c3f; }
+.dt-item.done { opacity: .4; }
+.dt-item .dt-time { font-size: 14px; font-weight: 700; color: #d4a843; width: 50px; text-align: center; font-variant-numeric: tabular-nums; }
+.dt-item .dt-cat { width: 5px; height: 28px; border-radius: 3px; flex-shrink: 0; }
+.dt-item .dt-name { flex: 1; font-size: 14px; font-weight: 600; }
+.dt-item .dt-dur { font-size: 12px; color: #888; }
+
+/* Alarm flash overlay */
+.alarm-flash { position: fixed; inset: 0; background: rgba(212,168,67,.3); pointer-events: none; z-index: 200; animation: flashAnim .3s ease-out; }
+@keyframes flashAnim { from { opacity: 1; } to { opacity: 0; } }
+
+/* Finished overlay */
+.finished-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 150; }
+.finished-overlay h1 { font-size: 48px; color: #d4a843; font-weight: 900; margin-bottom: 8px; }
+.finished-overlay p { font-size: 16px; color: #888; margin-bottom: 30px; }
+
+/* Toast */
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 300; animation: toastIn .3s ease-out; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .countdown { font-size: 72px; }
+  .current-drill .cd-name { font-size: 22px; }
+  .tc-btn { width: 56px; height: 56px; font-size: 18px; }
+  .tc-btn.primary { width: 70px; height: 70px; font-size: 22px; }
+}
+
+/* Prevent text selection during interaction */
+.no-select { user-select: none; -webkit-user-select: none; }
+</style>
+</head>
+<body class="no-select">
+
+<div class="top-bar">
+  <span class="logo">SESSION TIMER</span>
+  <button id="nav-templates" class="active" onclick="showView('templates')">Sessions</button>
+  <button id="nav-timer" onclick="showView('timer')">Timer</button>
+</div>
+
+<div id="view-templates" class="view active templates-view"></div>
+<div id="view-editor" class="view editor-view"></div>
+<div id="view-timer" class="view timer-view"></div>
+
+<script>
+// =============================================
+// STATE
+// =============================================
+const STORE_KEY = 'hockeySessionTimer';
+const CATEGORIES = [
+  { id: 'connection', label: 'Connection', color: '#d4a0d4' },
+  { id: 'running', label: 'Running', color: '#8bc34a' },
+  { id: 'kitup', label: 'Kit Up', color: '#81d4fa' },
+  { id: 'hockey', label: 'Hockey', color: '#ffb300' },
+  { id: 'off-pitch', label: 'Off Pitch', color: '#d4a0d4' },
+  { id: 'other', label: 'Other', color: '#666' }
+];
+
+let state = {
+  sessions: [],
+  ui: { view: 'templates', editingId: null }
+};
+
+// Timer runtime (not persisted)
+let timer = {
+  sessionId: null,
+  running: false,
+  currentIndex: 0,
+  elapsed: 0, // seconds into current drill
+  intervalId: null,
+  startedAt: null, // Date.now() when drill timer started
+  pausedElapsed: 0, // elapsed at pause
+  wakeLock: null
+};
+
+function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+function load() {
+  try { const r = localStorage.getItem(STORE_KEY); if (r) Object.assign(state, JSON.parse(r)); } catch(e) {}
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// =============================================
+// AUDIO
+// =============================================
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playBeep(freq, duration, count) {
+  const ctx = getAudioCtx();
+  for (let i = 0; i < count; i++) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    const startTime = ctx.currentTime + i * (duration + 0.08);
+    gain.gain.setValueAtTime(0.5, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  }
+}
+
+function playWarningBeep() { playBeep(880, 0.15, 2); }
+function playTransitionAlarm() { playBeep(1200, 0.2, 3); }
+function playFinishAlarm() { playBeep(1600, 0.3, 5); }
+
+// Unlock audio on first interaction (required on iOS)
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  gain.gain.value = 0;
+  osc.start();
+  osc.stop(ctx.currentTime + 0.01);
+  audioUnlocked = true;
+}
+document.addEventListener('touchstart', unlockAudio, { once: true });
+document.addEventListener('click', unlockAudio, { once: true });
+
+// =============================================
+// WAKE LOCK
+// =============================================
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      timer.wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+function releaseWakeLock() {
+  if (timer.wakeLock) { timer.wakeLock.release(); timer.wakeLock = null; }
+}
+
+// =============================================
+// VIEWS
+// =============================================
+function showView(v) {
+  state.ui.view = v;
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.top-bar button').forEach(b => b.classList.remove('active'));
+  if (v === 'templates') {
+    document.getElementById('view-templates').classList.add('active');
+    document.getElementById('nav-templates').classList.add('active');
+    renderTemplates();
+  } else if (v === 'editor') {
+    document.getElementById('view-editor').classList.add('active');
+    document.getElementById('nav-templates').classList.add('active');
+    renderEditor();
+  } else if (v === 'timer') {
+    document.getElementById('view-timer').classList.add('active');
+    document.getElementById('nav-timer').classList.add('active');
+    renderTimer();
+  }
+  save();
+}
+
+// =============================================
+// TEMPLATES
+// =============================================
+function renderTemplates() {
+  const el = document.getElementById('view-templates');
+  let html = `<h2>Sessions</h2>
+    <div class="new-tmpl-btns">
+      <button class="btn btn-gold" onclick="createSession('prematch')">+ Pre-Match Warmup</button>
+      <button class="btn btn-dark" onclick="createSession('training')">+ Training Session</button>
+    </div>`;
+
+  if (state.sessions.length === 0) {
+    html += `<p style="color:#666; font-size:14px; text-align:center; padding:40px 0;">No sessions yet. Create one above.</p>`;
+  }
+
+  state.sessions.forEach(s => {
+    const drillCount = (s.drills || []).length;
+    const totalMins = (s.drills || []).reduce((sum, d) => sum + (d.duration || 0), 0);
+    const typeLabel = s.type === 'prematch' ? 'Pre-Match' : 'Training';
+    html += `<div class="tmpl-card" onclick="editSession('${s.id}')">
+      <div class="info">
+        <h3>${esc(s.name)}</h3>
+        <small>${typeLabel} · ${drillCount} drills · ${totalMins} min</small>
+      </div>
+      <div class="actions" onclick="event.stopPropagation()">
+        <button onclick="startSession('${s.id}')">▶ Start</button>
+        <button onclick="dupSession('${s.id}')">Dup</button>
+        <button class="del" onclick="delSession('${s.id}')">×</button>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function createSession(type) {
+  const s = {
+    id: uid(),
+    name: type === 'prematch' ? 'Pre-Match Warmup' : 'Training Session',
+    type: type,
+    gameTime: type === 'prematch' ? '10:00' : '',
+    startTime: type === 'prematch' ? '' : '',
+    drills: type === 'prematch' ? getDefaultPrematch() : getDefaultTraining()
+  };
+  state.sessions.push(s);
+  state.ui.editingId = s.id;
+  save();
+  showView('editor');
+}
+
+function getDefaultPrematch() {
+  return [
+    { id: uid(), name: 'On Pitch Connection', category: 'connection', duration: 1 },
+    { id: uid(), name: 'Running General', category: 'running', duration: 3 },
+    { id: uid(), name: 'Stretching & Agility', category: 'running', duration: 3 },
+    { id: uid(), name: 'Speed & Mobility', category: 'running', duration: 3 },
+    { id: uid(), name: 'Kit Up', category: 'kitup', duration: 2 },
+    { id: uid(), name: 'Stick & Ball', category: 'hockey', duration: 2 },
+    { id: uid(), name: 'Ball @ Back / Goal Scoring', category: 'hockey', duration: 4 },
+    { id: uid(), name: 'PCA / Mini Games x2', category: 'hockey', duration: 5 },
+    { id: uid(), name: 'Combative', category: 'hockey', duration: 4 },
+    { id: uid(), name: 'Off Pitch', category: 'off-pitch', duration: 8 }
+  ];
+}
+
+function getDefaultTraining() {
+  return [
+    { id: uid(), name: 'Individual Eliminations', category: 'hockey', duration: 15 },
+    { id: uid(), name: 'On Pitch Connection', category: 'connection', duration: 5 },
+    { id: uid(), name: 'Shooting & Basics', category: 'hockey', duration: 20 },
+    { id: uid(), name: 'Shooting Advanced', category: 'hockey', duration: 20 },
+    { id: uid(), name: 'Match Play', category: 'hockey', duration: 25 },
+    { id: uid(), name: 'Combative', category: 'hockey', duration: 15 }
+  ];
+}
+
+function editSession(id) {
+  state.ui.editingId = id;
+  save();
+  showView('editor');
+}
+
+function dupSession(id) {
+  const orig = state.sessions.find(s => s.id === id);
+  if (!orig) return;
+  const copy = JSON.parse(JSON.stringify(orig));
+  copy.id = uid();
+  copy.name += ' (copy)';
+  copy.drills.forEach(d => d.id = uid());
+  state.sessions.push(copy);
+  save();
+  renderTemplates();
+}
+
+function delSession(id) {
+  if (!confirm('Delete this session?')) return;
+  state.sessions = state.sessions.filter(s => s.id !== id);
+  save();
+  renderTemplates();
+}
+
+// =============================================
+// EDITOR
+// =============================================
+function getEditing() { return state.sessions.find(s => s.id === state.ui.editingId); }
+
+function renderEditor() {
+  const el = document.getElementById('view-editor');
+  const s = getEditing();
+  if (!s) { showView('templates'); return; }
+
+  const isPrematch = s.type === 'prematch';
+
+  let html = `<div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+    <button class="btn btn-dark btn-sm" onclick="showView('templates')">← Back</button>
+    <h2 style="margin:0; flex:1;">${isPrematch ? 'Pre-Match Warmup' : 'Training Session'}</h2>
+    <button class="btn btn-gold" onclick="startSession('${s.id}')">▶ Start</button>
+  </div>`;
+
+  html += `<div class="ed-field">
+    <label>Session Name</label>
+    <input value="${esc(s.name)}" onchange="getEditing().name=this.value;save();">
+  </div>`;
+
+  if (isPrematch) {
+    html += `<div class="ed-row">
+      <div class="ed-field">
+        <label>Game Start Time</label>
+        <input type="time" value="${esc(s.gameTime)}" onchange="getEditing().gameTime=this.value;save();renderEditor();">
+      </div>
+      <div class="ed-field">
+        <label>Warmup Start (auto)</label>
+        <input value="${calcWarmupStart(s)}" readonly style="color:#d4a843; font-weight:700;">
+      </div>
+    </div>`;
+  }
+
+  // Drill list
+  html += `<div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px; margin-bottom:8px;">
+    <h3 style="margin:0; color:#d4a843; font-size:15px;">Drills</h3>
+    <span style="font-size:12px; color:#888;">${s.drills.length} drills · ${s.drills.reduce((a,d)=>a+(d.duration||0),0)} min total</span>
+  </div>`;
+
+  // Show computed times for prematch
+  const times = isPrematch ? computePrematchTimes(s) : null;
+
+  html += `<div class="drill-list" id="drill-list">`;
+  s.drills.forEach((d, i) => {
+    const cat = CATEGORIES.find(c => c.id === d.category) || CATEGORIES[5];
+    const timeStr = times ? times[i] : '';
+    html += `<div class="drill-item" data-index="${i}">
+      <span class="drag-handle" title="Drag to reorder">⠿</span>
+      <div class="di-cat" style="background:${cat.color};"></div>
+      <div class="di-info">
+        <div class="di-name">${esc(d.name)}</div>
+        <div class="di-meta">${timeStr ? timeStr + ' · ' : ''}${d.duration} min · ${cat.label}</div>
+      </div>
+      <div class="di-actions">
+        <button onclick="editDrill(${i})">✎</button>
+        <button onclick="moveDrill(${i},-1)">↑</button>
+        <button onclick="moveDrill(${i},1)">↓</button>
+        <button onclick="removeDrill(${i})" style="color:#e74c3c;">×</button>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Add drill form
+  html += `<div class="add-drill-form">
+    <h4>Add Drill</h4>
+    <div class="ed-row">
+      <div class="ed-field" style="flex:2;"><label>Name</label><input id="new-drill-name" placeholder="Drill name"></div>
+      <div class="ed-field" style="flex:0 0 80px;"><label>Min</label><input id="new-drill-dur" type="number" value="5" min="1" max="120"></div>
+    </div>
+    <div class="ed-row" style="margin-top:8px;">
+      <div class="ed-field" style="flex:1;">
+        <label>Category</label>
+        <select id="new-drill-cat">
+          ${CATEGORIES.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="ed-field" style="flex:0 0 auto; display:flex; align-items:flex-end;">
+        <button class="btn btn-gold" onclick="addDrill()">+ Add</button>
+      </div>
+    </div>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+function calcWarmupStart(session) {
+  if (!session.gameTime) return '--:--';
+  const totalMins = session.drills.reduce((a, d) => a + (d.duration || 0), 0);
+  const [h, m] = session.gameTime.split(':').map(Number);
+  const startMins = h * 60 + m - totalMins;
+  const sh = Math.floor(startMins / 60);
+  const sm = startMins % 60;
+  return `${sh}:${sm.toString().padStart(2, '0')}`;
+}
+
+function computePrematchTimes(session) {
+  if (!session.gameTime) return session.drills.map(() => '');
+  const totalMins = session.drills.reduce((a, d) => a + (d.duration || 0), 0);
+  const [h, m] = session.gameTime.split(':').map(Number);
+  let currentMins = h * 60 + m - totalMins;
+  return session.drills.map(d => {
+    const sh = Math.floor(currentMins / 60);
+    const sm = currentMins % 60;
+    const str = `${sh}:${sm.toString().padStart(2, '0')}`;
+    currentMins += d.duration || 0;
+    return str;
+  });
+}
+
+function addDrill() {
+  const s = getEditing(); if (!s) return;
+  const name = document.getElementById('new-drill-name').value.trim();
+  const dur = parseInt(document.getElementById('new-drill-dur').value) || 5;
+  const cat = document.getElementById('new-drill-cat').value;
+  if (!name) { document.getElementById('new-drill-name').focus(); return; }
+  s.drills.push({ id: uid(), name, category: cat, duration: dur });
+  save();
+  document.getElementById('new-drill-name').value = '';
+  renderEditor();
+}
+
+function removeDrill(i) {
+  const s = getEditing(); if (!s) return;
+  s.drills.splice(i, 1);
+  save();
+  renderEditor();
+}
+
+function moveDrill(i, dir) {
+  const s = getEditing(); if (!s) return;
+  const ni = i + dir;
+  if (ni < 0 || ni >= s.drills.length) return;
+  [s.drills[i], s.drills[ni]] = [s.drills[ni], s.drills[i]];
+  save();
+  renderEditor();
+}
+
+function editDrill(i) {
+  const s = getEditing(); if (!s) return;
+  const d = s.drills[i];
+  const name = prompt('Drill name:', d.name);
+  if (name === null) return;
+  d.name = name;
+  const dur = prompt('Duration (minutes):', d.duration);
+  if (dur !== null) d.duration = parseInt(dur) || d.duration;
+  save();
+  renderEditor();
+}
+
+// =============================================
+// TIMER
+// =============================================
+function startSession(id) {
+  const s = state.sessions.find(s => s.id === id);
+  if (!s || s.drills.length === 0) { alert('Add drills first.'); return; }
+
+  unlockAudio();
+  timer.sessionId = id;
+  timer.currentIndex = 0;
+  timer.elapsed = 0;
+  timer.running = false;
+  timer.pausedElapsed = 0;
+
+  showView('timer');
+  requestWakeLock();
+}
+
+function getTimerSession() { return state.sessions.find(s => s.id === timer.sessionId); }
+
+function renderTimer() {
+  const el = document.getElementById('view-timer');
+  const s = getTimerSession();
+
+  if (!s) {
+    el.innerHTML = `<div style="padding:40px; text-align:center; color:#888;">
+      <p>No session loaded.</p>
+      <button class="btn btn-gold" onclick="showView('templates')" style="margin-top:16px;">Choose Session</button>
+    </div>`;
+    return;
+  }
+
+  const drill = s.drills[timer.currentIndex];
+  const isFinished = !drill;
+  const isPrematch = s.type === 'prematch';
+  const times = isPrematch ? computePrematchTimes(s) : null;
+
+  if (isFinished) {
+    el.innerHTML = `<div class="finished-overlay">
+      <h1>SESSION COMPLETE</h1>
+      <p>${esc(s.name)}</p>
+      <button class="btn btn-gold" onclick="showView('templates')">Done</button>
+    </div>`;
+    releaseWakeLock();
+    playFinishAlarm();
+    return;
+  }
+
+  const cat = CATEGORIES.find(c => c.id === drill.category) || CATEGORIES[5];
+  const totalSec = (drill.duration || 1) * 60;
+  const remaining = Math.max(0, totalSec - timer.elapsed);
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  const pct = Math.min(100, (timer.elapsed / totalSec) * 100);
+  const isWarning = remaining <= 30 && remaining > 0;
+
+  const nextDrill = s.drills[timer.currentIndex + 1];
+  const timeStr = times ? times[timer.currentIndex] : '';
+
+  let html = `<div class="timer-header">
+    <h2>${esc(s.name)}</h2>
+    <small>${isPrematch && s.gameTime ? 'Game Start: ' + s.gameTime + ' · ' : ''}Drill ${timer.currentIndex + 1} of ${s.drills.length}</small>
+  </div>
+
+  <div class="current-drill">
+    <div class="cd-category" style="background:${cat.color}; color:#000;">${cat.label}</div>
+    <div class="cd-name">${esc(drill.name)}</div>
+    <div class="cd-time-range">${timeStr ? timeStr + ' · ' : ''}${drill.duration} min</div>
+
+    <div class="countdown ${isWarning ? 'warning' : 'normal'}">${mins}:${secs.toString().padStart(2,'0')}</div>
+
+    <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%; background:${isWarning ? '#e74c3c' : '#d4a843'};"></div></div>
+
+    ${nextDrill ? `<div class="next-up">Next: <span>${esc(nextDrill.name)}</span></div>` : `<div class="next-up">Last drill</div>`}
+  </div>
+
+  <div class="timer-controls">
+    <button class="tc-btn" onclick="prevDrill()" title="Previous">⏮</button>
+    <button class="tc-btn primary" onclick="toggleTimer()" title="${timer.running ? 'Pause' : 'Start'}" id="play-btn">${timer.running ? '⏸' : '▶'}</button>
+    <button class="tc-btn" onclick="skipDrill()" title="Next">⏭</button>
+    <button class="tc-btn danger" onclick="stopTimer()" title="Stop">⏹</button>
+  </div>
+
+  <div class="drill-timeline">`;
+
+  s.drills.forEach((d, i) => {
+    const dc = CATEGORIES.find(c => c.id === d.category) || CATEGORIES[5];
+    const ts = times ? times[i] : '';
+    const cls = i === timer.currentIndex ? 'active' : (i < timer.currentIndex ? 'done' : '');
+    html += `<div class="dt-item ${cls}" onclick="jumpToDrill(${i})">
+      <span class="dt-time">${ts || (i+1)}</span>
+      <div class="dt-cat" style="background:${dc.color};"></div>
+      <span class="dt-name">${esc(d.name)}</span>
+      <span class="dt-dur">${d.duration}m</span>
+    </div>`;
+  });
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function toggleTimer() {
+  unlockAudio();
+  if (timer.running) {
+    // Pause
+    clearInterval(timer.intervalId);
+    timer.running = false;
+    timer.pausedElapsed = timer.elapsed;
+  } else {
+    // Start/resume
+    timer.running = true;
+    timer.startedAt = Date.now() - (timer.pausedElapsed * 1000);
+    timer.intervalId = setInterval(timerTick, 200);
+  }
+  renderTimer();
+}
+
+function timerTick() {
+  const s = getTimerSession();
+  if (!s) { clearInterval(timer.intervalId); return; }
+
+  const drill = s.drills[timer.currentIndex];
+  if (!drill) { clearInterval(timer.intervalId); renderTimer(); return; }
+
+  const totalSec = (drill.duration || 1) * 60;
+  timer.elapsed = Math.floor((Date.now() - timer.startedAt) / 1000);
+
+  const remaining = totalSec - timer.elapsed;
+
+  // Warning beep at 30s
+  if (remaining === 30) {
+    playWarningBeep();
+    showToast('30 seconds remaining');
+  }
+
+  // Warning beep at 10s
+  if (remaining === 10) {
+    playWarningBeep();
+  }
+
+  // Time's up
+  if (remaining <= 0) {
+    playTransitionAlarm();
+    showFlash();
+    advanceDrill();
+    return;
+  }
+
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const s = getTimerSession();
+  if (!s) return;
+  const drill = s.drills[timer.currentIndex];
+  if (!drill) return;
+
+  const totalSec = (drill.duration || 1) * 60;
+  const remaining = Math.max(0, totalSec - timer.elapsed);
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  const pct = Math.min(100, (timer.elapsed / totalSec) * 100);
+  const isWarning = remaining <= 30;
+
+  const countdown = document.querySelector('.countdown');
+  const progress = document.querySelector('.progress-bar');
+  if (countdown) {
+    countdown.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+    countdown.className = 'countdown ' + (isWarning ? 'warning' : 'normal');
+  }
+  if (progress) {
+    progress.style.width = pct + '%';
+    progress.style.background = isWarning ? '#e74c3c' : '#d4a843';
+  }
+}
+
+function advanceDrill() {
+  timer.currentIndex++;
+  timer.elapsed = 0;
+  timer.pausedElapsed = 0;
+  timer.startedAt = Date.now();
+
+  const s = getTimerSession();
+  if (!s || timer.currentIndex >= s.drills.length) {
+    clearInterval(timer.intervalId);
+    timer.running = false;
+  }
+  renderTimer();
+  // Keep running if not finished
+  if (timer.running) {
+    // Interval already running
+  }
+}
+
+function skipDrill() {
+  const wasRunning = timer.running;
+  if (timer.running) {
+    clearInterval(timer.intervalId);
+    timer.running = false;
+  }
+  timer.currentIndex++;
+  timer.elapsed = 0;
+  timer.pausedElapsed = 0;
+
+  const s = getTimerSession();
+  if (s && timer.currentIndex >= s.drills.length) {
+    timer.currentIndex = s.drills.length;
+  }
+  renderTimer();
+  if (wasRunning && s && timer.currentIndex < s.drills.length) {
+    toggleTimer();
+  }
+}
+
+function prevDrill() {
+  const wasRunning = timer.running;
+  if (timer.running) {
+    clearInterval(timer.intervalId);
+    timer.running = false;
+  }
+  if (timer.elapsed > 5) {
+    // Reset current drill
+    timer.elapsed = 0;
+    timer.pausedElapsed = 0;
+  } else if (timer.currentIndex > 0) {
+    timer.currentIndex--;
+    timer.elapsed = 0;
+    timer.pausedElapsed = 0;
+  }
+  renderTimer();
+  if (wasRunning) toggleTimer();
+}
+
+function jumpToDrill(i) {
+  const wasRunning = timer.running;
+  if (timer.running) {
+    clearInterval(timer.intervalId);
+    timer.running = false;
+  }
+  timer.currentIndex = i;
+  timer.elapsed = 0;
+  timer.pausedElapsed = 0;
+  renderTimer();
+  if (wasRunning) toggleTimer();
+}
+
+function stopTimer() {
+  if (!confirm('Stop this session?')) return;
+  clearInterval(timer.intervalId);
+  timer.running = false;
+  timer.elapsed = 0;
+  timer.pausedElapsed = 0;
+  releaseWakeLock();
+  showView('templates');
+}
+
+function showFlash() {
+  const f = document.createElement('div');
+  f.className = 'alarm-flash';
+  document.body.appendChild(f);
+  setTimeout(() => f.remove(), 300);
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+// =============================================
+// INIT
+// =============================================
+load();
+if (state.ui.view === 'editor' && state.ui.editingId) showView('editor');
+else showView('templates');
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
