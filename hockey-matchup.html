@@ -50,7 +50,8 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .pos-bar { display: flex; height: 36px; border-radius: 4px; overflow: hidden; }
 .pos-bar.top { margin-bottom: 0; border-radius: 4px 4px 0 0; }
 .pos-bar.bottom { margin-top: 0; border-radius: 0 0 4px 4px; }
-.pos-bar .pos-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; letter-spacing: 1px; border-right: 1px solid rgba(0,0,0,.2); }
+.pos-bar .pos-seg { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; letter-spacing: 1px; border-right: 1px solid rgba(0,0,0,.2); cursor: pointer; transition: opacity .15s; }
+.pos-bar .pos-seg:hover { opacity: .7; }
 .pos-bar .pos-seg:last-child { border-right: none; }
 .pos-bar.team-home .pos-seg { background: #c9a94e; color: #000; }
 .pos-bar.team-away .pos-seg { background: #111; color: #fff; }
@@ -328,8 +329,8 @@ function renderEditor() {
   html += `<div class="editor-layout">
     <div class="editor-main">`;
 
-  // Home pos bar (top)
-  html += `<div class="pos-bar top team-home">${m.homePosBar.map(s => `<div class="pos-seg">${esc(s)}</div>`).join('')}</div>`;
+  // Home pos bar (top) — click to rename segments
+  html += `<div class="pos-bar top team-home">${m.homePosBar.map((s, i) => `<div class="pos-seg" onclick="renamePosBarSeg('home',${i})">${esc(s)}</div>`).join('')}</div>`;
 
   // Field
   html += `<div class="field-wrap" id="field-drop" ondragover="event.preventDefault()" ondrop="dropOnField(event)">
@@ -353,8 +354,8 @@ function renderEditor() {
 
   html += `</div>`;
 
-  // Away pos bar (bottom)
-  html += `<div class="pos-bar bottom team-away">${m.awayPosBar.map(s => `<div class="pos-seg">${esc(s)}</div>`).join('')}</div>`;
+  // Away pos bar (bottom) — click to rename segments
+  html += `<div class="pos-bar bottom team-away">${m.awayPosBar.map((s, i) => `<div class="pos-seg" onclick="renamePosBarSeg('away',${i})">${esc(s)}</div>`).join('')}</div>`;
 
   html += `</div>`; // end editor-main
 
@@ -425,20 +426,34 @@ function renamePlayer(team, index) {
   renderEditor();
 }
 
+function renamePosBarSeg(team, index) {
+  const m = getCurrent(); if (!m) return;
+  const bar = team === 'home' ? m.homePosBar : m.awayPosBar;
+  const current = bar[index] || '';
+  const newName = prompt('Rename segment:', current);
+  if (newName === null) return;
+  bar[index] = newName.trim().toUpperCase();
+  save();
+  renderEditor();
+}
+
 function applyPreset(team, presetName) {
   const m = getCurrent(); if (!m) return;
   const preset = FORMATION_PRESETS[presetName];
   if (!preset) return;
 
+  // Swap L↔R in position names when mirroring for away team
+  const LR_SWAP = { LH:'RH', RH:'LH', LB:'RB', RB:'LB', LM:'RM', RM:'LM', LS:'RS', RS:'LS' };
+
   // Clear existing and apply preset positions
   const players = preset.map(p => {
-    let x = p.x, y = p.y;
+    let x = p.x, y = p.y, pos = p.pos;
     if (team === 'away') {
-      // Mirror: flip both X (swap halves) and Y (so their right is their right)
-      x = 100 - p.x;
-      y = 100 - p.y;
+      x = 100 - p.x;          // flip to right half
+      pos = LR_SWAP[pos] || pos; // swap L↔R names (GK, CM, CB, CS stay)
+      // y stays the same — so home LH (top) faces away RH (top)
     }
-    return { id: uid(), pos: p.pos, name: '', x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)) };
+    return { id: uid(), pos, name: '', x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)) };
   });
 
   m[team].players = players;
