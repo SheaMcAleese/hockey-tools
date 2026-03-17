@@ -6,18 +6,21 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#d4a843">
 <link rel="manifest" href="manifest.json">
-<title>Opposition Scout</title>
+<title>Opposition Scout | HNZ</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', -apple-system, Arial, sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; }
 
+/* ============================================
+   NAV — matches all other hockey tools
+   ============================================ */
 nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; flex-wrap: wrap; }
 nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #d4a843; letter-spacing: 1px; }
 nav button { background: none; border: none; color: #8899aa; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
 nav button:hover { color: #fff; }
 nav button.active { color: #fff; border-bottom-color: #d4a843; }
 
-.view { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+.view { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
 .view.active { display: block; }
 
 h2 { font-size: 22px; margin-bottom: 16px; color: #d4a843; }
@@ -31,167 +34,96 @@ h2 { font-size: 22px; margin-bottom: 16px; color: #d4a843; }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
 input, select, textarea { padding: 6px 10px; border: 1px solid #334; border-radius: 4px; background: #0d1b2a; color: #fff; font-size: 13px; font-family: inherit; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: #d4a843; }
-textarea { resize: vertical; min-height: 80px; width: 100%; }
+textarea { resize: vertical; min-height: 100px; width: 100%; }
 label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+
+/* ============================================
+   TEAM SELECTOR TABS
+   ============================================ */
+.team-tabs { display: flex; gap: 0; margin-bottom: 20px; background: #0d1b2a; border-radius: 6px; overflow: hidden; border: 1px solid #334; }
+.team-tab { flex: 1; padding: 12px 0; text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #667; transition: all .2s; letter-spacing: 1px; text-transform: uppercase; }
+.team-tab:hover { color: #aaa; background: #16213e; }
+.team-tab.active { background: #d4a843; color: #000; }
+.team-tab + .team-tab { border-left: 1px solid #334; }
+
+/* ============================================
+   PDF-STYLE SCOUTING PANELS
+   ============================================ */
+.page-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #2a2a2a; border-bottom: 2px solid #555; margin-bottom: 24px; border-radius: 4px 4px 0 0; }
+.page-bar-left { font-size: 13px; font-weight: 700; color: #ccc; letter-spacing: 1px; text-transform: uppercase; }
+.page-bar-right { font-size: 12px; color: #888; letter-spacing: 1px; }
+
+.doc-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+.doc-subtitle { font-size: 14px; color: #888; font-style: italic; margin-bottom: 24px; line-height: 1.5; }
+
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.info-box { background: #2a2a2a; border-radius: 4px; padding: 14px 16px; }
+.info-box-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #999; text-transform: uppercase; margin-bottom: 6px; }
+.info-box textarea, .info-box input { background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 600; width: 100%; resize: none; min-height: 40px; padding: 0; }
+.info-box textarea:focus, .info-box input:focus { outline: none; }
+
+.scout-panel { background: #2a2a2a; border-left: 3px solid #555; border-radius: 0 4px 4px 0; padding: 16px 20px; margin-bottom: 14px; }
+.scout-panel.accent-green { border-left-color: #4a8c3f; }
+.scout-panel.accent-red { border-left-color: #e74c3c; }
+.scout-panel.accent-gold { border-left-color: #d4a843; }
+.scout-panel-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #ccc; text-transform: uppercase; margin-bottom: 8px; }
+.scout-panel textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 60px; line-height: 1.7; font-style: italic; padding: 0; resize: vertical; }
+.scout-panel textarea:focus { outline: none; color: #fff; font-style: normal; }
+.scout-panel textarea::placeholder { color: #666; font-style: italic; }
+
+.threat-card { display: flex; gap: 0; margin-bottom: 14px; border-radius: 4px; overflow: hidden; }
+.threat-num { background: #c0616b; color: #fff; font-size: 28px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 70px; padding: 20px 0; }
+.threat-body { background: #2a2a2a; flex: 1; padding: 16px 20px; }
+.threat-body input { background: transparent; border: none; color: #ccc; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 100%; margin-bottom: 6px; padding: 0; }
+.threat-body input:focus { outline: none; color: #fff; }
+.threat-body textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 50px; line-height: 1.7; font-style: italic; padding: 0; resize: vertical; }
+.threat-body textarea:focus { outline: none; color: #fff; font-style: normal; }
+
+.sv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+.log-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.log-table th { background: #8faab8; color: #1a1a2e; padding: 10px 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-align: left; }
+.log-table td { padding: 8px 12px; background: #2a2a2a; border-bottom: 2px solid #1a1a2e; vertical-align: top; }
+.log-table td input, .log-table td textarea { background: transparent; border: none; color: #ccc; font-size: 12px; width: 100%; padding: 0; resize: none; min-height: 36px; }
+.log-table td input:focus, .log-table td textarea:focus { outline: none; color: #fff; }
+
+.section-tabs { display: flex; gap: 0; margin-bottom: 20px; background: #1e1e1e; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
+.section-tab { flex: 1; padding: 10px 6px; text-align: center; font-size: 11px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #667; transition: all .2s; letter-spacing: .5px; text-transform: uppercase; }
+.section-tab:hover { color: #ccc; background: #2a2a2a; }
+.section-tab.active { background: #2a2a2a; color: #d4a843; border-bottom: 2px solid #d4a843; }
+.section-tab + .section-tab { border-left: 1px solid #333; }
+.sec { display: none; }
+.sec.active { display: block; }
+
+.doc-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; margin-top: 24px; border-top: 1px solid #333; }
+.doc-footer .page-num { font-size: 11px; color: #555; }
+.doc-footer .brand { font-size: 11px; color: #555; letter-spacing: 2px; text-transform: uppercase; }
+
 .section { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
 .section h3 { color: #d4a843; margin-bottom: 12px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
-.form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: flex-end; }
-.form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
-
-/* Team cards */
-.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
-.team-card { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; cursor: pointer; transition: all .2s; }
-.team-card:hover { border-color: #d4a843; transform: translateY(-2px); }
-.team-card h4 { color: #fff; font-size: 16px; margin-bottom: 4px; }
-.team-card .meta { color: #889; font-size: 12px; margin-bottom: 8px; }
-.team-card .stats { display: flex; gap: 12px; font-size: 11px; color: #667; }
-.team-card .stats span { display: flex; align-items: center; gap: 4px; }
-
-/* Threat badges */
-.threat { display: inline-block; padding: 3px 10px; border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
-.threat-low { background: #2a5a2a; color: #8fc; }
-.threat-medium { background: #5a4a1a; color: #fc0; }
-.threat-high { background: #5a2a2a; color: #f88; }
-.threat-elite { background: #8b0000; color: #fcc; }
-
-/* Profile tabs */
-.profile-tabs { display: flex; gap: 0; margin-bottom: 16px; background: #0d1b2a; border-radius: 6px; overflow: hidden; border: 1px solid #334; }
-.profile-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #667; transition: all .2s; letter-spacing: 1px; }
-.profile-tab:hover { color: #aaa; background: #16213e; }
-.profile-tab.active { background: #d4a843; color: #000; }
-.profile-tab + .profile-tab { border-left: 1px solid #334; }
-.ptab { display: none; }
-.ptab.active { display: block; }
-
-/* Dossier player cards */
-.dossier-category { margin-bottom: 20px; }
-.dossier-category-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843; text-transform: uppercase; padding-bottom: 6px; border-bottom: 2px solid #d4a843; margin-bottom: 10px; }
-.dossier-card { background: #0d1b2a; border-left: 3px solid #d4a843; border-radius: 0 4px 4px 0; margin-bottom: 10px; overflow: hidden; }
-.dossier-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #111a2e; flex-wrap: wrap; gap: 8px; }
-.dossier-id { display: flex; align-items: baseline; gap: 10px; }
-.dossier-jersey { font-size: 20px; font-weight: 900; color: #d4a843; }
-.dossier-name { font-size: 15px; font-weight: 700; color: #fff; }
-.dossier-nickname { font-size: 12px; color: #889; font-style: italic; margin-left: 6px; }
-.dossier-position { font-size: 11px; font-weight: 700; color: #667; letter-spacing: 1px; text-transform: uppercase; }
-.dossier-body { padding: 12px 14px; }
-.dossier-row { display: flex; gap: 12px; margin-bottom: 8px; }
-.dossier-panel { flex: 1; padding: 8px 10px; border-radius: 3px; }
-.dossier-panel.threat-panel { background: rgba(231,76,60,.12); border-left: 2px solid #e74c3c; }
-.dossier-panel.counter-panel { background: rgba(74,140,63,.12); border-left: 2px solid #4a8c3f; }
-.dossier-panel-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
-.dossier-panel.threat-panel .dossier-panel-label { color: #e74c3c; }
-.dossier-panel.counter-panel .dossier-panel-label { color: #4a8c3f; }
-.dossier-panel-text { font-size: 12px; color: #ccc; line-height: 1.5; }
-.dossier-stars { color: #d4a843; font-size: 14px; margin-top: 4px; }
-.dossier-actions { display: flex; gap: 6px; }
-
-/* Hockey field for formation */
-.field-wrap { position: relative; width: 100%; max-width: 800px; aspect-ratio: 1.5 / 1; background: #4a8c3f; overflow: hidden; border: 3px solid #2d6627; border-radius: 4px; margin-bottom: 16px; }
-.field-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.formation-marker { position: absolute; transform: translate(-50%, -50%); background: #fff; color: #111; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 3px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.4); text-align: center; min-width: 50px; border: 2px solid #fff; pointer-events: none; }
-
-/* Attack pattern items */
-.pattern-item { background: #0d1b2a; border-left: 3px solid #d4a843; padding: 12px 14px; border-radius: 0 4px 4px 0; margin-bottom: 8px; }
-.pattern-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-.pattern-name { font-weight: 700; color: #d4a843; font-size: 14px; }
-.pattern-badges { display: flex; gap: 6px; }
-.pattern-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; letter-spacing: .5px; }
-.pattern-desc { font-size: 12px; color: #bbb; margin-bottom: 4px; line-height: 1.5; }
-.pattern-meta { font-size: 11px; color: #667; }
-
-/* PC routine items */
-.pc-item { background: #0d1b2a; border-left: 3px solid #c0392b; padding: 12px 14px; border-radius: 0 4px 4px 0; margin-bottom: 8px; }
-.pc-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-.pc-name { font-weight: 700; color: #e74c3c; font-size: 14px; }
-
-/* Weakness items */
-.weakness-item { background: #0d1b2a; padding: 12px 14px; border-radius: 4px; margin-bottom: 8px; }
-.weakness-item.priority-high { border-left: 3px solid #e74c3c; }
-.weakness-item.priority-medium { border-left: 3px solid #f39c12; }
-.weakness-item.priority-low { border-left: 3px solid #4a8c3f; }
-.weakness-title { font-weight: 700; color: #fff; font-size: 14px; margin-bottom: 4px; }
-.weakness-desc { font-size: 12px; color: #bbb; margin-bottom: 6px; line-height: 1.5; }
-.weakness-tactic { font-size: 12px; color: #4a8c3f; font-style: italic; line-height: 1.5; }
-
-/* Scouting */
-.scout-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.scout-tag { padding: 6px 12px; border: 1px solid #334; border-radius: 4px; background: #0d1b2a; color: #889; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
-.scout-tag:hover { border-color: #d4a843; color: #d4a843; }
-.scout-tag.active { background: #d4a843; color: #000; border-color: #d4a843; }
-.scout-entry { background: #0d1b2a; border-left: 3px solid #d4a843; padding: 10px 14px; border-radius: 0 4px 4px 0; margin-bottom: 8px; }
-.scout-entry-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; background: #d4a843; color: #000; margin-bottom: 4px; letter-spacing: .5px; }
-.scout-entry-time { font-size: 11px; color: #667; margin-bottom: 4px; }
-.scout-entry-text { font-size: 13px; color: #ccc; line-height: 1.5; }
-.scout-entry .btn { margin-top: 6px; }
-
-/* Match log */
-.match-entry { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 10px; }
-.match-score { font-size: 24px; font-weight: 900; color: #d4a843; }
-.match-result-w { color: #4a8c3f; }
-.match-result-l { color: #e74c3c; }
-.match-result-d { color: #f39c12; }
-
-/* Pre-Match Brief output */
-.brief-output { background: #1e1e1e; color: #c8c8c8; max-width: 960px; margin: 0 auto; overflow: hidden; }
-.brief-output * { color: #c8c8c8; }
-.brief-banner { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #1a1a1a; border-bottom: 3px solid #d4a843; }
-.brief-banner .team-name { font-size: 16px; font-weight: 900; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; }
-.brief-banner .doc-type { font-size: 12px; letter-spacing: 3px; color: #888 !important; text-transform: uppercase; }
-.brief-info-bar { display: flex; padding: 16px 24px; background: #1e1e1e; border-bottom: 1px solid #333; }
-.brief-info-item { flex: 1; padding: 0 16px; border-right: 1px solid #333; }
-.brief-info-item:last-child { border-right: none; }
-.brief-info-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 4px; }
-.brief-info-value { font-size: 15px; color: #fff !important; font-weight: 600; }
-.brief-body { padding: 20px 24px; }
-.brief-section-hdr { font-size: 12px; font-weight: 700; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #d4a843; }
-.brief-player-row { margin-bottom: 12px; padding-left: 12px; border-left: 2px solid rgba(212,168,67,.3); }
-.brief-player-name { font-weight: 700; color: #d4a843 !important; font-size: 14px; }
-.brief-threat-text { color: #e74c3c !important; font-size: 13px; margin-top: 2px; }
-.brief-counter-text { color: #4a8c3f !important; font-size: 13px; font-style: italic; margin-top: 2px; }
-.brief-pattern-row { margin-bottom: 10px; padding-left: 12px; }
-.brief-weakness-row { margin-bottom: 10px; padding: 10px 12px; background: #252525; border-left: 3px solid #e74c3c; }
-.brief-weakness-row .exploit { color: #4a8c3f !important; font-style: italic; margin-top: 4px; }
-.brief-priority-section { margin: 20px 0; padding: 16px; border: 1px solid #d4a843; border-top: 3px solid #d4a843; }
-.brief-priority-section h4 { color: #d4a843 !important; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
-.brief-priority-item { display: flex; gap: 8px; margin-bottom: 6px; font-size: 14px; font-weight: 600; color: #fff !important; }
-.brief-priority-num { color: #d4a843 !important; font-weight: 900; min-width: 24px; }
-.brief-footer { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid #333; }
-.brief-footer .stamp { font-size: 11px; color: #c0392b !important; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-.brief-footer .date { font-size: 11px; color: #555 !important; }
-
-/* Modal */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; align-items: center; justify-content: center; }
-.modal-bg.active { display: flex; }
-.modal { background: #16213e; border: 2px solid #d4a843; border-radius: 6px; padding: 20px; max-width: 550px; width: 90%; max-height: 90vh; overflow-y: auto; }
-.modal h3 { color: #d4a843; margin-bottom: 14px; font-size: 16px; letter-spacing: 1px; }
-.modal .form-group { margin-bottom: 12px; }
-.modal .form-group input, .modal .form-group select, .modal .form-group textarea { width: 100%; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-
-.empty-state { text-align: center; padding: 40px 20px; color: #667; }
-.empty-state-icon { font-size: 40px; margin-bottom: 12px; }
 
 @media print {
-  body { background: #1e1e1e; }
-  nav, .view:not(.print-target), .no-print, .toolbar { display: none !important; }
-  .view.print-target { display: block !important; padding: 0; }
-  .brief-output { border: none; margin: 0; }
+  body { background: #1e1e1e !important; }
+  nav, .team-tabs, .section-tabs, .toolbar, .doc-footer .page-num, .view:not(.print-active), .no-print { display: none !important; }
+  .view.print-active { display: block !important; padding: 0 16px; }
+  .sec { display: block !important; page-break-inside: avoid; margin-bottom: 24px; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  @page { size: landscape; margin: 8mm; }
+  @page { size: landscape; margin: 10mm; }
+  textarea, input { border: none !important; }
 }
+
 @media (max-width: 768px) {
   nav { padding: 0 10px; }
   nav .logo { font-size: 14px; margin-right: 10px; }
-  nav button { font-size: 12px; padding: 10px 10px; }
+  nav button { font-size: 12px; padding: 10px 8px; }
   .view { padding: 12px; }
-  .team-grid { grid-template-columns: 1fr; }
-  .dossier-row { flex-direction: column; }
-  .brief-info-bar { flex-direction: column; }
-  .brief-info-item { border-right: none; border-bottom: 1px solid #333; padding: 8px 0; }
-  .brief-info-item:last-child { border-bottom: none; }
-  .profile-tabs { flex-wrap: wrap; }
-  .profile-tab { min-width: 0; font-size: 11px; letter-spacing: 0; }
+  .sv-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr 1fr; }
+  .threat-num { min-width: 50px; font-size: 22px; }
+  .section-tabs { flex-wrap: wrap; }
+  .section-tab { min-width: 0; font-size: 10px; letter-spacing: 0; }
+  .team-tab { font-size: 11px; letter-spacing: 0; padding: 10px 4px; }
 }
 </style>
 </head>
@@ -199,1259 +131,340 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 
 <nav>
   <span class="logo">OPPOSITION SCOUT</span>
-  <button class="active" onclick="showView('teams')">Teams</button>
-  <button onclick="showView('profile')">Profile</button>
-  <button onclick="showView('scouting')">Scouting</button>
-  <button onclick="showView('matchlog')">Match Log</button>
-  <button onclick="showView('brief')">Pre-Match Brief</button>
+  <button class="active" onclick="showView('scout')">Scouting</button>
+  <button onclick="showView('live')">Live Mode</button>
   <button onclick="showView('data')">Data</button>
 </nav>
 
-<div id="view-teams" class="view active"></div>
-<div id="view-profile" class="view"></div>
-<div id="view-scouting" class="view"></div>
-<div id="view-matchlog" class="view"></div>
-<div id="view-brief" class="view"></div>
+<div id="view-scout" class="view active"></div>
+<div id="view-live" class="view"></div>
 <div id="view-data" class="view"></div>
 
-<!-- Modals -->
-<div class="modal-bg" id="modal-team"><div class="modal" id="modal-team-inner"></div></div>
-<div class="modal-bg" id="modal-player"><div class="modal" id="modal-player-inner"></div></div>
-<div class="modal-bg" id="modal-pattern"><div class="modal" id="modal-pattern-inner"></div></div>
-<div class="modal-bg" id="modal-pc"><div class="modal" id="modal-pc-inner"></div></div>
-<div class="modal-bg" id="modal-pcdef"><div class="modal" id="modal-pcdef-inner"></div></div>
-<div class="modal-bg" id="modal-weakness"><div class="modal" id="modal-weakness-inner"></div></div>
-<div class="modal-bg" id="modal-match"><div class="modal" id="modal-match-inner"></div></div>
-
 <script>
-// ============================================
-// DATA LAYER
-// ============================================
-const STORE = 'hockeyOppoScout';
-const COMPETITIONS = ['FIH Pro League','Hockey World Cup','Olympic Games','Olympic Qualifiers','Nations Cup','Sultan Azlan Shah','Champions Trophy','Asian Games','Commonwealth Games','Test Series','Friendly','Other'];
-const PLAYER_CATEGORIES = [
-  { key: 'DIRECTORS', label: 'DIRECTORS', desc: 'Playmakers & Distributors', icon: '\u25C9' },
-  { key: 'ASSASSINS', label: 'ASSASSINS', desc: 'Finishers & Goal Threats', icon: '\u2694' },
-  { key: 'ENGINE', label: 'ENGINE ROOM', desc: 'Midfield & Tempo', icon: '\u2699' },
-  { key: 'PRESS', label: 'PRESS TARGETS', desc: 'Weak Links to Exploit', icon: '\u26A0' }
-];
+const STORE = 'hockeyOppoScoutV2';
 
-let data = { teams: [] };
-let currentTeamId = null;
-let currentProfileTab = 'players';
-let scoutTags = new Set();
-let scoutFeed = [];
+function blankTeam(name, country, competition) {
+  return {
+    id: uid(), name, country, competition: competition || 'Hockey World Cup',
+    worldRanking: '', headCoach: '', keyPlayersOverview: '', lastResultVsNZ: '',
+    playingIdentity: '', strengthsTop3: '', vulnerabilitiesTop3: '',
+    defensiveFormation: '', pressTriggers: '', defensiveBlock: '',
+    setPieceDefence: '', transitionLosingPossession: '',
+    buildUpPattern: '', attackTransition: '', dangerousZones: '',
+    setPieceAttack: '', keyAttackingPlayers: '',
+    threats: [{ title: '', description: '' },{ title: '', description: '' },{ title: '', description: '' }],
+    ourAttackingPriority: '', ourDefensivePriority: '',
+    setPieceStrategy: '', psychologicalEdge: '',
+    log: []
+  };
+}
+
+let data = { teams: [], currentTeamIdx: 0, currentSection: 0 };
 
 function save() { localStorage.setItem(STORE, JSON.stringify(data)); }
-function load() { try { const r = localStorage.getItem(STORE); if (r) data = JSON.parse(r); if (!data.teams) data.teams = []; } catch(e) { data = { teams: [] }; } }
+function load() {
+  try {
+    const r = localStorage.getItem(STORE);
+    if (r) data = JSON.parse(r);
+    if (!data.teams) data.teams = [];
+    if (data.currentTeamIdx === undefined) data.currentTeamIdx = 0;
+    if (data.currentSection === undefined) data.currentSection = 0;
+  } catch(e) { data = { teams: [], currentTeamIdx: 0, currentSection: 0 }; }
+  if (data.teams.length === 0) {
+    data.teams.push(blankTeam('Netherlands', 'Netherlands', 'Hockey World Cup'));
+    data.teams.push(blankTeam('Argentina', 'Argentina', 'Hockey World Cup'));
+    data.teams.push(blankTeam('Japan', 'Japan', 'Hockey World Cup'));
+    save();
+  }
+}
 function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,6); }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function team(id) { return data.teams.find(t => t.id === id); }
-function saveTeam(t) { const i = data.teams.findIndex(x => x.id === t.id); if (i >= 0) data.teams[i] = t; else data.teams.push(t); t.lastScouted = new Date().toISOString(); save(); }
+function ct() { return data.teams[data.currentTeamIdx]; }
 
-function newTeam() {
-  return { id: uid(), name: '', country: '', competition: 'FIH Pro League', threatLevel: 'MEDIUM',
-    lastScouted: null, players: [], attackPatterns: [], pcAttack: [], pcDefence: [], weaknesses: [],
-    matches: [], formationType: '3-3', formationNotes: '', defensiveNotes: '',
-    pressType: 'mixed', pressNotes: '', priorities: ['','','','',''] };
-}
-
-function fieldSVG() {
-  return `<svg class="field-svg" viewBox="0 0 1000 690" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="2" width="996" height="686" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="3" rx="2"/>
-    <line x1="500" y1="2" x2="500" y2="688" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
-    <line x1="250" y1="2" x2="250" y2="688" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-dasharray="10,8"/>
-    <line x1="750" y1="2" x2="750" y2="688" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-dasharray="10,8"/>
-    <path d="M 2 140 Q 220 345 2 550" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
-    <rect x="0" y="315" width="8" height="60" fill="rgba(255,255,255,.7)" rx="1"/>
-    <path d="M 998 140 Q 780 345 998 550" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
-    <rect x="992" y="315" width="8" height="60" fill="rgba(255,255,255,.7)" rx="1"/>
-    <circle cx="80" cy="345" r="4" fill="rgba(255,255,255,.5)"/>
-    <circle cx="920" cy="345" r="4" fill="rgba(255,255,255,.5)"/>
-  </svg>`;
-}
-
-const FORMATION_PRESETS = {
-  '1-3-3-3': { positions: [
-    { pos:'GK', x:5, y:50 },
-    { pos:'LH', x:18, y:25 }, { pos:'CB', x:14, y:50 }, { pos:'RH', x:18, y:75 },
-    { pos:'LM', x:34, y:25 }, { pos:'CM', x:30, y:50 }, { pos:'RM', x:34, y:75 },
-    { pos:'LS', x:48, y:20 }, { pos:'CS', x:44, y:50 }, { pos:'RS', x:48, y:80 }
-  ]},
-  '1-4-3-3': { positions: [
-    { pos:'GK', x:5, y:50 },
-    { pos:'LH', x:22, y:18 }, { pos:'LB', x:16, y:38 }, { pos:'RB', x:16, y:62 }, { pos:'RH', x:22, y:82 },
-    { pos:'LM', x:38, y:30 }, { pos:'CM', x:35, y:50 }, { pos:'RM', x:38, y:70 },
-    { pos:'LS', x:52, y:20 }, { pos:'CS', x:48, y:50 }, { pos:'RS', x:52, y:80 }
-  ]},
-  '1-3-4-3': { positions: [
-    { pos:'GK', x:5, y:50 },
-    { pos:'LH', x:18, y:25 }, { pos:'CB', x:14, y:50 }, { pos:'RH', x:18, y:75 },
-    { pos:'LM', x:34, y:18 }, { pos:'CM', x:30, y:40 }, { pos:'CM2', x:30, y:60 }, { pos:'RM', x:34, y:82 },
-    { pos:'LS', x:50, y:20 }, { pos:'CS', x:46, y:50 }, { pos:'RS', x:50, y:80 }
-  ]},
-  '1-4-4-2': { positions: [
-    { pos:'GK', x:5, y:50 },
-    { pos:'LH', x:20, y:15 }, { pos:'LB', x:16, y:38 }, { pos:'RB', x:16, y:62 }, { pos:'RH', x:20, y:85 },
-    { pos:'LM', x:36, y:18 }, { pos:'CM', x:33, y:40 }, { pos:'CM2', x:33, y:60 }, { pos:'RM', x:36, y:82 },
-    { pos:'LS', x:50, y:35 }, { pos:'RS', x:50, y:65 }
-  ]}
-};
-
-// ============================================
-// VIEW SWITCHING
-// ============================================
 function showView(name) {
-  document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); v.classList.remove('print-target'); });
+  document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); v.classList.remove('print-active'); });
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => { if (b.textContent.toLowerCase().replace(/[\s-]/g,'').includes(name.replace(/[\s-]/g,''))) b.classList.add('active'); });
-  if (name === 'teams') renderTeams();
-  if (name === 'profile') renderProfile();
-  if (name === 'scouting') renderScouting();
-  if (name === 'matchlog') renderMatchLog();
-  if (name === 'brief') renderBrief();
+  document.querySelectorAll('nav button').forEach(b => {
+    if ((name === 'scout' && b.textContent === 'Scouting') ||
+        (name === 'live' && b.textContent === 'Live Mode') ||
+        (name === 'data' && b.textContent === 'Data')) b.classList.add('active');
+  });
+  if (name === 'scout') renderScout();
+  if (name === 'live') renderLive();
   if (name === 'data') renderData();
 }
 
-// ============================================
-// VIEW: TEAMS
-// ============================================
-function renderTeams() {
-  const el = document.getElementById('view-teams');
-  const teams = data.teams.slice();
-
-  el.innerHTML = `
-    <div class="toolbar" style="justify-content:space-between;">
-      <h2>Opposition Teams</h2>
-      <button class="btn btn-primary" onclick="openTeamModal()">+ New Team</button>
-    </div>
-    <div class="toolbar">
-      <div class="form-group" style="flex:0 0 auto; min-width: 160px;">
-        <label>Competition</label>
-        <select id="filter-comp" onchange="renderTeams()">
-          <option value="">All</option>
-          ${COMPETITIONS.map(c => '<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')}
-        </select>
-      </div>
-      <div class="form-group" style="flex:0 0 auto; min-width: 140px;">
-        <label>Sort By</label>
-        <select id="sort-teams" onchange="renderTeams()">
-          <option value="name">Name</option>
-          <option value="date">Last Scouted</option>
-          <option value="threat">Threat Level</option>
-        </select>
-      </div>
-    </div>
-    <div class="team-grid" id="teams-grid"></div>`;
-
-  let filtered = teams;
-  const fc = document.getElementById('filter-comp');
-  if (fc && fc.value) filtered = filtered.filter(t => t.competition === fc.value);
-  const sb = document.getElementById('sort-teams');
-  const sort = sb ? sb.value : 'name';
-  if (sort === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name));
-  if (sort === 'date') filtered.sort((a,b) => new Date(b.lastScouted||0) - new Date(a.lastScouted||0));
-  if (sort === 'threat') { const o = {ELITE:0,HIGH:1,MEDIUM:2,LOW:3}; filtered.sort((a,b) => (o[a.threatLevel]||3) - (o[b.threatLevel]||3)); }
-
-  const grid = document.getElementById('teams-grid');
-  if (filtered.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">\uD83C\uDFD1</div><p>No teams yet. Add your first opposition team profile.</p></div>';
-    return;
-  }
-  grid.innerHTML = filtered.map(t => {
-    const pc = (t.players||[]).length;
-    const mc = (t.matches||[]).length;
-    return `<div class="team-card" onclick="openTeamProfile('${t.id}')">
-      <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
-        <div><h4>${esc(t.name)}</h4><div class="meta">${esc(t.country)} \u2022 ${esc(t.competition)}</div></div>
-        <span class="threat threat-${t.threatLevel.toLowerCase()}">${t.threatLevel}</span>
-      </div>
-      <div class="stats">
-        <span>\uD83D\uDC64 ${pc} player${pc!==1?'s':''}</span>
-        <span>\uD83D\uDCCB ${mc} match${mc!==1?'es':''}</span>
-        <span>\uD83D\uDD52 ${t.lastScouted ? new Date(t.lastScouted).toLocaleDateString() : 'Never'}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openTeamProfile(id) { currentTeamId = id; showView('profile'); }
-
-// ============================================
-// VIEW: TEAM PROFILE
-// ============================================
-function renderProfile() {
-  const el = document.getElementById('view-profile');
-  const t = team(currentTeamId);
-  if (!t) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">\uD83C\uDFD1</div><p>Select a team from the Teams view.</p></div>'; return; }
-
-  el.innerHTML = `
-    <div class="toolbar">
-      <button class="btn btn-secondary" onclick="showView('teams')">\u2190 Back</button>
-      <h2 style="flex:1;">${esc(t.name)}</h2>
-      <span class="threat threat-${t.threatLevel.toLowerCase()}" style="font-size:13px;">${t.threatLevel}</span>
-      <select id="profile-threat" onchange="updateThreat()" style="width:100px;">
-        ${['LOW','MEDIUM','HIGH','ELITE'].map(v => `<option value="${v}" ${t.threatLevel===v?'selected':''}>${v}</option>`).join('')}
-      </select>
-      <button class="btn btn-danger btn-sm" onclick="deleteCurrentTeam()">Delete</button>
-    </div>
-    <div class="meta" style="color:#889;margin-bottom:16px;">${esc(t.country)} \u2022 ${esc(t.competition)} \u2022 Last scouted: ${t.lastScouted ? new Date(t.lastScouted).toLocaleDateString() : 'Never'}</div>
-
-    <div class="profile-tabs">
-      <button class="profile-tab ${currentProfileTab==='players'?'active':''}" onclick="switchProfileTab('players')">Key Players</button>
-      <button class="profile-tab ${currentProfileTab==='tactical'?'active':''}" onclick="switchProfileTab('tactical')">Tactical</button>
-      <button class="profile-tab ${currentProfileTab==='setpieces'?'active':''}" onclick="switchProfileTab('setpieces')">Set Pieces</button>
-      <button class="profile-tab ${currentProfileTab==='weaknesses'?'active':''}" onclick="switchProfileTab('weaknesses')">Weaknesses</button>
-    </div>
-
-    <div id="ptab-players" class="ptab ${currentProfileTab==='players'?'active':''}"></div>
-    <div id="ptab-tactical" class="ptab ${currentProfileTab==='tactical'?'active':''}"></div>
-    <div id="ptab-setpieces" class="ptab ${currentProfileTab==='setpieces'?'active':''}"></div>
-    <div id="ptab-weaknesses" class="ptab ${currentProfileTab==='weaknesses'?'active':''}"></div>`;
-
-  renderPlayersTab();
-  renderTacticalTab();
-  renderSetPiecesTab();
-  renderWeaknessesTab();
-}
-
-function switchProfileTab(tab) { currentProfileTab = tab; renderProfile(); }
-function updateThreat() { const t = team(currentTeamId); t.threatLevel = document.getElementById('profile-threat').value; saveTeam(t); renderProfile(); }
-function deleteCurrentTeam() { if (!confirm('Delete this entire team profile? This cannot be undone.')) return; data.teams = data.teams.filter(t => t.id !== currentTeamId); save(); currentTeamId = null; showView('teams'); }
-
-// -- Players Tab --
-function renderPlayersTab() {
-  const t = team(currentTeamId);
-  const el = document.getElementById('ptab-players');
-  let html = `<div class="toolbar"><div style="flex:1;"></div><button class="btn btn-primary" onclick="openPlayerModal()">+ Add Player</button></div>`;
-
-  PLAYER_CATEGORIES.forEach(cat => {
-    const players = (t.players||[]).filter(p => p.category === cat.key);
-    html += `<div class="dossier-category">
-      <div class="dossier-category-label">${cat.icon} ${cat.label} \u2014 ${cat.desc}</div>`;
-    if (players.length === 0) {
-      html += `<div style="color:#667;font-size:12px;padding:8px 0;">No players in this category</div>`;
-    } else {
-      players.forEach(p => {
-        html += `<div class="dossier-card">
-          <div class="dossier-header">
-            <div class="dossier-id">
-              <span class="dossier-jersey">#${p.jersey||'?'}</span>
-              <span class="dossier-name">${esc(p.name)}</span>
-              <span class="dossier-nickname">"${esc(p.nickname)}"</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="dossier-position">${esc(p.position)}</span>
-              <span class="dossier-stars">${'\u2605'.repeat(p.form||0)}${'\u2606'.repeat(5-(p.form||0))}</span>
-            </div>
-          </div>
-          <div class="dossier-body">
-            <div class="dossier-row">
-              <div class="dossier-panel threat-panel">
-                <div class="dossier-panel-label">Threat Assessment</div>
-                <div class="dossier-panel-text">${esc(p.threat)}</div>
-              </div>
-              <div class="dossier-panel counter-panel">
-                <div class="dossier-panel-label">Counter-Tactic / Exploit</div>
-                <div class="dossier-panel-text">${esc(p.counter)}</div>
-              </div>
-            </div>
-            <div class="dossier-actions">
-              <button class="btn btn-secondary btn-sm" onclick="openPlayerModal('${p.id}')">Edit</button>
-              <button class="btn btn-danger btn-sm" onclick="deletePlayer('${p.id}')">Delete</button>
-            </div>
-          </div>
-        </div>`;
-      });
-    }
-    html += '</div>';
-  });
-
-  el.innerHTML = html;
-}
-
-// -- Tactical Tab --
-function renderTacticalTab() {
-  const t = team(currentTeamId);
-  const el = document.getElementById('ptab-tactical');
-
-  const formationHtml = buildFormationFieldHtml(t);
-
-  el.innerHTML = `
-    <div class="section">
-      <h3>Formation & Structure</h3>
-      <div class="form-row">
-        <div class="form-group" style="flex:0 0 auto;min-width:180px;">
-          <label>Formation Type</label>
-          <select id="tac-formation" onchange="updateFormationField()">
-            <option value="3-3" ${t.formationType==='3-3'?'selected':''}>3-3 (Balanced)</option>
-            <option value="3-2-1" ${t.formationType==='3-2-1'?'selected':''}>3-2-1 (Defensive)</option>
-            <option value="2-3-1" ${t.formationType==='2-3-1'?'selected':''}>2-3-1 (Attacking)</option>
-            <option value="4-3-3" ${t.formationType==='4-3-3'?'selected':''}>4-3-3 (Wide)</option>
-            <option value="Fluid" ${t.formationType==='Fluid'?'selected':''}>Fluid / Pressing</option>
-            <option value="Other" ${t.formationType==='Other'?'selected':''}>Other</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex:0 0 auto;">
-          <label>Visualise</label>
-          <div style="display:flex;gap:4px;flex-wrap:wrap;">
-            ${Object.keys(FORMATION_PRESETS).map(k => `<button class="btn btn-secondary btn-sm" onclick="showFormationOnField('${k}')">${k}</button>`).join('')}
-          </div>
-        </div>
-      </div>
-      <div id="formation-field-container">${formationHtml}</div>
-      <div class="form-group" style="margin-top:12px;">
-        <label>Formation Notes</label>
-        <textarea id="tac-formation-notes" placeholder="Describe their typical setup, positioning, defensive structure...">${esc(t.formationNotes)}</textarea>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Attacking Patterns</h3>
-      <button class="btn btn-primary btn-sm" onclick="openPatternModal()" style="margin-bottom:12px;">+ Add Pattern</button>
-      <div id="patterns-list"></div>
-    </div>
-
-    <div class="section">
-      <h3>Defensive Structure</h3>
-      <div class="form-group">
-        <label>Defensive Setup</label>
-        <textarea id="tac-defensive" placeholder="Describe their defensive positioning, marking, recovery patterns...">${esc(t.defensiveNotes)}</textarea>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Pressing Profile</h3>
-      <div class="form-row">
-        <div class="form-group" style="flex:0 0 auto;min-width:180px;">
-          <label>Press Type</label>
-          <select id="tac-press-type">
-            <option value="full" ${t.pressType==='full'?'selected':''}>Full Press</option>
-            <option value="half" ${t.pressType==='half'?'selected':''}>Half-Court Press</option>
-            <option value="zonal" ${t.pressType==='zonal'?'selected':''}>Zonal Defence</option>
-            <option value="mixed" ${t.pressType==='mixed'?'selected':''}>Mixed Approach</option>
-            <option value="none" ${t.pressType==='none'?'selected':''}>Minimal Pressing</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Press Details</label>
-        <textarea id="tac-press-notes" placeholder="When do they press? Who initiates? How aggressive? Trigger moments...">${esc(t.pressNotes)}</textarea>
-      </div>
-    </div>
-
-    <div style="margin-top:16px;">
-      <button class="btn btn-primary" onclick="saveTacticalProfile()">Save Tactical Profile</button>
-    </div>`;
-
-  renderPatternsList();
-}
-
-function buildFormationFieldHtml(t, preset) {
-  const positions = preset ? FORMATION_PRESETS[preset]?.positions : null;
-  if (!positions) return '<div style="color:#667;font-size:12px;padding:8px 0;">Click a formation preset above to visualise positions on the pitch.</div>';
-  let markers = '';
-  positions.forEach(p => {
-    markers += `<div class="formation-marker" style="left:${p.x}%;top:${p.y}%;">${esc(p.pos)}</div>`;
-  });
-  return `<div class="field-wrap">${fieldSVG()}${markers}</div>`;
-}
-
-function showFormationOnField(preset) {
-  const t = team(currentTeamId);
-  document.getElementById('formation-field-container').innerHTML = buildFormationFieldHtml(t, preset);
-}
-
-function updateFormationField() {}
-
-function renderPatternsList() {
-  const t = team(currentTeamId);
-  const el = document.getElementById('patterns-list');
-  const patterns = t.attackPatterns || [];
-  if (patterns.length === 0) { el.innerHTML = '<div style="color:#667;font-size:12px;">No attack patterns documented yet.</div>'; return; }
-
-  el.innerHTML = patterns.map(p => {
-    const dangerColor = p.danger >= 4 ? '#e74c3c' : p.danger >= 3 ? '#f39c12' : '#4a8c3f';
-    return `<div class="pattern-item">
-      <div class="pattern-header">
-        <span class="pattern-name">${esc(p.name)}</span>
-        <div class="pattern-badges">
-          <span class="pattern-badge" style="background:${dangerColor};color:#fff;">DANGER ${p.danger}/5</span>
-          <span class="pattern-badge" style="background:#0f3460;color:#889;">${esc(p.frequency)}</span>
-        </div>
-      </div>
-      <div class="pattern-desc">${esc(p.description)}</div>
-      <div class="pattern-meta">Key players: ${esc(p.players)}</div>
-      <div style="margin-top:6px;display:flex;gap:6px;">
-        <button class="btn btn-secondary btn-sm" onclick="openPatternModal('${p.id}')">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deletePattern('${p.id}')">Delete</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function saveTacticalProfile() {
-  const t = team(currentTeamId);
-  t.formationType = document.getElementById('tac-formation').value;
-  t.formationNotes = document.getElementById('tac-formation-notes').value;
-  t.defensiveNotes = document.getElementById('tac-defensive').value;
-  t.pressType = document.getElementById('tac-press-type').value;
-  t.pressNotes = document.getElementById('tac-press-notes').value;
-  saveTeam(t);
-  alert('Tactical profile saved.');
-}
-
-// -- Set Pieces Tab --
-function renderSetPiecesTab() {
-  const t = team(currentTeamId);
-  const el = document.getElementById('ptab-setpieces');
-
-  el.innerHTML = `
-    <div class="section">
-      <h3>PC Attack Routines (Their Corners)</h3>
-      <p style="color:#889;font-size:12px;margin-bottom:10px;">How do they attack on their penalty corners?</p>
-      <button class="btn btn-primary btn-sm" onclick="openPCModal('attack')" style="margin-bottom:12px;">+ Add PC Attack Routine</button>
-      <div id="pc-attack-list"></div>
-    </div>
-
-    <div class="section">
-      <h3>PC Defence Routines (Defending Our Corners)</h3>
-      <p style="color:#889;font-size:12px;margin-bottom:10px;">How do they defend when we have a penalty corner?</p>
-      <button class="btn btn-primary btn-sm" onclick="openPCModal('defence')" style="margin-bottom:12px;">+ Add PC Defence Routine</button>
-      <div id="pc-defence-list"></div>
-    </div>`;
-
-  renderPCList('attack');
-  renderPCList('defence');
-}
-
-function renderPCList(type) {
-  const t = team(currentTeamId);
-  const list = type === 'attack' ? (t.pcAttack||[]) : (t.pcDefence||[]);
-  const el = document.getElementById('pc-' + type + '-list');
-
-  if (list.length === 0) { el.innerHTML = '<div style="color:#667;font-size:12px;">No routines documented yet.</div>'; return; }
-
-  el.innerHTML = list.map(r => {
-    const effColor = r.effectiveness >= 4 ? '#e74c3c' : r.effectiveness >= 3 ? '#f39c12' : '#4a8c3f';
-    return `<div class="pc-item">
-      <div class="pc-header">
-        <span class="pc-name">${esc(r.name)}</span>
-        <span class="pattern-badge" style="background:${effColor};color:#fff;">Effectiveness ${r.effectiveness}/5</span>
-      </div>
-      <div class="pattern-desc">${esc(r.description)}</div>
-      <div class="pattern-meta">Personnel: ${esc(r.personnel)} \u2022 Last seen: ${r.lastSeen || 'Unknown'}</div>
-      <div style="margin-top:6px;display:flex;gap:6px;">
-        <button class="btn btn-secondary btn-sm" onclick="openPCModal('${type}','${r.id}')">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deletePC('${type}','${r.id}')">Delete</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// -- Weaknesses Tab --
-function renderWeaknessesTab() {
-  const t = team(currentTeamId);
-  const el = document.getElementById('ptab-weaknesses');
-  const list = t.weaknesses || [];
-
-  let html = `<div class="toolbar"><div style="flex:1;"></div><button class="btn btn-primary" onclick="openWeaknessModal()">+ Add Weakness</button></div>`;
-
-  if (list.length === 0) {
-    html += '<div style="color:#667;font-size:12px;">No weaknesses documented yet.</div>';
-  } else {
-    html += list.map(w => `<div class="weakness-item priority-${w.priority.toLowerCase()}">
-      <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap;">
-        <div class="weakness-title">${esc(w.title)}</div>
-        <span class="threat threat-${w.priority==='HIGH'?'high':w.priority==='MEDIUM'?'medium':'low'}">${w.priority}</span>
-      </div>
-      <div class="weakness-desc">${esc(w.description)}</div>
-      <div class="weakness-tactic">\u2192 EXPLOIT: ${esc(w.tactic)}</div>
-      <div style="margin-top:8px;display:flex;gap:6px;">
-        <button class="btn btn-secondary btn-sm" onclick="openWeaknessModal('${w.id}')">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteWeakness('${w.id}')">Delete</button>
-      </div>
-    </div>`).join('');
-  }
-
-  el.innerHTML = html;
-}
-
-// ============================================
-// VIEW: SCOUTING
-// ============================================
-const SCOUT_TAG_OPTIONS = [
-  { key:'Attack Pattern', label:'Attack', color:'#e74c3c' },
-  { key:'Defensive Shape', label:'Defence', color:'#3498db' },
-  { key:'PC Routine', label:'PC Routine', color:'#c0392b' },
-  { key:'Key Player', label:'Key Player', color:'#d4a843' },
-  { key:'Weakness', label:'Weakness', color:'#f39c12' },
-  { key:'Formation Change', label:'Formation', color:'#8e44ad' },
-  { key:'Press Trigger', label:'Press Trigger', color:'#2ecc71' },
-  { key:'General', label:'General', color:'#667' }
+const SECTIONS = [
+  { key: 'overview', label: 'Team Overview' },
+  { key: 'defend', label: 'How They Defend' },
+  { key: 'attack', label: 'How They Attack' },
+  { key: 'threats', label: 'Key Threats' },
+  { key: 'gameplan', label: 'Our Game Plan' },
+  { key: 'log', label: 'Scouting Log' }
 ];
 
-function renderScouting() {
-  const el = document.getElementById('view-scouting');
-  const teamOpts = data.teams.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+function renderScout() {
+  const el = document.getElementById('view-scout');
+  const t = ct();
+  if (!t) return;
 
   el.innerHTML = `
+    <div class="toolbar no-print" style="justify-content:space-between;">
+      <h2 style="margin:0;">Opponent Scouting Report</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="addNewTeam()">+ Add Team</button>
+        <button class="btn btn-secondary" onclick="printScout()">Print Report</button>
+      </div>
+    </div>
+
+    <div class="team-tabs no-print">
+      ${data.teams.map((tm,i) => `<button class="team-tab ${i===data.currentTeamIdx?'active':''}" onclick="switchTeam(${i})">${esc(tm.name)}</button>`).join('')}
+    </div>
+
+    <div class="section-tabs no-print">
+      ${SECTIONS.map((s,i) => `<button class="section-tab ${i===data.currentSection?'active':''}" onclick="switchSection(${i})">${s.label}</button>`).join('')}
+    </div>
+
+    ${renderOverview(t)}
+    ${renderDefend(t)}
+    ${renderAttack(t)}
+    ${renderThreats(t)}
+    ${renderGameplan(t)}
+    ${renderLog(t)}
+
+    <div class="doc-footer">
+      <span class="page-num">${data.currentSection + 2} / 7</span>
+      <span class="brand">HNZ | BLACK STICKS MEN</span>
+    </div>`;
+}
+
+function switchTeam(idx) { autoSave(); data.currentTeamIdx = idx; save(); renderScout(); }
+function switchSection(idx) { autoSave(); data.currentSection = idx; save(); renderScout(); }
+
+function renderOverview(t) {
+  return `<div class="sec ${data.currentSection===0?'active':''}" id="sec-overview">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Team Overview</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">Team Overview</div>
+    <div class="info-grid">
+      <div class="info-box"><div class="info-box-label">World Ranking</div><input type="text" data-field="worldRanking" value="${esc(t.worldRanking)}" placeholder="e.g. #3" onchange="fieldChange(this)"></div>
+      <div class="info-box"><div class="info-box-label">Head Coach</div><input type="text" data-field="headCoach" value="${esc(t.headCoach)}" placeholder="Name" onchange="fieldChange(this)"></div>
+      <div class="info-box"><div class="info-box-label">Key Players</div><textarea data-field="keyPlayersOverview" placeholder="Top names to watch" onchange="fieldChange(this)">${esc(t.keyPlayersOverview)}</textarea></div>
+      <div class="info-box"><div class="info-box-label">Last Result vs NZ</div><input type="text" data-field="lastResultVsNZ" value="${esc(t.lastResultVsNZ)}" placeholder="e.g. NZ 2-3 NED" onchange="fieldChange(this)"></div>
+    </div>
+    <div class="scout-panel"><div class="scout-panel-label">Playing Identity / Style</div><textarea data-field="playingIdentity" placeholder="How do they play? High press, possession-based, direct, physical, technical? What's their identity?" onchange="fieldChange(this)">${esc(t.playingIdentity)}</textarea></div>
+    <div class="sv-grid">
+      <div><div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#ccc;text-transform:uppercase;margin-bottom:8px;">Strengths (Top 3)</div><div class="scout-panel accent-green" style="margin-bottom:0;"><textarea data-field="strengthsTop3" placeholder="Their three biggest weapons. Be specific \u2014 positions, patterns, set plays." onchange="fieldChange(this)">${esc(t.strengthsTop3)}</textarea></div></div>
+      <div><div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#ccc;text-transform:uppercase;margin-bottom:8px;">Vulnerabilities (Top 3)</div><div class="scout-panel accent-red" style="margin-bottom:0;"><textarea data-field="vulnerabilitiesTop3" placeholder="Where can we hurt them? Defensive transitions, aerial balls, press structure, set piece defending?" onchange="fieldChange(this)">${esc(t.vulnerabilitiesTop3)}</textarea></div></div>
+    </div>
+  </div>`;
+}
+
+function renderDefend(t) {
+  const fields = [
+    { key:'defensiveFormation', label:'Defensive Formation', ph:'4-4-2? 5-3-2? Back line structure when defending.' },
+    { key:'pressTriggers', label:'Press Triggers', ph:'When do they press? What triggers their press? Long balls, keeper possession, wide play?' },
+    { key:'defensiveBlock', label:'Defensive Block', ph:'How do they sit in a mid-block? Where is space available?' },
+    { key:'setPieceDefence', label:'Set Piece Defence', ph:'How do they defend corners and short corners? Marking scheme, positioning, sweeper.' },
+    { key:'transitionLosingPossession', label:'Transition \u2014 Losing Possession', ph:'What do they do immediately after losing the ball?' }
+  ];
+  return `<div class="sec ${data.currentSection===1?'active':''}" id="sec-defend">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Defensive Structure</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">How They Defend</div>
+    ${fields.map(f=>`<div class="scout-panel"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
+  </div>`;
+}
+
+function renderAttack(t) {
+  const fields = [
+    { key:'buildUpPattern', label:'Build-Up Pattern', ph:'How do they build from the back? GK distribution, wide or central build, overloads?' },
+    { key:'attackTransition', label:'Attack Transition', ph:'How fast do they transition? Counter-attack patterns, runners, key threats in transition.' },
+    { key:'dangerousZones', label:'Dangerous Zones', ph:'Where do most of their attacks come from? Left side, right side, central, high balls?' },
+    { key:'setPieceAttack', label:'Set Piece Attack', ph:'Corner and short corner structures. PC routine. Free hit patterns.' },
+    { key:'keyAttackingPlayers', label:'Key Attacking Player(s)', ph:'Who is the danger man? Number, name, their role and tendency.' }
+  ];
+  return `<div class="sec ${data.currentSection===2?'active':''}" id="sec-attack">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Attacking Structure</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">How They Attack</div>
+    ${fields.map(f=>`<div class="scout-panel"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
+  </div>`;
+}
+
+function renderThreats(t) {
+  if (!t.threats || t.threats.length < 3) t.threats = [{title:'',description:''},{title:'',description:''},{title:'',description:''}];
+  return `<div class="sec ${data.currentSection===3?'active':''}" id="sec-threats">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Key Threats</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">The Three Biggest Threats</div>
+    <div class="doc-subtitle">These are the patterns we must have a plan for. Brief the team specifically.</div>
+    ${t.threats.map((th,i)=>`<div class="threat-card"><div class="threat-num">0${i+1}</div><div class="threat-body"><input type="text" data-threat="${i}" data-tfield="title" value="${esc(th.title)}" placeholder="THREAT TITLE" onchange="threatChange(this)"><textarea data-threat="${i}" data-tfield="description" placeholder="Description of the threat \u2014 who, where, how it develops, and our planned response" onchange="threatChange(this)">${esc(th.description)}</textarea></div></div>`).join('')}
+  </div>`;
+}
+
+function renderGameplan(t) {
+  const fields = [
+    { key:'ourAttackingPriority', label:'Our Attacking Priority', ph:'Where and how will we create? What spaces will we target?' },
+    { key:'ourDefensivePriority', label:'Our Defensive Priority', ph:'How will we neutralise their biggest threat? Our structure / press plan.' },
+    { key:'setPieceStrategy', label:'Set Piece Strategy', ph:'PC routine selected. Corner and free hit plan.' },
+    { key:'psychologicalEdge', label:'The Psychological Edge', ph:'What is our mental / cultural advantage in this match?' }
+  ];
+  return `<div class="sec ${data.currentSection===4?'active':''}" id="sec-gameplan">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Our Game Plan</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">How We Will Approach This Game</div>
+    ${fields.map(f=>`<div class="scout-panel accent-gold"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
+  </div>`;
+}
+
+function renderLog(t) {
+  if (!t.log) t.log = [];
+  let rows = t.log.map((e,i)=>`<tr>
+    <td><input type="text" data-log="${i}" data-lfield="dateTournament" value="${esc(e.dateTournament)}" placeholder="Date / Tournament" onchange="logChange(this)"></td>
+    <td><input type="text" data-log="${i}" data-lfield="result" value="${esc(e.result)}" placeholder="Result" onchange="logChange(this)"></td>
+    <td><textarea data-log="${i}" data-lfield="observation" placeholder="Key observation" onchange="logChange(this)">${esc(e.observation)}</textarea></td>
+    <td><textarea data-log="${i}" data-lfield="action" placeholder="Action taken" onchange="logChange(this)">${esc(e.action)}</textarea></td>
+    <td style="width:40px;" class="no-print"><button class="btn btn-danger btn-sm" onclick="deleteLogEntry(${i})">\u00D7</button></td>
+  </tr>`).join('');
+
+  return `<div class="sec ${data.currentSection===5?'active':''}" id="sec-log">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Scouting Log</span><span class="page-bar-right">Updated Each Tournament</span></div>
+    <div class="doc-title">Running Observations Log</div>
+    <div class="doc-subtitle">Add a row each time you play or watch this team. This becomes your living intelligence database.</div>
+    <button class="btn btn-primary btn-sm no-print" onclick="addLogEntry()" style="margin-bottom:12px;">+ Add Entry</button>
+    <div style="overflow-x:auto;"><table class="log-table"><thead><tr>
+      <th style="width:18%;">Date / Tournament</th><th style="width:10%;">Result</th>
+      <th style="width:36%;">Key Observation</th><th style="width:30%;">Action Taken</th>
+      <th class="no-print" style="width:6%;"></th>
+    </tr></thead><tbody>${rows||'<tr><td colspan="5" style="text-align:center;color:#667;padding:20px;">No entries yet.</td></tr>'}</tbody></table></div>
+  </div>`;
+}
+
+function fieldChange(el) { ct()[el.dataset.field] = el.value; save(); }
+function threatChange(el) { ct().threats[parseInt(el.dataset.threat)][el.dataset.tfield] = el.value; save(); }
+function logChange(el) { ct().log[parseInt(el.dataset.log)][el.dataset.lfield] = el.value; save(); }
+
+function autoSave() {
+  const t = ct(); if (!t) return;
+  document.querySelectorAll('[data-field]').forEach(el => { t[el.dataset.field] = el.value; });
+  document.querySelectorAll('[data-threat]').forEach(el => {
+    const i = parseInt(el.dataset.threat);
+    if (t.threats && t.threats[i]) t.threats[i][el.dataset.tfield] = el.value;
+  });
+  document.querySelectorAll('[data-log]').forEach(el => {
+    const i = parseInt(el.dataset.log);
+    if (t.log && t.log[i]) t.log[i][el.dataset.lfield] = el.value;
+  });
+  save();
+}
+
+function addLogEntry() { autoSave(); ct().log.push({ dateTournament:'', result:'', observation:'', action:'' }); save(); renderScout(); }
+function deleteLogEntry(i) { autoSave(); ct().log.splice(i,1); save(); renderScout(); }
+function addNewTeam() { const n = prompt('Team name:'); if (!n) return; autoSave(); data.teams.push(blankTeam(n.trim(),n.trim(),'Hockey World Cup')); data.currentTeamIdx = data.teams.length-1; data.currentSection = 0; save(); renderScout(); }
+
+function printScout() {
+  autoSave();
+  document.getElementById('view-scout').classList.add('print-active');
+  window.print();
+  setTimeout(() => document.getElementById('view-scout').classList.remove('print-active'), 500);
+}
+
+// ============================================
+// LIVE SCOUTING MODE
+// ============================================
+let liveFeed = [], liveTags = new Set();
+const LIVE_TAGS = ['Attack Pattern','Defensive Shape','PC Routine','Key Player','Weakness','Formation','Press Trigger','Transition','General'];
+
+function renderLive() {
+  const el = document.getElementById('view-live');
+  const opts = data.teams.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join('');
+  el.innerHTML = `
     <h2>Live Scouting Mode</h2>
-    <div class="section">
-      <h3>Match Context</h3>
-      <div class="form-row">
-        <div class="form-group"><label>Team</label><select id="scout-team"><option value="">Select Team...</option>${teamOpts}</select></div>
-        <div class="form-group"><label>Match Date</label><input type="date" id="scout-date" value="${new Date().toISOString().split('T')[0]}"></div>
-        <div class="form-group"><label>Competition</label><input type="text" id="scout-comp" placeholder="e.g. FIH Pro League"></div>
-        <div class="form-group"><label>Venue</label><input type="text" id="scout-venue" placeholder="City/Stadium"></div>
+    <div class="section"><h3>Match Context</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;min-width:160px;"><label>Team</label><select id="live-team">${opts}</select></div>
+        <div style="display:flex;flex-direction:column;min-width:140px;"><label>Date</label><input type="date" id="live-date" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div style="display:flex;flex-direction:column;flex:1;min-width:160px;"><label>Competition</label><input type="text" id="live-comp" placeholder="e.g. FIH Pro League"></div>
       </div>
     </div>
-
-    <div class="section">
-      <h3>Quick Tags</h3>
-      <div class="scout-tags" id="scout-tags">
-        ${SCOUT_TAG_OPTIONS.map(t => `<div class="scout-tag" data-tag="${t.key}" onclick="toggleScoutTag(this)">${t.label}</div>`).join('')}
+    <div class="section"><h3>Quick Tags</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;" id="live-tags-wrap">
+        ${LIVE_TAGS.map(t=>`<div style="padding:6px 12px;border:1px solid #334;border-radius:4px;background:#0d1b2a;color:#889;font-size:12px;font-weight:600;cursor:pointer;" data-ltag="${t}" onclick="toggleLiveTag(this)">${t}</div>`).join('')}
       </div>
-      <div class="form-row">
-        <div class="form-group" style="flex:0 0 auto;min-width:120px;">
-          <label>Minute</label>
-          <input type="number" id="scout-minute" placeholder="e.g. 15" min="0" max="120">
-        </div>
-        <div class="form-group" style="flex:0 0 auto;align-self:flex-end;">
-          <button class="btn btn-secondary btn-sm" onclick="insertMinute()">Insert Time</button>
-        </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;">
+        <div style="display:flex;flex-direction:column;width:80px;"><label>Min</label><input type="number" id="live-min" placeholder="15" min="0" max="120"></div>
+        <button class="btn btn-secondary btn-sm" onclick="insertLiveMin()">Insert</button>
       </div>
+      <div style="display:flex;flex-direction:column;"><label>Observation</label><textarea id="live-notes" placeholder="Write your observation..." style="min-height:60px;"></textarea></div>
+      <button class="btn btn-primary" onclick="addLiveEntry()" style="margin-top:8px;">+ Add to Feed</button>
     </div>
-
-    <div class="section">
-      <h3>Observation</h3>
-      <div class="form-group"><textarea id="scout-notes" placeholder="Write your scouting observation..."></textarea></div>
-      <button class="btn btn-primary" onclick="addScoutEntry()">+ Add to Feed</button>
-    </div>
-
-    <div class="section">
-      <h3>Scouting Feed</h3>
-      <div id="scout-feed"></div>
-      <div style="margin-top:16px;display:flex;gap:8px;">
-        <button class="btn btn-primary" onclick="processScoutFeed()">Process & Route to Profile</button>
-        <button class="btn btn-secondary" onclick="clearScoutFeed()">Clear Feed</button>
+    <div class="section"><h3>Feed</h3><div id="live-feed"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="processLiveFeed()">Process & Add to Log</button>
+        <button class="btn btn-secondary" onclick="liveFeed=[];liveTags.clear();renderLiveFeed();">Clear</button>
       </div>
     </div>`;
-
-  renderScoutFeed();
+  renderLiveFeed();
 }
 
-function toggleScoutTag(el) { el.classList.toggle('active'); const tag = el.dataset.tag; if (el.classList.contains('active')) scoutTags.add(tag); else scoutTags.delete(tag); }
-function insertMinute() { const m = document.getElementById('scout-minute').value; if (!m) return; const ta = document.getElementById('scout-notes'); ta.value += `[${m}'] `; ta.focus(); }
+function toggleLiveTag(el) {
+  const tag = el.dataset.ltag;
+  if (liveTags.has(tag)) { liveTags.delete(tag); el.style.background='#0d1b2a'; el.style.color='#889'; el.style.borderColor='#334'; }
+  else { liveTags.add(tag); el.style.background='#d4a843'; el.style.color='#000'; el.style.borderColor='#d4a843'; }
+}
+function insertLiveMin() { const m=document.getElementById('live-min').value; if(!m)return; const ta=document.getElementById('live-notes'); ta.value+=`[${m}'] `; ta.focus(); }
 
-function addScoutEntry() {
-  const text = document.getElementById('scout-notes').value.trim();
-  if (!text) return alert('Write an observation first.');
-  const tags = Array.from(scoutTags);
-  if (tags.length === 0) tags.push('General');
-  scoutFeed.push({ id: uid(), tags, text, time: new Date().toLocaleTimeString() });
-  document.getElementById('scout-notes').value = '';
-  renderScoutFeed();
+function addLiveEntry() {
+  const text = document.getElementById('live-notes').value.trim();
+  if (!text) return alert('Write an observation.');
+  const tags = Array.from(liveTags); if (tags.length===0) tags.push('General');
+  liveFeed.push({ id:uid(), tags, text, time:new Date().toLocaleTimeString() });
+  document.getElementById('live-notes').value = '';
+  renderLiveFeed();
 }
 
-function renderScoutFeed() {
-  const el = document.getElementById('scout-feed');
-  if (!el) return;
-  if (scoutFeed.length === 0) { el.innerHTML = '<div style="color:#667;font-size:12px;">No observations recorded yet.</div>'; return; }
-
-  el.innerHTML = scoutFeed.map(e => `<div class="scout-entry">
-    <div>${e.tags.map(t => `<span class="scout-entry-tag">${esc(t)}</span>`).join(' ')}</div>
-    <div class="scout-entry-time">${e.time}</div>
-    <div class="scout-entry-text">${esc(e.text)}</div>
-    <button class="btn btn-danger btn-sm" onclick="removeScoutEntry('${e.id}')" style="margin-top:6px;">Remove</button>
+function renderLiveFeed() {
+  const el = document.getElementById('live-feed'); if(!el)return;
+  if (liveFeed.length===0) { el.innerHTML='<div style="color:#667;font-size:12px;">No observations yet.</div>'; return; }
+  el.innerHTML = liveFeed.map(e=>`<div style="background:#0d1b2a;border-left:3px solid #d4a843;padding:10px 14px;border-radius:0 4px 4px 0;margin-bottom:8px;">
+    <div>${e.tags.map(t=>`<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;background:#d4a843;color:#000;margin-right:4px;">${esc(t)}</span>`).join('')}</div>
+    <div style="font-size:11px;color:#667;margin:4px 0;">${e.time}</div>
+    <div style="font-size:13px;color:#ccc;line-height:1.5;">${esc(e.text)}</div>
   </div>`).join('');
 }
 
-function removeScoutEntry(id) { scoutFeed = scoutFeed.filter(e => e.id !== id); renderScoutFeed(); }
-
-function clearScoutFeed() { if (confirm('Clear all scouting entries?')) { scoutFeed = []; renderScoutFeed(); } }
-
-function processScoutFeed() {
-  const teamId = document.getElementById('scout-team').value;
-  if (!teamId) return alert('Select a team first.');
-  if (scoutFeed.length === 0) return alert('No entries to process.');
-
-  const t = team(teamId);
-  if (!t.attackPatterns) t.attackPatterns = [];
-  if (!t.weaknesses) t.weaknesses = [];
-  if (!t.pcAttack) t.pcAttack = [];
-  if (!t.pcDefence) t.pcDefence = [];
-  if (!t.matches) t.matches = [];
-
-  let routed = { attack: 0, defence: 0, pc: 0, player: 0, weakness: 0, formation: 0, general: 0 };
-
-  scoutFeed.forEach(entry => {
-    const tags = entry.tags;
-
-    // Route Attack Pattern observations
-    if (tags.includes('Attack Pattern')) {
-      t.attackPatterns.push({ id: uid(), name: 'Scouted Pattern', description: entry.text, players: '', frequency: 'Observed', danger: 3 });
-      routed.attack++;
-    }
-    // Route Weakness observations
-    if (tags.includes('Weakness')) {
-      t.weaknesses.push({ id: uid(), title: 'Scouted Weakness', description: entry.text, tactic: '', priority: 'MEDIUM' });
-      routed.weakness++;
-    }
-    // Route PC Routine observations
-    if (tags.includes('PC Routine')) {
-      t.pcAttack.push({ id: uid(), name: 'Scouted PC Routine', description: entry.text, personnel: '', lastSeen: document.getElementById('scout-date').value, effectiveness: 3 });
-      routed.pc++;
-    }
-    // Route Key Player observations to match log with tag
-    if (tags.includes('Key Player')) { routed.player++; }
-    if (tags.includes('Defensive Shape')) { routed.defence++; }
-    if (tags.includes('Formation Change')) { routed.formation++; }
-
-    // Everything goes to match log
-    t.matches.push({
-      id: uid(), date: document.getElementById('scout-date').value,
-      competition: document.getElementById('scout-comp').value,
-      venue: document.getElementById('scout-venue').value,
-      observations: entry.text, tags: entry.tags.join(', '),
-      ourScore: 0, theirScore: 0, adjustments: '', reflections: ''
-    });
-    routed.general++;
-  });
-
-  saveTeam(t);
-  const summary = [];
-  if (routed.attack) summary.push(`${routed.attack} attack pattern(s)`);
-  if (routed.weakness) summary.push(`${routed.weakness} weakness(es)`);
-  if (routed.pc) summary.push(`${routed.pc} PC routine(s)`);
-  summary.push(`${routed.general} entries to match log`);
-
-  alert(`Processed & routed for ${t.name}:\n\u2022 ${summary.join('\n\u2022 ')}\n\nTip: Review routed items in the team profile to refine names and details.`);
-  scoutFeed = [];
-  scoutTags.clear();
-  renderScoutFeed();
+function processLiveFeed() {
+  const idx = parseInt(document.getElementById('live-team').value);
+  if (liveFeed.length===0) return alert('No entries.');
+  const t = data.teams[idx]; if(!t.log) t.log=[];
+  const d = document.getElementById('live-date').value, c = document.getElementById('live-comp').value;
+  liveFeed.forEach(e => { t.log.push({ dateTournament:`${d} ${c}`.trim(), result:'', observation:`[${e.tags.join(', ')}] ${e.text}`, action:'' }); });
+  save();
+  alert(`${liveFeed.length} entries added to ${t.name}'s scouting log.`);
+  liveFeed=[]; liveTags.clear(); renderLiveFeed();
 }
 
 // ============================================
-// VIEW: MATCH LOG
-// ============================================
-function renderMatchLog() {
-  const el = document.getElementById('view-matchlog');
-  const teamOpts = data.teams.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
-
-  el.innerHTML = `
-    <h2>Match Log</h2>
-    <div class="toolbar">
-      <div class="form-group" style="flex:0 0 auto;min-width:200px;">
-        <label>Team</label>
-        <select id="matchlog-team" onchange="renderMatchLogEntries()">${teamOpts.length?'<option value="">Select Team...</option>'+teamOpts:'<option value="">No teams</option>'}</select>
-      </div>
-      <button class="btn btn-primary" onclick="openMatchModal()">+ New Match Entry</button>
-    </div>
-    <div id="matchlog-entries"></div>`;
-
-  renderMatchLogEntries();
-}
-
-function renderMatchLogEntries() {
-  const el = document.getElementById('matchlog-entries');
-  const tid = document.getElementById('matchlog-team').value;
-  if (!tid) { el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">\uD83C\uDFD1</div><p>Select a team to view their match log.</p></div>'; return; }
-
-  const t = team(tid);
-  const matches = (t.matches||[]).filter(m => m.ourScore !== undefined || m.observations).sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
-
-  if (matches.length === 0) { el.innerHTML = '<div class="empty-state"><p>No match entries yet.</p></div>'; return; }
-
-  el.innerHTML = matches.map(m => {
-    const resultClass = m.ourScore > m.theirScore ? 'match-result-w' : m.ourScore < m.theirScore ? 'match-result-l' : 'match-result-d';
-    const hasScore = m.ourScore !== undefined && m.theirScore !== undefined && (m.ourScore > 0 || m.theirScore > 0);
-    return `<div class="match-entry">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-        <div>
-          <div style="color:#d4a843;font-weight:700;">${m.date||'No date'}</div>
-          <div style="color:#889;font-size:12px;">${esc(m.competition)} \u2022 ${esc(m.venue)}</div>
-        </div>
-        ${hasScore ? `<div class="match-score ${resultClass}">${m.ourScore} - ${m.theirScore}</div>` : ''}
-      </div>
-      ${m.tags ? `<div style="margin-bottom:6px;">${m.tags.split(',').map(t => `<span class="scout-entry-tag" style="margin-right:4px;">${esc(t.trim())}</span>`).join('')}</div>` : ''}
-      <div style="font-size:13px;color:#ccc;line-height:1.6;margin-bottom:6px;">${esc(m.observations)}</div>
-      ${m.adjustments ? `<div style="font-size:12px;color:#4a8c3f;margin-bottom:4px;"><strong>Adjustments:</strong> ${esc(m.adjustments)}</div>` : ''}
-      ${m.reflections ? `<div style="font-size:12px;color:#d4a843;"><strong>Reflections:</strong> ${esc(m.reflections)}</div>` : ''}
-      <div style="margin-top:8px;display:flex;gap:6px;">
-        <button class="btn btn-secondary btn-sm" onclick="openMatchModal('${m.id}')">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteMatch('${m.id}')">Delete</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function deleteMatch(id) {
-  if (!confirm('Delete this match entry?')) return;
-  const tid = document.getElementById('matchlog-team').value;
-  const t = team(tid);
-  t.matches = (t.matches||[]).filter(m => m.id !== id);
-  saveTeam(t);
-  renderMatchLogEntries();
-}
-
-// ============================================
-// VIEW: PRE-MATCH BRIEF
-// ============================================
-function renderBrief() {
-  const el = document.getElementById('view-brief');
-  const teamOpts = data.teams.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
-
-  el.innerHTML = `
-    <h2>Pre-Match Brief</h2>
-    <div class="toolbar no-print">
-      <div class="form-group" style="flex:0 0 auto;min-width:200px;">
-        <label>Team</label>
-        <select id="brief-team" onchange="generateBrief()">${teamOpts.length?'<option value="">Select Team...</option>'+teamOpts:'<option value="">No teams</option>'}</select>
-      </div>
-      <button class="btn btn-primary" onclick="printBrief()">Print Brief</button>
-    </div>
-    <div id="brief-priorities-editor" class="section no-print" style="display:none;">
-      <h3>Tactical Priorities (editable \u2014 these appear on the printed brief)</h3>
-      <div id="priorities-inputs"></div>
-      <button class="btn btn-primary btn-sm" onclick="savePriorities()" style="margin-top:8px;">Save Priorities</button>
-    </div>
-    <div id="brief-container"></div>`;
-}
-
-function generateBrief() {
-  const tid = document.getElementById('brief-team').value;
-  const container = document.getElementById('brief-container');
-  const prioEditor = document.getElementById('brief-priorities-editor');
-
-  if (!tid) { container.innerHTML = ''; prioEditor.style.display = 'none'; return; }
-
-  const t = team(tid);
-  if (!t.priorities) t.priorities = ['','','','',''];
-
-  // Show priorities editor
-  prioEditor.style.display = 'block';
-  document.getElementById('priorities-inputs').innerHTML = t.priorities.map((p,i) =>
-    `<div class="form-row" style="margin-bottom:6px;">
-      <span style="color:#d4a843;font-weight:900;font-size:16px;min-width:24px;">${i+1}.</span>
-      <input type="text" id="priority-${i}" value="${esc(p)}" placeholder="Priority ${i+1}..." style="flex:1;">
-    </div>`
-  ).join('');
-
-  // Build brief output
-  const threatPlayers = (t.players||[]).filter(p => ['DIRECTORS','ASSASSINS'].includes(p.category));
-  const pressPlayers = (t.players||[]).filter(p => p.category === 'PRESS');
-  const enginePlayers = (t.players||[]).filter(p => p.category === 'ENGINE');
-  const dangerPatterns = (t.attackPatterns||[]).filter(p => p.danger >= 3).sort((a,b) => b.danger - a.danger);
-  const highWeaknesses = (t.weaknesses||[]).filter(w => w.priority === 'HIGH');
-  const allWeaknesses = (t.weaknesses||[]).filter(w => w.priority !== 'HIGH');
-  const pcAtk = t.pcAttack || [];
-  const pcDef = t.pcDefence || [];
-  const priorities = (t.priorities||[]).filter(p => p.trim());
-
-  let html = `<div class="brief-output">
-    <div class="brief-banner">
-      <span class="team-name">\uD83C\uDFD1 Opposition Brief \u2014 ${esc(t.name)}</span>
-      <span class="doc-type">${esc(t.competition)}</span>
-    </div>
-    <div class="brief-info-bar">
-      <div class="brief-info-item"><div class="brief-info-label">Country</div><div class="brief-info-value">${esc(t.country)}</div></div>
-      <div class="brief-info-item"><div class="brief-info-label">Threat Level</div><div class="brief-info-value"><span class="threat threat-${t.threatLevel.toLowerCase()}" style="font-size:13px;">${t.threatLevel}</span></div></div>
-      <div class="brief-info-item"><div class="brief-info-label">Formation</div><div class="brief-info-value">${esc(t.formationType||'Unknown')}</div></div>
-      <div class="brief-info-item"><div class="brief-info-label">Press</div><div class="brief-info-value">${esc(t.pressType||'Unknown')}</div></div>
-    </div>
-    <div class="brief-body">`;
-
-  // Formation & Structure
-  if (t.formationNotes) {
-    html += `<div class="brief-section-hdr">Formation & Structure</div>
-      <div style="font-size:13px;color:#ccc;line-height:1.7;margin-bottom:12px;">${esc(t.formationNotes)}</div>`;
-  }
-
-  // Key Threats
-  html += '<div class="brief-section-hdr">Key Threats</div>';
-  if (threatPlayers.length > 0) {
-    threatPlayers.forEach(p => {
-      html += `<div class="brief-player-row">
-        <div class="brief-player-name">#${p.jersey} ${esc(p.name)} \u2014 "${esc(p.nickname)}" (${esc(p.position)}) ${'\u2605'.repeat(p.form||0)}</div>
-        <div class="brief-threat-text">THREAT: ${esc(p.threat)}</div>
-        <div class="brief-counter-text">COUNTER: ${esc(p.counter)}</div>
-      </div>`;
-    });
-  } else { html += '<div style="color:#888;font-size:13px;">No threat players documented.</div>'; }
-
-  // Engine Room
-  if (enginePlayers.length > 0) {
-    html += '<div class="brief-section-hdr">Engine Room</div>';
-    enginePlayers.forEach(p => {
-      html += `<div class="brief-player-row">
-        <div class="brief-player-name">#${p.jersey} ${esc(p.name)} \u2014 "${esc(p.nickname)}" (${esc(p.position)})</div>
-        <div class="brief-threat-text">ROLE: ${esc(p.threat)}</div>
-        <div class="brief-counter-text">DISRUPT: ${esc(p.counter)}</div>
-      </div>`;
-    });
-  }
-
-  // Press Targets
-  if (pressPlayers.length > 0) {
-    html += '<div class="brief-section-hdr">Press Targets</div>';
-    pressPlayers.forEach(p => {
-      html += `<div class="brief-player-row">
-        <div class="brief-player-name">#${p.jersey} ${esc(p.name)} (${esc(p.position)})</div>
-        <div class="brief-counter-text">EXPLOIT: ${esc(p.counter)}</div>
-      </div>`;
-    });
-  }
-
-  // Attack Patterns
-  if (dangerPatterns.length > 0) {
-    html += '<div class="brief-section-hdr">Attacking Patterns</div>';
-    dangerPatterns.forEach(p => {
-      html += `<div class="brief-pattern-row">
-        <div style="font-weight:700;color:#d4a843 !important;font-size:14px;">${esc(p.name)} <span style="color:#e74c3c !important;">(Danger ${p.danger}/5, ${esc(p.frequency)})</span></div>
-        <div style="font-size:13px;color:#ccc;margin-top:2px;">${esc(p.description)}</div>
-        <div style="font-size:12px;color:#888;margin-top:2px;">Key players: ${esc(p.players)}</div>
-      </div>`;
-    });
-  }
-
-  // Set Pieces
-  html += '<div class="brief-section-hdr">Set Pieces</div>';
-  html += '<div style="font-weight:700;color:#e74c3c !important;font-size:13px;margin-bottom:6px;">PC ATTACK ROUTINES (THEIR CORNERS)</div>';
-  if (pcAtk.length > 0) {
-    pcAtk.forEach(r => { html += `<div style="padding-left:12px;margin-bottom:6px;font-size:13px;color:#ccc;">\u2022 <strong style="color:#d4a843 !important;">${esc(r.name)}</strong>: ${esc(r.description)} <span style="color:#888;">(Eff: ${r.effectiveness}/5)</span></div>`; });
-  } else { html += '<div style="padding-left:12px;font-size:13px;color:#888;">No PC attack routines documented.</div>'; }
-
-  html += '<div style="font-weight:700;color:#4a8c3f !important;font-size:13px;margin:12px 0 6px;">PC DEFENCE (HOW THEY DEFEND OUR CORNERS)</div>';
-  if (pcDef.length > 0) {
-    pcDef.forEach(r => { html += `<div style="padding-left:12px;margin-bottom:6px;font-size:13px;color:#ccc;">\u2022 <strong style="color:#d4a843 !important;">${esc(r.name)}</strong>: ${esc(r.description)} <span style="color:#888;">(Eff: ${r.effectiveness}/5)</span></div>`; });
-  } else { html += '<div style="padding-left:12px;font-size:13px;color:#888;">No PC defence routines documented.</div>'; }
-
-  // Weaknesses
-  if (highWeaknesses.length > 0 || allWeaknesses.length > 0) {
-    html += '<div class="brief-section-hdr">Weaknesses to Exploit</div>';
-    highWeaknesses.forEach(w => {
-      html += `<div class="brief-weakness-row">
-        <div style="font-weight:700;color:#e74c3c !important;font-size:13px;">\u26A0 ${esc(w.title)}</div>
-        <div style="font-size:13px;color:#ccc;margin-top:4px;">${esc(w.description)}</div>
-        <div class="exploit">\u2192 EXPLOIT: ${esc(w.tactic)}</div>
-      </div>`;
-    });
-    allWeaknesses.forEach(w => {
-      html += `<div style="padding-left:12px;margin-bottom:8px;font-size:13px;color:#ccc;">
-        <strong style="color:#f39c12 !important;">${esc(w.title)}</strong>: ${esc(w.description)}
-        <div style="color:#4a8c3f !important;font-style:italic;margin-top:2px;">\u2192 ${esc(w.tactic)}</div>
-      </div>`;
-    });
-  }
-
-  // Pressing Profile
-  if (t.pressNotes) {
-    html += `<div class="brief-section-hdr">Pressing Profile</div>
-      <div style="font-size:13px;color:#ccc;line-height:1.7;"><strong style="color:#d4a843 !important;">Type:</strong> ${esc(t.pressType)}<br>${esc(t.pressNotes)}</div>`;
-  }
-
-  // Defensive Structure
-  if (t.defensiveNotes) {
-    html += `<div class="brief-section-hdr">Defensive Structure</div>
-      <div style="font-size:13px;color:#ccc;line-height:1.7;">${esc(t.defensiveNotes)}</div>`;
-  }
-
-  // Tactical Priorities
-  if (priorities.length > 0) {
-    html += `<div class="brief-priority-section">
-      <h4>Tactical Priorities \u2014 Team Meeting</h4>
-      ${priorities.map((p,i) => `<div class="brief-priority-item"><span class="brief-priority-num">${i+1}.</span><span>${esc(p)}</span></div>`).join('')}
-    </div>`;
-  }
-
-  html += `</div>
-    <div class="brief-footer">
-      <span class="stamp">\u26A0 Confidential \u2014 High Performance</span>
-      <span class="date">Generated: ${new Date().toLocaleDateString()}</span>
-    </div>
-  </div>`;
-
-  container.innerHTML = html;
-}
-
-function savePriorities() {
-  const tid = document.getElementById('brief-team').value;
-  if (!tid) return;
-  const t = team(tid);
-  t.priorities = [0,1,2,3,4].map(i => document.getElementById('priority-'+i).value);
-  saveTeam(t);
-  generateBrief();
-  alert('Priorities saved.');
-}
-
-function printBrief() {
-  const el = document.getElementById('view-brief');
-  el.classList.add('print-target');
-  window.print();
-  setTimeout(() => el.classList.remove('print-target'), 500);
-}
-
-// ============================================
-// VIEW: DATA
+// DATA MANAGEMENT
 // ============================================
 function renderData() {
   const el = document.getElementById('view-data');
-  const size = (JSON.stringify(data).length / 1024).toFixed(1);
-  const teamOpts = data.teams.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
-
-  el.innerHTML = `
-    <h2>Data Management</h2>
+  const size = (JSON.stringify(data).length/1024).toFixed(1);
+  el.innerHTML = `<h2>Data Management</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
-      <div class="section">
-        <h3>Export Data</h3>
-        <div class="form-group">
-          <label>Export Type</label>
-          <select id="export-type" onchange="document.getElementById('export-team-wrap').style.display=this.value==='single'?'block':'none'">
-            <option value="all">All Teams</option>
-            <option value="single">Single Team</option>
-          </select>
-        </div>
-        <div id="export-team-wrap" style="display:none;" class="form-group">
-          <label>Select Team</label>
-          <select id="export-team">${teamOpts}</select>
-        </div>
-        <button class="btn btn-primary" onclick="exportData()">Export JSON</button>
-      </div>
-      <div class="section">
-        <h3>Import Data</h3>
-        <div class="form-group">
-          <input type="file" id="import-file" accept=".json">
-        </div>
-        <button class="btn btn-primary" onclick="importData()">Import</button>
-      </div>
-      <div class="section">
-        <h3>Storage Info</h3>
-        <p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p>
-        <p style="color:#ccc;margin-bottom:12px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p>
-        <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
-      </div>
+      <div class="section"><h3>Export</h3><p style="color:#889;font-size:12px;margin-bottom:12px;">Download all scouting data as JSON.</p><button class="btn btn-primary" onclick="exportData()">Export All</button></div>
+      <div class="section"><h3>Import</h3><input type="file" id="import-file" accept=".json" style="margin-bottom:8px;"><button class="btn btn-primary" onclick="importData()">Import</button></div>
+      <div class="section"><h3>Storage</h3><p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p><p style="color:#ccc;margin-bottom:12px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p><button class="btn btn-danger" onclick="clearAllData()">Clear All</button></div>
+      <div class="section"><h3>Manage Teams</h3>${data.teams.map((t,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334;"><span style="font-size:13px;">${esc(t.name)}</span><button class="btn btn-danger btn-sm" onclick="deleteTeam(${i})">Delete</button></div>`).join('')}<button class="btn btn-primary btn-sm" onclick="addNewTeam()" style="margin-top:12px;">+ Add Team</button></div>
     </div>`;
 }
 
-function exportData() {
-  const type = document.getElementById('export-type').value;
-  let exportObj, filename;
-  if (type === 'single') {
-    const tid = document.getElementById('export-team').value;
-    const t = team(tid);
-    exportObj = { teams: [t] };
-    filename = `oppo-scout-${t.name.replace(/\s+/g,'-')}-${new Date().toISOString().split('T')[0]}.json`;
-  } else {
-    exportObj = data;
-    filename = `oppo-scout-all-${new Date().toISOString().split('T')[0]}.json`;
-  }
-  const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
-}
+function exportData() { autoSave(); const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`oppo-scout-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); }
+function importData() { const f=document.getElementById('import-file').files[0]; if(!f)return alert('Select a file.'); const r=new FileReader(); r.onload=function(e){try{const d=JSON.parse(e.target.result);if(d.teams){data=d;data.currentTeamIdx=0;data.currentSection=0;save();alert('Imported.');showView('scout');}else alert('Invalid.');}catch(e){alert('Error: '+e.message);}}; r.readAsText(f); }
+function clearAllData() { if(!confirm('Delete ALL data?'))return; if(!confirm('Sure?'))return; localStorage.removeItem(STORE); data={teams:[],currentTeamIdx:0,currentSection:0}; load(); showView('scout'); }
+function deleteTeam(i) { if(!confirm('Delete '+data.teams[i].name+'?'))return; data.teams.splice(i,1); if(data.currentTeamIdx>=data.teams.length)data.currentTeamIdx=Math.max(0,data.teams.length-1); save(); if(data.teams.length===0)load(); renderData(); }
 
-function importData() {
-  const file = document.getElementById('import-file').files[0];
-  if (!file) return alert('Select a file.');
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const imp = JSON.parse(e.target.result);
-      if (!imp.teams || !Array.isArray(imp.teams)) return alert('Invalid file format.');
-      const newTeams = imp.teams.filter(t => !data.teams.find(x => x.id === t.id));
-      data.teams.push(...newTeams);
-      save();
-      alert(`Imported ${newTeams.length} new team(s).`);
-      renderData();
-    } catch(err) { alert('Error: ' + err.message); }
-  };
-  reader.readAsText(file);
-}
+window.addEventListener('beforeunload', autoSave);
 
-function clearAllData() {
-  if (!confirm('Delete ALL opposition data? Cannot be undone.')) return;
-  if (!confirm('Are you sure? This is permanent.')) return;
-  localStorage.removeItem(STORE);
-  data = { teams: [] };
-  showView('teams');
-}
-
-// ============================================
-// MODALS
-// ============================================
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-// Close on backdrop click
-document.querySelectorAll('.modal-bg').forEach(bg => {
-  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('active'); });
-});
-
-// -- Team Modal --
-function openTeamModal() {
-  document.getElementById('modal-team-inner').innerHTML = `
-    <h3>New Team</h3>
-    <div class="form-group"><label>Team Name</label><input type="text" id="mt-name" placeholder="e.g. Australia Kookaburras"></div>
-    <div class="form-group"><label>Country</label><input type="text" id="mt-country" placeholder="e.g. Australia"></div>
-    <div class="form-group"><label>Competition</label><select id="mt-comp">${COMPETITIONS.map(c => '<option>'+esc(c)+'</option>').join('')}</select></div>
-    <div class="form-group"><label>Threat Level</label><select id="mt-threat"><option>LOW</option><option selected>MEDIUM</option><option>HIGH</option><option>ELITE</option></select></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('modal-team')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNewTeam()">Save Team</button>
-    </div>`;
-  openModal('modal-team');
-}
-
-function saveNewTeam() {
-  const name = document.getElementById('mt-name').value.trim();
-  if (!name) return alert('Enter a team name.');
-  const t = newTeam();
-  t.name = name;
-  t.country = document.getElementById('mt-country').value.trim();
-  t.competition = document.getElementById('mt-comp').value;
-  t.threatLevel = document.getElementById('mt-threat').value;
-  saveTeam(t);
-  closeModal('modal-team');
-  renderTeams();
-}
-
-// -- Player Modal --
-let editingPlayerId = null;
-
-function openPlayerModal(playerId) {
-  editingPlayerId = playerId || null;
-  const t = team(currentTeamId);
-  const p = editingPlayerId ? (t.players||[]).find(x => x.id === editingPlayerId) : null;
-
-  document.getElementById('modal-player-inner').innerHTML = `
-    <h3>${p ? 'Edit' : 'Add'} Player</h3>
-    <div class="form-group"><label>Player Name</label><input type="text" id="mp-name" value="${p?esc(p.name):''}"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Jersey #</label><input type="number" id="mp-jersey" min="1" max="99" value="${p?p.jersey:''}"></div>
-      <div class="form-group"><label>Position</label><input type="text" id="mp-pos" value="${p?esc(p.position):''}" placeholder="e.g. Forward"></div>
-    </div>
-    <div class="form-group"><label>Tactical Nickname</label><input type="text" id="mp-nick" value="${p?esc(p.nickname):''}" placeholder='e.g. "The Tempo Setter"'></div>
-    <div class="form-group"><label>Category</label><select id="mp-cat">
-      ${PLAYER_CATEGORIES.map(c => `<option value="${c.key}" ${p&&p.category===c.key?'selected':''}>${c.icon} ${c.label}</option>`).join('')}
-    </select></div>
-    <div class="form-group"><label>Threat Assessment</label><textarea id="mp-threat" placeholder="What makes this player dangerous?">${p?esc(p.threat):''}</textarea></div>
-    <div class="form-group"><label>Counter-Tactic / Exploit</label><textarea id="mp-counter" placeholder="How to neutralize or exploit...">${p?esc(p.counter):''}</textarea></div>
-    <div class="form-group"><label>Form Rating (1-5)</label><input type="number" id="mp-form" min="1" max="5" value="${p?p.form:3}"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('modal-player')">Cancel</button>
-      <button class="btn btn-primary" onclick="savePlayer()">Save</button>
-    </div>`;
-  openModal('modal-player');
-}
-
-function savePlayer() {
-  const t = team(currentTeamId);
-  if (!t.players) t.players = [];
-  const pd = {
-    id: editingPlayerId || uid(),
-    name: document.getElementById('mp-name').value, jersey: parseInt(document.getElementById('mp-jersey').value)||0,
-    position: document.getElementById('mp-pos').value, nickname: document.getElementById('mp-nick').value,
-    category: document.getElementById('mp-cat').value, threat: document.getElementById('mp-threat').value,
-    counter: document.getElementById('mp-counter').value, form: parseInt(document.getElementById('mp-form').value)||3
-  };
-  if (editingPlayerId) { const i = t.players.findIndex(x => x.id === editingPlayerId); if (i >= 0) t.players[i] = pd; }
-  else t.players.push(pd);
-  saveTeam(t); closeModal('modal-player'); renderPlayersTab();
-}
-
-function deletePlayer(id) {
-  if (!confirm('Delete this player?')) return;
-  const t = team(currentTeamId); t.players = (t.players||[]).filter(p => p.id !== id); saveTeam(t); renderPlayersTab();
-}
-
-// -- Attack Pattern Modal --
-let editingPatternId = null;
-
-function openPatternModal(patternId) {
-  editingPatternId = patternId || null;
-  const t = team(currentTeamId);
-  const p = editingPatternId ? (t.attackPatterns||[]).find(x => x.id === editingPatternId) : null;
-
-  document.getElementById('modal-pattern-inner').innerHTML = `
-    <h3>${p ? 'Edit' : 'Add'} Attack Pattern</h3>
-    <div class="form-group"><label>Pattern Name</label><input type="text" id="map-name" value="${p?esc(p.name):''}"></div>
-    <div class="form-group"><label>Description</label><textarea id="map-desc">${p?esc(p.description):''}</textarea></div>
-    <div class="form-group"><label>Key Players</label><input type="text" id="map-players" value="${p?esc(p.players):''}" placeholder="Comma-separated"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Frequency</label><select id="map-freq">
-        ${['Very Common','Common','Occasional','Rare'].map(f => `<option ${p&&p.frequency===f?'selected':''}>${f}</option>`).join('')}
-      </select></div>
-      <div class="form-group"><label>Danger (1-5)</label><input type="number" id="map-danger" min="1" max="5" value="${p?p.danger:3}"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('modal-pattern')">Cancel</button>
-      <button class="btn btn-primary" onclick="savePattern()">Save</button>
-    </div>`;
-  openModal('modal-pattern');
-}
-
-function savePattern() {
-  const t = team(currentTeamId);
-  if (!t.attackPatterns) t.attackPatterns = [];
-  const pd = {
-    id: editingPatternId || uid(),
-    name: document.getElementById('map-name').value, description: document.getElementById('map-desc').value,
-    players: document.getElementById('map-players').value, frequency: document.getElementById('map-freq').value,
-    danger: parseInt(document.getElementById('map-danger').value)||3
-  };
-  if (editingPatternId) { const i = t.attackPatterns.findIndex(x => x.id === editingPatternId); if (i >= 0) t.attackPatterns[i] = pd; }
-  else t.attackPatterns.push(pd);
-  saveTeam(t); closeModal('modal-pattern'); renderPatternsList();
-}
-
-function deletePattern(id) {
-  if (!confirm('Delete this pattern?')) return;
-  const t = team(currentTeamId); t.attackPatterns = (t.attackPatterns||[]).filter(p => p.id !== id); saveTeam(t); renderPatternsList();
-}
-
-// -- PC Modal (Attack & Defence) --
-let editingPCId = null;
-let editingPCType = 'attack';
-
-function openPCModal(type, pcId) {
-  editingPCType = type;
-  editingPCId = pcId || null;
-  const t = team(currentTeamId);
-  const list = type === 'attack' ? (t.pcAttack||[]) : (t.pcDefence||[]);
-  const p = editingPCId ? list.find(x => x.id === editingPCId) : null;
-  const label = type === 'attack' ? 'PC Attack Routine' : 'PC Defence Routine';
-
-  document.getElementById('modal-pc-inner').innerHTML = `
-    <h3>${p ? 'Edit' : 'Add'} ${label}</h3>
-    <div class="form-group"><label>Routine Name</label><input type="text" id="mpc-name" value="${p?esc(p.name):''}"></div>
-    <div class="form-group"><label>Description</label><textarea id="mpc-desc" placeholder="${type==='attack'?'Describe execution: injector, receiver, finish...':'Describe defensive setup: positioning, rushers, strategy...'}">${p?esc(p.description):''}</textarea></div>
-    <div class="form-group"><label>Key Personnel</label><input type="text" id="mpc-personnel" value="${p?esc(p.personnel):''}" placeholder="Comma-separated"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Last Seen</label><input type="date" id="mpc-date" value="${p?p.lastSeen:new Date().toISOString().split('T')[0]}"></div>
-      <div class="form-group"><label>Effectiveness (1-5)</label><input type="number" id="mpc-eff" min="1" max="5" value="${p?p.effectiveness:3}"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('modal-pc')">Cancel</button>
-      <button class="btn btn-primary" onclick="savePC()">Save</button>
-    </div>`;
-  openModal('modal-pc');
-}
-
-function savePC() {
-  const t = team(currentTeamId);
-  const key = editingPCType === 'attack' ? 'pcAttack' : 'pcDefence';
-  if (!t[key]) t[key] = [];
-  const pd = {
-    id: editingPCId || uid(),
-    name: document.getElementById('mpc-name').value, description: document.getElementById('mpc-desc').value,
-    personnel: document.getElementById('mpc-personnel').value, lastSeen: document.getElementById('mpc-date').value,
-    effectiveness: parseInt(document.getElementById('mpc-eff').value)||3
-  };
-  if (editingPCId) { const i = t[key].findIndex(x => x.id === editingPCId); if (i >= 0) t[key][i] = pd; }
-  else t[key].push(pd);
-  saveTeam(t); closeModal('modal-pc'); renderPCList(editingPCType);
-}
-
-function deletePC(type, id) {
-  if (!confirm('Delete this routine?')) return;
-  const t = team(currentTeamId);
-  const key = type === 'attack' ? 'pcAttack' : 'pcDefence';
-  t[key] = (t[key]||[]).filter(x => x.id !== id);
-  saveTeam(t); renderPCList(type);
-}
-
-// -- Weakness Modal --
-let editingWeaknessId = null;
-
-function openWeaknessModal(wId) {
-  editingWeaknessId = wId || null;
-  const t = team(currentTeamId);
-  const w = editingWeaknessId ? (t.weaknesses||[]).find(x => x.id === editingWeaknessId) : null;
-
-  document.getElementById('modal-weakness-inner').innerHTML = `
-    <h3>${w ? 'Edit' : 'Add'} Weakness</h3>
-    <div class="form-group"><label>Title</label><input type="text" id="mw-title" value="${w?esc(w.title):''}"></div>
-    <div class="form-group"><label>Description</label><textarea id="mw-desc">${w?esc(w.description):''}</textarea></div>
-    <div class="form-group"><label>Tactical Recommendation</label><textarea id="mw-tactic" placeholder="How should we exploit this?">${w?esc(w.tactic):''}</textarea></div>
-    <div class="form-group"><label>Priority</label><select id="mw-priority">
-      ${['HIGH','MEDIUM','LOW'].map(p => `<option ${w&&w.priority===p?'selected':''}>${p}</option>`).join('')}
-    </select></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('modal-weakness')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveWeakness()">Save</button>
-    </div>`;
-  openModal('modal-weakness');
-}
-
-function saveWeakness() {
-  const t = team(currentTeamId);
-  if (!t.weaknesses) t.weaknesses = [];
-  const wd = {
-    id: editingWeaknessId || uid(),
-    title: document.getElementById('mw-title').value, description: document.getElementById('mw-desc').value,
-    tactic: document.getElementById('mw-tactic').value, priority: document.getElementById('mw-priority').value
-  };
-  if (editingWeaknessId) { const i = t.weaknesses.findIndex(x => x.id === editingWeaknessId); if (i >= 0) t.weaknesses[i] = wd; }
-  else t.weaknesses.push(wd);
-  saveTeam(t); closeModal('modal-weakness'); renderWeaknessesTab();
-}
-
-function deleteWeakness(id) {
-  if (!confirm('Delete this weakness?')) return;
-  const t = team(currentTeamId); t.weaknesses = (t.weaknesses||[]).filter(w => w.id !== id); saveTeam(t); renderWeaknessesTab();
-}
-
-// -- Match Modal --
-let editingMatchId = null;
-
-function openMatchModal(matchId) {
-  editingMatchId = matchId || null;
-  const tid = document.getElementById('matchlog-team')?.value;
-  const t = tid ? team(tid) : null;
-  const m = editingMatchId && t ? (t.matches||[]).find(x => x.id === editingMatchId) : null;
-
-  document.getElementById('modal-match-inner').innerHTML = `
-    <h3>${m ? 'Edit' : 'New'} Match Entry</h3>
-    <div class="form-group"><label>Match Date</label><input type="date" id="mm-date" value="${m?m.date:new Date().toISOString().split('T')[0]}"></div>
-    <div class="form-group"><label>Competition</label><input type="text" id="mm-comp" value="${m?esc(m.competition):''}" placeholder="e.g. FIH Pro League"></div>
-    <div class="form-row">
-      <div class="form-group"><label>Our Score</label><input type="number" id="mm-ours" min="0" value="${m?m.ourScore:''}"></div>
-      <div class="form-group"><label>Their Score</label><input type="number" id="mm-theirs" min="0" value="${m?m.theirScore:''}"></div>
-    </div>
-    <div class="form-group"><label>Venue</label><input type="text" id="mm-venue" value="${m?esc(m.venue):''}" placeholder="City/Stadium"></div>
-    <div class="form-group"><label>Key Observations</label><textarea id="mm-obs">${m?esc(m.observations):''}</textarea></div>
-    <div class="form-group"><label>Tactical Adjustments</label><textarea id="mm-adj">${m?esc(m.adjustments||''):''}</textarea></div>
-    <div class="form-group"><label>What Worked / Didn't</label><textarea id="mm-ref">${m?esc(m.reflections||''):''}</textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('modal-match')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveMatch()">Save</button>
-    </div>`;
-  openModal('modal-match');
-}
-
-function saveMatch() {
-  const tid = document.getElementById('matchlog-team').value;
-  if (!tid) return alert('Select a team first.');
-  const t = team(tid);
-  if (!t.matches) t.matches = [];
-  const md = {
-    id: editingMatchId || uid(),
-    date: document.getElementById('mm-date').value, competition: document.getElementById('mm-comp').value,
-    ourScore: parseInt(document.getElementById('mm-ours').value)||0, theirScore: parseInt(document.getElementById('mm-theirs').value)||0,
-    venue: document.getElementById('mm-venue').value, observations: document.getElementById('mm-obs').value,
-    adjustments: document.getElementById('mm-adj').value, reflections: document.getElementById('mm-ref').value
-  };
-  if (editingMatchId) { const i = t.matches.findIndex(x => x.id === editingMatchId); if (i >= 0) t.matches[i] = md; }
-  else t.matches.push(md);
-  saveTeam(t); closeModal('modal-match'); renderMatchLogEntries();
-}
-
-// ============================================
-// INIT
-// ============================================
 load();
-renderTeams();
+renderScout();
 </script>
 </body>
 </html>
