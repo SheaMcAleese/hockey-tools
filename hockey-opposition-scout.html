@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#d4a843">
 <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>Opposition Scout | HNZ</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -204,6 +205,7 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 
 <nav>
   <span class="logo">OPPOSITION SCOUT</span>
+  <span id="sync-badge" style="font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:3px;margin-right:auto;color:#667;">...</span>
   <button class="active" onclick="showView('scout')">Scouting</button>
   <button onclick="showView('live')">Live Mode</button>
   <button onclick="showView('data')">Data</button>
@@ -217,9 +219,16 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 const STORE = 'hockeyOppoScoutV4';
 const USER_STORE = 'hockeyScoutUser';
 
-function blankTeam(name, country, competition) {
+/* ============================================
+   SUPABASE CLIENT
+   ============================================ */
+const SB_URL = 'https://rqqjqoyjaiphsfhyyvka.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcWpxb3lqYWlwaHNmaHl5dmthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTEyMTksImV4cCI6MjA4OTQyNzIxOX0.kIZI3gNv3kfaWOsZhQ6k2B1Me4Q-zZMaaIcQTHD3Tuc';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+let sbOnline = true;
+
+function blankTeamData() {
   return {
-    id: uid(), name, country, competition: competition || 'Hockey World Cup',
     worldRanking: '', headCoach: '', keyPlayersOverview: '', lastResultVsNZ: '',
     videoLink: '',
     playingIdentity: '', strengthsTop3: '', vulnerabilitiesTop3: '',
@@ -234,6 +243,21 @@ function blankTeam(name, country, competition) {
     tacticalImages: [],
     log: []
   };
+}
+
+function blankTeam(name, country, competition) {
+  return { id: uid(), name, country, competition: competition || 'Hockey World Cup', ...blankTeamData() };
+}
+
+/* ---- Convert between app format and DB format ---- */
+function teamToRow(t) {
+  const { id, name, country, competition, ...rest } = t;
+  return { id, name, country, competition, team_data: rest, updated_at: new Date().toISOString() };
+}
+function rowToTeam(r) {
+  const defaults = blankTeamData();
+  const td = r.team_data || {};
+  return { id: r.id, name: r.name, country: r.country, competition: r.competition, ...defaults, ...td };
 }
 
 let data = { teams: [], currentTeamIdx: 0, currentSection: 0 };
@@ -279,8 +303,77 @@ function postedByStamp() {
   return `${currentUser.initials} \u2014 ${d} ${t}`;
 }
 
-function save() { localStorage.setItem(STORE, JSON.stringify(data)); }
-function load() {
+/* ============================================
+   SAVE — localStorage immediately, Supabase debounced
+   ============================================ */
+let _syncTimer = null;
+function save() {
+  localStorage.setItem(STORE, JSON.stringify(data));
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(syncToSupabase, 1500);
+  updateSyncBadge('saving');
+}
+
+async function syncToSupabase() {
+  try {
+    for (const team of data.teams) {
+      const row = teamToRow(team);
+      const { error } = await sb.from('scout_teams').upsert(row);
+      if (error) throw error;
+    }
+    sbOnline = true;
+    updateSyncBadge('synced');
+  } catch(e) {
+    console.warn('Supabase sync failed:', e);
+    sbOnline = false;
+    updateSyncBadge('offline');
+  }
+}
+
+async function syncDeleteTeam(id) {
+  try { await sb.from('scout_teams').delete().eq('id', id); } catch(e) { console.warn('Delete sync failed:', e); }
+}
+
+async function syncInsertTeam(team) {
+  try {
+    const row = teamToRow(team);
+    row.created_at = new Date().toISOString();
+    await sb.from('scout_teams').upsert(row);
+  } catch(e) { console.warn('Insert sync failed:', e); }
+}
+
+function updateSyncBadge(state) {
+  const el = document.getElementById('sync-badge');
+  if (!el) return;
+  if (state === 'synced') { el.textContent = 'Synced'; el.style.color = '#4a8c3f'; }
+  else if (state === 'saving') { el.textContent = 'Saving...'; el.style.color = '#d4a843'; }
+  else if (state === 'offline') { el.textContent = 'Offline'; el.style.color = '#e74c3c'; }
+  else if (state === 'loading') { el.textContent = 'Loading...'; el.style.color = '#3498db'; }
+}
+
+/* ============================================
+   LOAD — Supabase first, localStorage fallback
+   ============================================ */
+async function load() {
+  updateSyncBadge('loading');
+  // Try Supabase first
+  try {
+    const { data: rows, error } = await sb.from('scout_teams').select('*').order('created_at');
+    if (!error && rows && rows.length > 0) {
+      data.teams = rows.map(rowToTeam);
+      data.currentTeamIdx = 0;
+      data.currentSection = 0;
+      localStorage.setItem(STORE, JSON.stringify(data));
+      sbOnline = true;
+      updateSyncBadge('synced');
+      return;
+    }
+  } catch(e) {
+    console.warn('Supabase load failed, using localStorage:', e);
+    sbOnline = false;
+  }
+
+  // Fall back to localStorage
   try {
     const r = localStorage.getItem(STORE);
     if (r) data = JSON.parse(r);
@@ -288,18 +381,23 @@ function load() {
     if (data.currentTeamIdx === undefined) data.currentTeamIdx = 0;
     if (data.currentSection === undefined) data.currentSection = 0;
   } catch(e) { data = { teams: [], currentTeamIdx: 0, currentSection: 0 }; }
+
   // Ensure new fields exist on legacy data
   data.teams.forEach(t => {
     if (!t.videoLink) t.videoLink = '';
     if (!t.players) t.players = [];
     if (!t.tacticalImages) t.tacticalImages = [];
   });
+
   if (data.teams.length === 0) {
     data.teams.push(blankTeam('Netherlands', 'Netherlands', 'Hockey World Cup'));
     data.teams.push(blankTeam('Argentina', 'Argentina', 'Hockey World Cup'));
     data.teams.push(blankTeam('Japan', 'Japan', 'Hockey World Cup'));
-    save();
+    localStorage.setItem(STORE, JSON.stringify(data));
+    // Try to seed Supabase
+    for (const t of data.teams) await syncInsertTeam(t);
   }
+  updateSyncBadge(sbOnline ? 'synced' : 'offline');
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,6); }
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -774,7 +872,7 @@ function autoSave() {
 
 function addLogEntry() { autoSave(); ct().log.push({ dateTournament:'', result:'', observation:'', action:'', postedBy: postedByStamp() }); save(); renderScout(); }
 function deleteLogEntry(i) { autoSave(); ct().log.splice(i,1); save(); renderScout(); }
-function addNewTeam() { const n = prompt('Team name:'); if (!n) return; autoSave(); data.teams.push(blankTeam(n.trim(),n.trim(),'Hockey World Cup')); data.currentTeamIdx = data.teams.length-1; data.currentSection = 0; save(); renderScout(); }
+function addNewTeam() { const n = prompt('Team name:'); if (!n) return; autoSave(); const t = blankTeam(n.trim(),n.trim(),'Hockey World Cup'); data.teams.push(t); data.currentTeamIdx = data.teams.length-1; data.currentSection = 0; save(); syncInsertTeam(t); renderScout(); }
 
 function printScout() {
   autoSave();
@@ -868,16 +966,16 @@ function renderData() {
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
       <div class="section"><h3>Export</h3><p style="color:#889;font-size:12px;margin-bottom:12px;">Download all scouting data as JSON.</p><button class="btn btn-primary" onclick="exportData()">Export All</button></div>
       <div class="section"><h3>Import</h3><input type="file" id="import-file" accept=".json" style="margin-bottom:8px;"><button class="btn btn-primary" onclick="importData()">Import</button></div>
-      <div class="section"><h3>Storage</h3><p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p><p style="color:#ccc;margin-bottom:12px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p><button class="btn btn-danger" onclick="clearAllData()">Clear All</button></div>
+      <div class="section"><h3>Storage</h3><p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p><p style="color:#ccc;margin-bottom:4px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p><p style="color:#ccc;margin-bottom:12px;">Supabase: <strong style="color:${sbOnline?'#4a8c3f':'#e74c3c'};">${sbOnline?'Connected':'Offline'}</strong></p><button class="btn btn-secondary" onclick="forceSync()" style="margin-bottom:8px;">Force Sync</button><br><button class="btn btn-danger" onclick="clearAllData()">Clear All</button></div>
       <div class="section"><h3>Your Identity</h3><p style="color:#ccc;margin-bottom:4px;">Logged in as: <strong style="color:#d4a843;">${currentUser ? esc(currentUser.name) + ' (' + esc(currentUser.initials) + ')' : 'Not set'}</strong></p><button class="btn btn-secondary" onclick="promptUserIdentity(function(){renderData();})">Change</button></div>
       <div class="section"><h3>Manage Teams</h3>${data.teams.map((t,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334;"><span style="font-size:13px;">${esc(t.name)}</span><button class="btn btn-danger btn-sm" onclick="deleteTeam(${i})">Delete</button></div>`).join('')}<button class="btn btn-primary btn-sm" onclick="addNewTeam()" style="margin-top:12px;">+ Add Team</button></div>
     </div>`;
 }
 
 function exportData() { autoSave(); const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`oppo-scout-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); }
-function importData() { const f=document.getElementById('import-file').files[0]; if(!f)return alert('Select a file.'); const r=new FileReader(); r.onload=function(e){try{const d=JSON.parse(e.target.result);if(d.teams){data=d;data.currentTeamIdx=0;data.currentSection=0;save();alert('Imported.');showView('scout');}else alert('Invalid.');}catch(e){alert('Error: '+e.message);}}; r.readAsText(f); }
-function clearAllData() { if(!confirm('Delete ALL data?'))return; if(!confirm('Sure?'))return; localStorage.removeItem(STORE); data={teams:[],currentTeamIdx:0,currentSection:0}; load(); showView('scout'); }
-function deleteTeam(i) { if(!confirm('Delete '+data.teams[i].name+'?'))return; data.teams.splice(i,1); if(data.currentTeamIdx>=data.teams.length)data.currentTeamIdx=Math.max(0,data.teams.length-1); save(); if(data.teams.length===0)load(); renderData(); }
+function importData() { const f=document.getElementById('import-file').files[0]; if(!f)return alert('Select a file.'); const r=new FileReader(); r.onload=async function(e){try{const d=JSON.parse(e.target.result);if(d.teams){data=d;data.currentTeamIdx=0;data.currentSection=0;save();await syncToSupabase();alert('Imported & synced.');showView('scout');}else alert('Invalid.');}catch(e){alert('Error: '+e.message);}}; r.readAsText(f); }
+async function clearAllData() { if(!confirm('Delete ALL data?'))return; if(!confirm('Sure?'))return; for(const t of data.teams) await syncDeleteTeam(t.id); localStorage.removeItem(STORE); data={teams:[],currentTeamIdx:0,currentSection:0}; await load(); showView('scout'); }
+function deleteTeam(i) { if(!confirm('Delete '+data.teams[i].name+'?'))return; const tid=data.teams[i].id; data.teams.splice(i,1); if(data.currentTeamIdx>=data.teams.length)data.currentTeamIdx=Math.max(0,data.teams.length-1); save(); syncDeleteTeam(tid); if(data.teams.length===0)boot(); else renderData(); }
 
 /* ---- Expandable text toggle ---- */
 function toggleExpand(btn) {
@@ -927,15 +1025,25 @@ function initExpandables() {
 const _origRenderScout = renderScout;
 renderScout = function() { _origRenderScout(); setTimeout(initExpandables, 50); };
 
-window.addEventListener('beforeunload', autoSave);
+async function forceSync() {
+  autoSave();
+  updateSyncBadge('saving');
+  await syncToSupabase();
+  renderData();
+}
+
+window.addEventListener('beforeunload', function() { autoSave(); syncToSupabase(); });
 
 // ---- Boot ----
-load();
-if (!getUser()) {
-  promptUserIdentity(function() { renderScout(); });
-} else {
-  renderScout();
+async function boot() {
+  await load();
+  if (!getUser()) {
+    promptUserIdentity(function() { renderScout(); });
+  } else {
+    renderScout();
+  }
 }
+boot();
 </script>
 </body>
 </html>
