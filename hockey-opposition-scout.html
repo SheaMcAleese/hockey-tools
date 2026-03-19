@@ -609,7 +609,10 @@ function renderScout() {
           ? `<div class="ai-card-body">${renderMarkdown(t.aiBriefing)}</div>`
           : '<div class="ai-card-empty">No AI analysis generated yet. Fill in scouting data then generate a SWOT briefing.</div>'}
       </div>
-      <button class="btn btn-primary" id="ai-swot-btn" onclick="generateAISwot()" style="margin-top:12px;">${t.aiBriefing ? 'Regenerate AI SWOT' : 'Generate AI SWOT'}</button>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+        <button class="btn btn-primary" id="ai-swot-btn" onclick="generateAISwot()">${t.aiBriefing ? 'Regenerate AI SWOT' : 'Generate AI SWOT'}</button>
+        <span style="font-size:12px;color:#999;font-style:italic;">Coaches only — generates an AI tactical briefing</span>
+      </div>
     </div>
 
     <div class="section-tabs no-print">
