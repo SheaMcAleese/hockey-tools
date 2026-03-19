@@ -160,6 +160,27 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .video-placeholder { font-size: 11px; color: #556; font-style: italic; margin-top: 4px; }
 
 /* ============================================
+   AUTH LOGIN SCREEN
+   ============================================ */
+.auth-screen { position: fixed; inset: 0; background: #1a1a2e; display: flex; align-items: center; justify-content: center; z-index: 10000; }
+.auth-card { background: #16213e; border: 1px solid #334; border-radius: 8px; padding: 40px; max-width: 400px; width: 90%; text-align: center; }
+.auth-card h2 { color: #d4a843; margin-bottom: 8px; font-size: 24px; letter-spacing: 2px; }
+.auth-card .auth-subtitle { color: #889; font-size: 13px; margin-bottom: 24px; }
+.auth-card input { width: 100%; margin-bottom: 12px; padding: 12px; }
+.auth-card .btn { width: 100%; padding: 12px; font-size: 14px; }
+.auth-card .auth-toggle { color: #3498db; font-size: 12px; cursor: pointer; margin-top: 16px; display: inline-block; border: none; background: none; }
+.auth-card .auth-toggle:hover { text-decoration: underline; }
+.auth-error { color: #e74c3c; font-size: 12px; margin-bottom: 12px; min-height: 16px; }
+
+/* ============================================
+   AI EXECUTIVE BRIEFING
+   ============================================ */
+.ai-briefing { background: #1a2a1a; border: 1px solid #4a8c3f; border-radius: 6px; padding: 20px; margin-bottom: 16px; white-space: pre-wrap; font-size: 13px; color: #ccc; line-height: 1.7; }
+.ai-briefing-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ai-briefing-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #4a8c3f; text-transform: uppercase; }
+.ai-briefing-time { font-size: 10px; color: #556; }
+
+/* ============================================
    TACTICAL BOARD
    ============================================ */
 .tactical-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-top: 16px; }
@@ -211,12 +232,25 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 </head>
 <body>
 
-<nav>
+<div id="auth-screen" class="auth-screen" style="display:none;">
+  <div class="auth-card">
+    <h2>OPPOSITION SCOUT</h2>
+    <div class="auth-subtitle">Black Sticks Men | Hockey New Zealand</div>
+    <div id="auth-error" class="auth-error"></div>
+    <input type="email" id="auth-email" placeholder="Email">
+    <input type="password" id="auth-pass" placeholder="Password" onkeydown="if(event.key==='Enter')handleAuth()">
+    <button class="btn btn-primary" id="auth-submit" onclick="handleAuth()">Sign In</button>
+    <button class="auth-toggle" id="auth-toggle" onclick="toggleAuthMode()">Need an account? Sign Up</button>
+  </div>
+</div>
+
+<nav id="main-nav">
   <span class="logo">OPPOSITION SCOUT</span>
   <span id="sync-badge" style="font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:3px;margin-right:auto;color:#667;">...</span>
   <button class="active" onclick="showView('scout')">Scouting</button>
   <button onclick="showView('live')">Live Mode</button>
   <button onclick="showView('data')">Data</button>
+  <button onclick="handleSignOut()" style="color:#e74c3c;margin-left:8px;">Logout</button>
 </nav>
 
 <div id="view-scout" class="view active"></div>
@@ -249,7 +283,9 @@ function blankTeamData() {
     setPieceStrategy: '', psychologicalEdge: '',
     players: [],
     tacticalImages: [],
-    log: []
+    log: [],
+    aiBriefing: '',
+    aiBriefingTime: ''
   };
 }
 
@@ -309,6 +345,84 @@ function postedByStamp() {
   const d = now.toLocaleDateString('en-NZ', { day:'numeric', month:'short', year:'numeric' });
   const t = now.toLocaleTimeString('en-NZ', { hour:'2-digit', minute:'2-digit' });
   return `${currentUser.initials} \u2014 ${d} ${t}`;
+}
+
+/* ============================================
+   AUTHENTICATION
+   ============================================ */
+let authMode = 'login';
+
+function showLoginScreen() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('main-nav').style.display = 'none';
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+}
+
+function hideLoginScreen() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('main-nav').style.display = '';
+}
+
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  document.getElementById('auth-submit').textContent = authMode === 'login' ? 'Sign In' : 'Sign Up';
+  document.getElementById('auth-toggle').textContent = authMode === 'login' ? 'Need an account? Sign Up' : 'Already have an account? Sign In';
+  document.getElementById('auth-error').textContent = '';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'Email and password required.'; return; }
+
+  const btn = document.getElementById('auth-submit');
+  btn.disabled = true;
+  btn.textContent = authMode === 'login' ? 'Signing in...' : 'Signing up...';
+
+  try {
+    if (authMode === 'login') {
+      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) throw error;
+    } else {
+      const { data: signUpData, error } = await sb.auth.signUp({ email, password: pass });
+      if (error) throw error;
+      if (signUpData.session) {
+        // Auto-confirmed — proceed directly
+      } else {
+        errEl.style.color = '#4a8c3f';
+        errEl.textContent = 'Account created! Check your email to confirm, then sign in.';
+        authMode = 'login';
+        btn.textContent = 'Sign In';
+        btn.disabled = false;
+        document.getElementById('auth-toggle').textContent = 'Need an account? Sign Up';
+        return;
+      }
+    }
+    hideLoginScreen();
+    await proceedAfterAuth();
+  } catch(e) {
+    errEl.style.color = '#e74c3c';
+    errEl.textContent = e.message || 'Authentication failed.';
+    btn.textContent = authMode === 'login' ? 'Sign In' : 'Sign Up';
+    btn.disabled = false;
+  }
+}
+
+async function handleSignOut() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function proceedAfterAuth() {
+  document.getElementById('view-scout').classList.add('active');
+  await load();
+  if (!getUser()) {
+    promptUserIdentity(function() { renderScout(); });
+  } else {
+    renderScout();
+  }
 }
 
 /* ============================================
@@ -823,9 +937,14 @@ function renderGameplan(t) {
     { key:'setPieceStrategy', label:'Set Piece Strategy', ph:'PC routine selected. Corner and free hit plan.' },
     { key:'psychologicalEdge', label:'The Psychological Edge', ph:'What is our mental / cultural advantage in this match?' }
   ];
+  const briefingHtml = t.aiBriefing
+    ? `<div class="ai-briefing"><div class="ai-briefing-header"><span class="ai-briefing-label">AI Executive Briefing</span><span class="ai-briefing-time">${esc(t.aiBriefingTime||'')}</span></div>${esc(t.aiBriefing)}</div>`
+    : '';
   return `<div class="sec ${data.currentSection===6?'active':''}" id="sec-gameplan">
     <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Our Game Plan</span><span class="page-bar-right">${esc(t.competition)}</span></div>
     <div class="doc-title">How We Will Approach This Game</div>
+    <button class="btn btn-secondary no-print" id="ai-swot-btn" onclick="generateAISwot()" style="margin-bottom:16px;">Generate AI SWOT</button>
+    ${briefingHtml}
     ${fields.map(f=>`<div class="scout-panel accent-gold"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
   </div>`;
 }
@@ -1074,16 +1193,38 @@ async function forceSync() {
   renderData();
 }
 
+/* ---- AI SWOT via Edge Function ---- */
+async function generateAISwot() {
+  const t = ct();
+  const btn = document.getElementById('ai-swot-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  try {
+    const { data: result, error } = await sb.functions.invoke('ai-swot', {
+      body: { teamId: t.id, teamData: teamToRow(t) }
+    });
+    if (error) throw error;
+    t.aiBriefing = result.briefing;
+    t.aiBriefingTime = new Date().toLocaleString('en-NZ');
+    save();
+    renderScout();
+  } catch(e) {
+    alert('AI SWOT generation failed: ' + (e.message || 'Unknown error'));
+    btn.disabled = false;
+    btn.textContent = 'Generate AI SWOT';
+  }
+}
+
 window.addEventListener('beforeunload', function() { autoSave(); syncToSupabase(); });
 
 // ---- Boot ----
 async function boot() {
-  await load();
-  if (!getUser()) {
-    promptUserIdentity(function() { renderScout(); });
-  } else {
-    renderScout();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    showLoginScreen();
+    return;
   }
+  await proceedAfterAuth();
 }
 boot();
 </script>
