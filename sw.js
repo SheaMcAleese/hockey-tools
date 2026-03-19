@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hockey-tools-v7';
+const CACHE_NAME = 'hockey-tools-v8';
 const ASSETS = [
   './',
   './index.html',
