@@ -507,6 +507,7 @@ async function syncToSupabase() {
    REALTIME — Listen for changes from other users
    ============================================ */
 let _realtimeChannel = null;
+let _lastSyncVersion = 0;
 function subscribeToRealtime() {
   if (_realtimeChannel) return;
   _realtimeChannel = sb.channel('scout-sync')
@@ -522,8 +523,8 @@ function handleRealtimeUpdate(payload) {
     const row = payload.new;
     const idx = data.teams.findIndex(function(t) { return t.id === row.id; });
     if (idx >= 0) {
-      // Capture any in-progress edits before overwriting
-      autoSave();
+      // Capture current DOM values into data without triggering save/sync
+      captureDOMValues();
       data.teams[idx] = rowToTeam(row);
       localStorage.setItem(STORE, JSON.stringify(data));
       if (idx === data.currentTeamIdx) renderScout();
@@ -543,6 +544,24 @@ function handleRealtimeUpdate(payload) {
       renderScout();
     }
   }
+}
+
+/* Capture DOM values into data WITHOUT calling save() — prevents sync loops */
+function captureDOMValues() {
+  const t = ct(); if (!t) return;
+  document.querySelectorAll('[data-field]').forEach(function(el) { t[el.dataset.field] = el.value; });
+  document.querySelectorAll('[data-threat]').forEach(function(el) {
+    const i = parseInt(el.dataset.threat);
+    if (t.threats && t.threats[i]) t.threats[i][el.dataset.tfield] = el.value;
+  });
+  document.querySelectorAll('[data-log]').forEach(function(el) {
+    const i = parseInt(el.dataset.log);
+    if (t.log && t.log[i]) t.log[i][el.dataset.lfield] = el.value;
+  });
+  document.querySelectorAll('[data-pidx]').forEach(function(el) {
+    const i = parseInt(el.dataset.pidx);
+    if (t.players && t.players[i] && el.dataset.pfield) t.players[i][el.dataset.pfield] = el.value;
+  });
 }
 
 async function syncDeleteTeam(id) {
