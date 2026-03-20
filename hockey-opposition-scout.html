@@ -15,7 +15,7 @@ body { font-family: 'Segoe UI', -apple-system, Arial, sans-serif; background: #1
 /* ============================================
    NAV
    ============================================ */
-nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; flex-wrap: wrap; }
+nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
 nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #d4a843; letter-spacing: 1px; }
 nav button { background: none; border: none; color: #8899aa; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
 nav button:hover { color: #fff; }
@@ -69,7 +69,7 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .scout-panel.accent-red { border-left-color: #e74c3c; }
 .scout-panel.accent-gold { border-left-color: #d4a843; }
 .scout-panel-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #ccc; text-transform: uppercase; margin-bottom: 8px; }
-.scout-panel textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 60px; line-height: 1.7; font-style: italic; padding: 0; resize: vertical; }
+.scout-panel textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 60px; line-height: 1.7; font-style: italic; padding: 0; resize: none; }
 .scout-panel textarea:focus { outline: none; color: #fff; font-style: normal; }
 .scout-panel textarea::placeholder { color: #666; font-style: italic; }
 
@@ -78,14 +78,14 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .threat-body { background: #2a2a2a; flex: 1; padding: 16px 20px; }
 .threat-body input { background: transparent; border: none; color: #ccc; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 100%; margin-bottom: 6px; padding: 0; }
 .threat-body input:focus { outline: none; color: #fff; }
-.threat-body textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 50px; line-height: 1.7; font-style: italic; padding: 0; resize: vertical; }
+.threat-body textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 50px; line-height: 1.7; font-style: italic; padding: 0; resize: none; }
 .threat-body textarea:focus { outline: none; color: #fff; font-style: normal; }
 
 .sv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 
 .log-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
 .log-table th { background: #8faab8; color: #1a1a2e; padding: 10px 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-align: left; }
-.log-table td { padding: 8px 12px; background: #2a2a2a; border-bottom: 2px solid #1a1a2e; vertical-align: top; }
+.log-table td { padding: 8px 12px; background: #2a2a2a; border-bottom: 2px solid #1a1a2e; vertical-align: middle; }
 .log-table td input, .log-table td textarea { background: transparent; border: none; color: #ccc; font-size: 12px; width: 100%; padding: 0; resize: none; min-height: 36px; }
 .log-table td input:focus, .log-table td textarea:focus { outline: none; color: #fff; }
 
@@ -134,13 +134,13 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
    PLAYER SCOUTING CARDS
    ============================================ */
 .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
-.player-card { background: #2a2a2a; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
+.player-card { background: #2a2a2a; border-radius: 6px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; }
 .player-card-header { position: relative; background: #1e1e1e; display: flex; align-items: center; justify-content: center; min-height: 180px; cursor: pointer; }
 .player-card-header img { width: 100%; height: 180px; object-fit: cover; }
 .player-card-header .upload-placeholder { text-align: center; padding: 20px; color: #555; }
 .player-card-header .upload-placeholder svg { width: 48px; height: 48px; fill: #444; margin-bottom: 8px; }
 .player-card-header .upload-placeholder div { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-.player-card-body { padding: 14px 16px; }
+.player-card-body { padding: 14px 16px; flex: 1; }
 .player-card-body input { background: transparent; border: none; border-bottom: 1px solid #444; color: #fff; font-size: 14px; font-weight: 700; width: 100%; padding: 4px 0; margin-bottom: 8px; border-radius: 0; }
 .player-card-body input:focus { outline: none; border-bottom-color: #d4a843; }
 .player-card-body .player-meta { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -315,6 +315,8 @@ function rowToTeam(r) {
 
 let data = { teams: [], currentTeamIdx: 0, currentSection: 0 };
 let currentUser = null;
+let currentRole = 'contributor'; // 'admin', 'coach', or 'contributor'
+let currentAuthUid = null;
 
 /* ---- Drawing state ---- */
 let drawingState = {};
@@ -358,6 +360,9 @@ function postedByStamp() {
   const d = now.toLocaleDateString('en-NZ', { day:'numeric', month:'short', year:'numeric' });
   const t = now.toLocaleTimeString('en-NZ', { hour:'2-digit', minute:'2-digit' });
   return `${currentUser.initials} \u2014 ${d} ${t}`;
+}
+function stampWithUid() {
+  return { postedBy: postedByStamp(), createdByUid: currentAuthUid };
 }
 
 /* ============================================
@@ -437,6 +442,13 @@ async function proceedAfterAuth() {
   if (_proceeding) return;
   _proceeding = true;
   try {
+    // Read role from Supabase user metadata
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) {
+      currentAuthUid = session.user.id;
+      const meta = session.user.app_metadata || {};
+      currentRole = meta.role || 'contributor';
+    }
     document.getElementById('view-scout').classList.add('active');
     await load();
     subscribeToRealtime();
@@ -449,6 +461,16 @@ async function proceedAfterAuth() {
     console.error('proceedAfterAuth error:', e);
     _proceeding = false;
   }
+}
+
+function canEdit(entry) {
+  if (currentRole === 'admin' || currentRole === 'coach') return true;
+  if (!entry || !entry.createdByUid) return true; // legacy entries without uid
+  return entry.createdByUid === currentAuthUid;
+}
+
+function isCoachOrAdmin() {
+  return currentRole === 'admin' || currentRole === 'coach';
 }
 
 /* ============================================
@@ -666,22 +688,6 @@ function renderScout() {
       ${data.teams.map((tm,i) => `<button class="team-tab ${i===data.currentTeamIdx?'active':''}" onclick="switchTeam(${i})">${esc(tm.name)}</button>`).join('')}
     </div>
 
-    <div class="ai-card no-print">
-      <div class="ai-card-header">
-        <span class="ai-card-title">Executive Briefing</span>
-        ${t.aiBriefingTime ? `<span class="ai-card-time">Generated ${esc(t.aiBriefingTime)}</span>` : ''}
-      </div>
-      <div id="ai-briefing-content">
-        ${t.aiBriefing
-          ? `<div class="ai-card-body">${renderMarkdown(t.aiBriefing)}</div>`
-          : '<div class="ai-card-empty">No AI analysis generated yet. Fill in scouting data then generate a SWOT briefing.</div>'}
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
-        <button class="btn btn-primary" id="ai-swot-btn" onclick="generateAISwot()">${t.aiBriefing ? 'Regenerate AI SWOT' : 'Generate AI SWOT'}</button>
-        <span style="font-size:12px;color:#999;font-style:italic;">Coaches only — generates an AI tactical briefing</span>
-      </div>
-    </div>
-
     <div class="section-tabs no-print">
       ${SECTIONS.map((s,i) => `<button class="section-tab ${i===data.currentSection?'active':''}" onclick="switchSection(${i})">${s.label}</button>`).join('')}
     </div>
@@ -791,9 +797,9 @@ function renderPlayers(t) {
         <textarea data-pidx="${i}" data-pfield="keyTendencies" placeholder="Preferred side, drag flick speed, movement patterns, weaknesses..." onchange="playerChange(this)">${esc(p.keyTendencies)}</textarea>
       </div>
       ${p.postedBy ? `<div class="player-posted-by">${esc(p.postedBy)}</div>` : ''}
-      <div class="player-card-actions">
+      ${canEdit(p) ? `<div class="player-card-actions">
         <button class="btn btn-danger btn-sm" onclick="deletePlayer(${i})">Remove</button>
-      </div>
+      </div>` : ''}
     </div>`).join('');
 
   return `<div class="sec ${data.currentSection===4?'active':''}" id="sec-players">
@@ -807,11 +813,12 @@ function renderPlayers(t) {
 
 function addPlayer() {
   autoSave();
-  ct().players.push({ id: uid(), name:'', number:'', position:'', headshot:'', scoutingProfile:'', keyTendencies:'', postedBy: postedByStamp() });
+  ct().players.push({ id: uid(), name:'', number:'', position:'', headshot:'', scoutingProfile:'', keyTendencies:'', postedBy: postedByStamp(), createdByUid: currentAuthUid });
   save(); renderScout();
 }
 function deletePlayer(i) {
-  if (!confirm('Remove this player?')) return;
+  if (!canEdit(ct().players[i])) return alert('You can only delete entries you created.');
+  if (!confirm('Are you sure you want to remove this player?')) return;
   autoSave(); ct().players.splice(i,1); save(); renderScout();
 }
 function playerChange(el) {
@@ -880,14 +887,15 @@ function uploadTacticalImage() {
     if (!inp.files[0]) return;
     compressImage(inp.files[0], 1200, 900, 0.85, function(dataUrl) {
       autoSave();
-      ct().tacticalImages.push({ id: uid(), image: dataUrl, annotations: '', title: '', strokes: [], postedBy: postedByStamp() });
+      ct().tacticalImages.push({ id: uid(), image: dataUrl, annotations: '', title: '', strokes: [], postedBy: postedByStamp(), createdByUid: currentAuthUid });
       save(); renderScout();
     });
   };
   inp.click();
 }
 function deleteTactical(i) {
-  if (!confirm('Delete this tactical image?')) return;
+  if (!canEdit(ct().tacticalImages[i])) return alert('You can only delete entries you created.');
+  if (!confirm('Are you sure you want to delete this tactical image?')) return;
   autoSave(); ct().tacticalImages.splice(i,1); save(); renderScout();
 }
 function tacTitleChange(el) {
@@ -1032,10 +1040,34 @@ function renderGameplan(t) {
     { key:'setPieceStrategy', label:'Set Piece Strategy', ph:'PC routine selected. Corner and free hit plan.' },
     { key:'psychologicalEdge', label:'The Psychological Edge', ph:'What is our mental / cultural advantage in this match?' }
   ];
+  const aiSwotHtml = isCoachOrAdmin() ? `
+    <div class="ai-card no-print" style="margin-top:20px;">
+      <div class="ai-card-header">
+        <span class="ai-card-title">Executive Briefing</span>
+        ${t.aiBriefingTime ? `<span class="ai-card-time">Generated ${esc(t.aiBriefingTime)}</span>` : ''}
+      </div>
+      <div id="ai-briefing-content">
+        ${t.aiBriefing
+          ? `<div class="ai-card-body">${renderMarkdown(t.aiBriefing)}</div>`
+          : '<div class="ai-card-empty">No AI analysis generated yet. Fill in scouting data then generate a SWOT briefing.</div>'}
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+        <button class="btn btn-primary" id="ai-swot-btn" onclick="generateAISwot()">${t.aiBriefing ? 'Regenerate AI SWOT' : 'Generate AI SWOT'}</button>
+        <span style="font-size:12px;color:#999;font-style:italic;">Coaches only — generates an AI tactical briefing</span>
+      </div>
+    </div>` : (t.aiBriefing ? `
+    <div class="ai-card" style="margin-top:20px;">
+      <div class="ai-card-header">
+        <span class="ai-card-title">Executive Briefing</span>
+        ${t.aiBriefingTime ? `<span class="ai-card-time">Generated ${esc(t.aiBriefingTime)}</span>` : ''}
+      </div>
+      <div class="ai-card-body">${renderMarkdown(t.aiBriefing)}</div>
+    </div>` : '');
   return `<div class="sec ${data.currentSection===6?'active':''}" id="sec-gameplan">
     <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Our Game Plan</span><span class="page-bar-right">${esc(t.competition)}</span></div>
     <div class="doc-title">How We Will Approach This Game</div>
     ${fields.map(f=>`<div class="scout-panel accent-gold"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
+    ${aiSwotHtml}
   </div>`;
 }
 
@@ -1050,7 +1082,7 @@ function renderLog(t) {
     <td><div class="expandable-wrap collapsed"><textarea data-log="${i}" data-lfield="observation" placeholder="Key observation" onchange="logChange(this)">${esc(e.observation)}</textarea><button class="expandable-toggle" onclick="toggleExpand(this)">See More</button></div></td>
     <td><div class="expandable-wrap collapsed"><textarea data-log="${i}" data-lfield="action" placeholder="Action taken" onchange="logChange(this)">${esc(e.action)}</textarea><button class="expandable-toggle" onclick="toggleExpand(this)">See More</button></div></td>
     <td style="font-size:10px;color:#667;white-space:nowrap;">${esc(e.postedBy||'')}</td>
-    <td style="width:40px;" class="no-print"><button class="btn btn-danger btn-sm" onclick="deleteLogEntry(${i})">\u00D7</button></td>
+    <td style="width:40px;" class="no-print">${canEdit(e) ? `<button class="btn btn-danger btn-sm" onclick="deleteLogEntry(${i})">\u00D7</button>` : ''}</td>
   </tr>`).join('');
 
   return `<div class="sec ${data.currentSection===7?'active':''}" id="sec-log">
@@ -1103,8 +1135,8 @@ function autoSave() {
   save();
 }
 
-function addLogEntry() { autoSave(); ct().log.push({ dateTournament:'', result:'', observation:'', action:'', postedBy: postedByStamp() }); save(); renderScout(); }
-function deleteLogEntry(i) { autoSave(); ct().log.splice(i,1); save(); renderScout(); }
+function addLogEntry() { autoSave(); ct().log.push({ dateTournament:'', result:'', observation:'', action:'', postedBy: postedByStamp(), createdByUid: currentAuthUid }); save(); renderScout(); }
+function deleteLogEntry(i) { if (!canEdit(ct().log[i])) return alert('You can only delete entries you created.'); if (!confirm('Are you sure you want to delete this log entry?')) return; autoSave(); ct().log.splice(i,1); save(); renderScout(); }
 function addNewTeam() { const n = prompt('Team name:'); if (!n) return; autoSave(); const t = blankTeam(n.trim(),n.trim(),'Hockey World Cup'); data.teams.push(t); data.currentTeamIdx = data.teams.length-1; data.currentSection = 0; save(); syncInsertTeam(t); renderScout(); }
 
 function printScout() {
@@ -1183,7 +1215,7 @@ function processLiveFeed() {
   if (liveFeed.length===0) return alert('No entries.');
   const t = data.teams[idx]; if(!t.log) t.log=[];
   const d = document.getElementById('live-date').value, c = document.getElementById('live-comp').value;
-  liveFeed.forEach(e => { t.log.push({ dateTournament:`${d} ${c}`.trim(), result:'', observation:`[${e.tags.join(', ')}] ${e.text}`, action:'', postedBy: postedByStamp() }); });
+  liveFeed.forEach(e => { t.log.push({ dateTournament:`${d} ${c}`.trim(), result:'', observation:`[${e.tags.join(', ')}] ${e.text}`, action:'', postedBy: postedByStamp(), createdByUid: currentAuthUid }); });
   save();
   alert(`${liveFeed.length} entries added to ${t.name}'s scouting log.`);
   liveFeed=[]; liveTags.clear(); renderLiveFeed();
@@ -1200,7 +1232,7 @@ function renderData() {
       <div class="section"><h3>Export</h3><p style="color:#889;font-size:12px;margin-bottom:12px;">Download all scouting data as JSON.</p><button class="btn btn-primary" onclick="exportData()">Export All</button></div>
       <div class="section"><h3>Import</h3><input type="file" id="import-file" accept=".json" style="margin-bottom:8px;"><button class="btn btn-primary" onclick="importData()">Import</button></div>
       <div class="section"><h3>Storage</h3><p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p><p style="color:#ccc;margin-bottom:4px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p><p style="color:#ccc;margin-bottom:12px;">Supabase: <strong style="color:${sbOnline?'#4a8c3f':'#e74c3c'};">${sbOnline?'Connected':'Offline'}</strong></p><button class="btn btn-secondary" onclick="forceSync()" style="margin-bottom:8px;">Force Sync</button><br><button class="btn btn-danger" onclick="clearAllData()">Clear All</button></div>
-      <div class="section"><h3>Your Identity</h3><p style="color:#ccc;margin-bottom:4px;">Logged in as: <strong style="color:#d4a843;">${currentUser ? esc(currentUser.name) + ' (' + esc(currentUser.initials) + ')' : 'Not set'}</strong></p><button class="btn btn-secondary" onclick="promptUserIdentity(function(){renderData();})">Change</button></div>
+      <div class="section"><h3>Your Identity</h3><p style="color:#ccc;margin-bottom:4px;">Logged in as: <strong style="color:#d4a843;">${currentUser ? esc(currentUser.name) + ' (' + esc(currentUser.initials) + ')' : 'Not set'}</strong></p><p style="color:#ccc;margin-bottom:12px;">Role: <strong style="color:#d4a843;text-transform:capitalize;">${esc(currentRole)}</strong></p><button class="btn btn-secondary" onclick="promptUserIdentity(function(){renderData();})">Change Name</button></div>
       <div class="section"><h3>Manage Teams</h3>${data.teams.map((t,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334;"><span style="font-size:13px;">${esc(t.name)}</span><button class="btn btn-danger btn-sm" onclick="deleteTeam(${i})">Delete</button></div>`).join('')}<button class="btn btn-primary btn-sm" onclick="addNewTeam()" style="margin-top:12px;">+ Add Team</button></div>
     </div>`;
 }
@@ -1208,7 +1240,7 @@ function renderData() {
 function exportData() { autoSave(); const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`oppo-scout-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); }
 function importData() { const f=document.getElementById('import-file').files[0]; if(!f)return alert('Select a file.'); const r=new FileReader(); r.onload=async function(e){try{const d=JSON.parse(e.target.result);if(d.teams){data=d;data.currentTeamIdx=0;data.currentSection=0;save();await syncToSupabase();alert('Imported & synced.');showView('scout');}else alert('Invalid.');}catch(e){alert('Error: '+e.message);}}; r.readAsText(f); }
 async function clearAllData() { if(!confirm('Delete ALL data?'))return; if(!confirm('Sure?'))return; for(const t of data.teams) await syncDeleteTeam(t.id); localStorage.removeItem(STORE); data={teams:[],currentTeamIdx:0,currentSection:0}; await load(); showView('scout'); }
-function deleteTeam(i) { if(!confirm('Delete '+data.teams[i].name+'?'))return; const tid=data.teams[i].id; data.teams.splice(i,1); if(data.currentTeamIdx>=data.teams.length)data.currentTeamIdx=Math.max(0,data.teams.length-1); save(); syncDeleteTeam(tid); if(data.teams.length===0)boot(); else renderData(); }
+function deleteTeam(i) { if(!confirm('Are you sure you want to delete '+data.teams[i].name+'? This cannot be undone.'))return; const tid=data.teams[i].id; data.teams.splice(i,1); if(data.currentTeamIdx>=data.teams.length)data.currentTeamIdx=Math.max(0,data.teams.length-1); save(); syncDeleteTeam(tid); if(data.teams.length===0)boot(); else renderData(); }
 
 /* ---- Expandable text toggle ---- */
 function toggleExpand(btn) {
