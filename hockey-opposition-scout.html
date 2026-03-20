@@ -439,6 +439,7 @@ async function proceedAfterAuth() {
   try {
     document.getElementById('view-scout').classList.add('active');
     await load();
+    subscribeToRealtime();
     if (!getUser()) {
       promptUserIdentity(function() { renderScout(); });
     } else {
@@ -454,14 +455,16 @@ async function proceedAfterAuth() {
    SAVE — localStorage immediately, Supabase debounced
    ============================================ */
 let _syncTimer = null;
+let _isSyncing = false;
 function save() {
   localStorage.setItem(STORE, JSON.stringify(data));
   clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(syncToSupabase, 1500);
+  _syncTimer = setTimeout(syncToSupabase, 800);
   updateSyncBadge('saving');
 }
 
 async function syncToSupabase() {
+  _isSyncing = true;
   try {
     for (const team of data.teams) {
       const row = teamToRow(team);
@@ -474,6 +477,49 @@ async function syncToSupabase() {
     console.warn('Supabase sync failed:', e);
     sbOnline = false;
     updateSyncBadge('offline');
+  }
+  setTimeout(function() { _isSyncing = false; }, 500);
+}
+
+/* ============================================
+   REALTIME — Listen for changes from other users
+   ============================================ */
+let _realtimeChannel = null;
+function subscribeToRealtime() {
+  if (_realtimeChannel) return;
+  _realtimeChannel = sb.channel('scout-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'scout_teams' }, function(payload) {
+      if (_isSyncing) return;
+      handleRealtimeUpdate(payload);
+    })
+    .subscribe();
+}
+
+function handleRealtimeUpdate(payload) {
+  if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+    const row = payload.new;
+    const idx = data.teams.findIndex(function(t) { return t.id === row.id; });
+    if (idx >= 0) {
+      // Capture any in-progress edits before overwriting
+      autoSave();
+      data.teams[idx] = rowToTeam(row);
+      localStorage.setItem(STORE, JSON.stringify(data));
+      if (idx === data.currentTeamIdx) renderScout();
+    } else {
+      data.teams.push(rowToTeam(row));
+      localStorage.setItem(STORE, JSON.stringify(data));
+      renderScout();
+    }
+    updateSyncBadge('synced');
+  } else if (payload.eventType === 'DELETE') {
+    const oldId = payload.old.id;
+    const idx = data.teams.findIndex(function(t) { return t.id === oldId; });
+    if (idx >= 0) {
+      data.teams.splice(idx, 1);
+      if (data.currentTeamIdx >= data.teams.length) data.currentTeamIdx = Math.max(0, data.teams.length - 1);
+      localStorage.setItem(STORE, JSON.stringify(data));
+      renderScout();
+    }
   }
 }
 
@@ -1024,6 +1070,20 @@ function renderLog(t) {
 function fieldChange(el) { ct()[el.dataset.field] = el.value; ct().lastEditedBy = postedByStamp(); save(); }
 function threatChange(el) { const i = parseInt(el.dataset.threat); ct().threats[i][el.dataset.tfield] = el.value; ct().threats[i].postedBy = postedByStamp(); save(); }
 function logChange(el) { const i = parseInt(el.dataset.log); ct().log[i][el.dataset.lfield] = el.value; ct().log[i].postedBy = postedByStamp(); save(); }
+
+/* ---- Live input sync — save while typing, not just on blur ---- */
+let _liveInputTimer = null;
+document.getElementById('view-scout').addEventListener('input', function(e) {
+  const el = e.target;
+  if (!el || !ct()) return;
+  if (el.dataset.field) { ct()[el.dataset.field] = el.value; }
+  else if (el.dataset.threat !== undefined && el.dataset.tfield) { const i = parseInt(el.dataset.threat); if (ct().threats && ct().threats[i]) ct().threats[i][el.dataset.tfield] = el.value; }
+  else if (el.dataset.log !== undefined && el.dataset.lfield) { const i = parseInt(el.dataset.log); if (ct().log && ct().log[i]) ct().log[i][el.dataset.lfield] = el.value; }
+  else if (el.dataset.pidx !== undefined && el.dataset.pfield) { const i = parseInt(el.dataset.pidx); if (ct().players && ct().players[i]) ct().players[i][el.dataset.pfield] = el.value; }
+  else return;
+  clearTimeout(_liveInputTimer);
+  _liveInputTimer = setTimeout(function() { save(); }, 600);
+});
 
 function autoSave() {
   const t = ct(); if (!t) return;
