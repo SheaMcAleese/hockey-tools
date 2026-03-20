@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hockey-tools-v10';
+const CACHE_NAME = 'hockey-tools-v11';
 const ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,8 @@ const ASSETS = [
   './hockey-rotation.html',
   './hockey-training-plan.html',
   './hockey-matchup.html',
-  './hockey-opposition-scout.html'
+  './hockey-opposition-scout.html',
+  './hockey-player-reviews.html'
 ];
 
 self.addEventListener('install', e => {

@@ -330,18 +330,22 @@ function setUser(name, initials) {
   localStorage.setItem(USER_STORE, JSON.stringify(currentUser));
 }
 function promptUserIdentity(cb) {
+  // Remove any existing identity modal to prevent duplicates
+  const existing = document.querySelector('.user-modal-overlay');
+  if (existing) existing.remove();
+
   const overlay = document.createElement('div');
   overlay.className = 'user-modal-overlay';
   overlay.innerHTML = `<div class="user-modal">
     <h3>Who are you?</h3>
-    <label>Full Name</label><input type="text" id="uid-name" placeholder="e.g. Shea McAleese">
-    <label>Initials</label><input type="text" id="uid-init" placeholder="e.g. SM" maxlength="4">
-    <button class="btn btn-primary" id="uid-go">Continue</button>
+    <label>Full Name</label><input type="text" class="uid-name-input" placeholder="e.g. Shea McAleese">
+    <label>Initials</label><input type="text" class="uid-init-input" placeholder="e.g. SM" maxlength="4">
+    <button class="btn btn-primary uid-go-btn">Continue</button>
   </div>`;
   document.body.appendChild(overlay);
-  document.getElementById('uid-go').onclick = function() {
-    const n = document.getElementById('uid-name').value.trim();
-    const i = document.getElementById('uid-init').value.trim().toUpperCase();
+  overlay.querySelector('.uid-go-btn').onclick = function() {
+    const n = overlay.querySelector('.uid-name-input').value.trim();
+    const i = overlay.querySelector('.uid-init-input').value.trim().toUpperCase();
     if (!n || !i) return;
     setUser(n, i);
     overlay.remove();
@@ -423,17 +427,26 @@ async function handleAuth() {
 }
 
 async function handleSignOut() {
+  _proceeding = false;
   await sb.auth.signOut();
   location.reload();
 }
 
+let _proceeding = false;
 async function proceedAfterAuth() {
-  document.getElementById('view-scout').classList.add('active');
-  await load();
-  if (!getUser()) {
-    promptUserIdentity(function() { renderScout(); });
-  } else {
-    renderScout();
+  if (_proceeding) return;
+  _proceeding = true;
+  try {
+    document.getElementById('view-scout').classList.add('active');
+    await load();
+    if (!getUser()) {
+      promptUserIdentity(function() { renderScout(); });
+    } else {
+      renderScout();
+    }
+  } catch(e) {
+    console.error('proceedAfterAuth error:', e);
+    _proceeding = false;
   }
 }
 
@@ -584,7 +597,15 @@ const SECTIONS = [
 function renderScout() {
   const el = document.getElementById('view-scout');
   const t = ct();
-  if (!t) return;
+  if (!t) {
+    el.innerHTML = `<div style="text-align:center;padding:60px 20px;">
+      <h2 style="color:#d4a843;">No Teams Loaded</h2>
+      <p style="color:#999;margin:16px 0;">Could not load scouting data. Check your connection and try again.</p>
+      <button class="btn btn-primary" onclick="location.reload()">Reload</button>
+      <button class="btn btn-secondary" onclick="addNewTeam()" style="margin-left:8px;">+ Add Team</button>
+    </div>`;
+    return;
+  }
 
   el.innerHTML = `
     <div class="toolbar no-print" style="justify-content:space-between;">
