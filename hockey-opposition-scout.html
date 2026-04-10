@@ -247,8 +247,7 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
     <div class="auth-subtitle">Black Sticks Men | Hockey New Zealand</div>
     <div id="auth-error" class="auth-error"></div>
     <input type="email" id="auth-email" placeholder="Email">
-    <input type="password" id="auth-pass" placeholder="Password" onkeydown="if(event.key==='Enter')handleAuth()">
-    <button class="btn btn-primary" id="auth-submit" onclick="handleAuth()">Sign In</button>
+    <button class="btn btn-primary" id="auth-submit" onclick="handleAuth()">Send Magic Link</button>
     <button class="auth-toggle" id="auth-toggle" onclick="toggleAuthMode()">Need an account? Sign Up</button>
   </div>
 </div>
@@ -390,7 +389,6 @@ function toggleAuthMode() {
 
 async function handleAuth() {
   const email = document.getElementById('auth-email').value.trim();
-  const pass = document.getElementById('auth-pass').value;
   const errEl = document.getElementById('auth-error');
   errEl.textContent = '';
   if (!email || !pass) { errEl.textContent = 'Email and password required.'; return; }
@@ -400,10 +398,8 @@ async function handleAuth() {
   btn.textContent = authMode === 'login' ? 'Signing in...' : 'Signing up...';
 
   try {
-    if (authMode === 'login') {
-      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-      if (error) throw error;
-    } else {
+    const { error } = await sb.auth.signInWithOtp({ email });
+            if (error) throw error; else {
       const { data: signUpData, error } = await sb.auth.signUp({
         email, password: pass,
         options: { emailRedirectTo: window.location.origin + window.location.pathname }
