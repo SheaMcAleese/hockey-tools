@@ -388,44 +388,20 @@ function toggleAuthMode() {
 }
 
 async function handleAuth() {
-  const email = document.getElementById('auth-email').value.trim();
-  const errEl = document.getElementById('auth-error');
-  errEl.textContent = '';
-  if (!email || !pass) { errEl.textContent = 'Email and password required.'; return; }
-
-  const btn = document.getElementById('auth-submit');
-  btn.disabled = true;
-  btn.textContent = authMode === 'login' ? 'Signing in...' : 'Signing up...';
-
-  try {
-    const { error } = await sb.auth.signInWithOtp({ email });
-            if (error) throw error; else {
-      const { data: signUpData, error } = await sb.auth.signUp({
-        email, password: pass,
-        options: { emailRedirectTo: window.location.origin + window.location.pathname }
-      });
-      if (error) throw error;
-      if (signUpData.session) {
-        // Auto-confirmed — proceed directly
-      } else {
-        errEl.style.color = '#4a8c3f';
-        errEl.textContent = 'Account created! Check your email to confirm, then sign in.';
-        authMode = 'login';
-        btn.textContent = 'Sign In';
-        btn.disabled = false;
-        document.getElementById('auth-toggle').textContent = 'Need an account? Sign Up';
-        return;
+        const email = document.getElementById('auth-email').value.trim();
+        const errEl = document.getElementById('auth-error');
+        errEl.textContent = '';
+        if (!email) { errEl.textContent = 'Please enter your email.'; return; }
+        try {
+          const { error } = await sb.auth.signInWithOtp({ email });
+          if (error) throw error;
+          errEl.style.color = '#4caf50';
+          errEl.textContent = 'Magic link sent! Check your email inbox.';
+        } catch(e) {
+          errEl.style.color = '#e74c3c';
+          errEl.textContent = e.message || 'Error sending magic link.';
+        }
       }
-    }
-    hideLoginScreen();
-    await proceedAfterAuth();
-  } catch(e) {
-    errEl.style.color = '#e74c3c';
-    errEl.textContent = e.message || 'Authentication failed.';
-    btn.textContent = authMode === 'login' ? 'Sign In' : 'Sign Up';
-    btn.disabled = false;
-  }
-}
 
 async function handleSignOut() {
   _proceeding = false;
