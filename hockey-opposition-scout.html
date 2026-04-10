@@ -393,7 +393,7 @@ async function handleAuth() {
         errEl.textContent = '';
         if (!email) { errEl.textContent = 'Please enter your email.'; return; }
         try {
-          const { error } = await sb.auth.signInWithOtp({ email });
+          const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: 'https://sheamcaleese.github.io/hockey-tools/hockey-opposition-scout.html' } });
           if (error) throw error;
           errEl.style.color = '#4caf50';
           errEl.textContent = 'Magic link sent! Check your email inbox.';
