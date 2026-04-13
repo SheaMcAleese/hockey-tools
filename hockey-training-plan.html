@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hockey Training Plan Generator</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#e94560">
-<link rel="manifest" href="manifest.json">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; }
@@ -818,8 +815,6 @@ function renderPreview() {
 // =============================================
 loadState();
 if (state.ui.currentView) switchView(state.ui.currentView);
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
