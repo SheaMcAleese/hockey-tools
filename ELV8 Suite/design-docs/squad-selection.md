@@ -1,124 +1,307 @@
+# Squad Selection — Design & Build Reference
+> Reload this file to re-engage Claude for work on this app. Canonical source: `ELV8 Suite/squad-selection.html` (mirrored to `Desktop/Black Sticks/Hockey Tools/ELV8 Suite/`). Preview staging: `/tmp/elv8preview/`.
+
+## 1. Purpose
+A squad/team-sheet tool for a hockey programme (defaults to BLACK STICKS MEN). It manages a wider squad roster, builds per-match selections with starter/interchange roles, lays out per-quarter formations on a drag-drop hockey pitch, and renders premium printable documents: a TEAM SHEET (Starting XI + Interchange grouped by position) and FORMATION pages (one per quarter). All client-side, offline, single HTML file.
+
+## 2. Architecture
+- **Single file**, vanilla JS, no framework, no build step. Four `<div class="view">` containers (`view-squad`, `view-matches`, `view-formation`, `view-preview`) rendered by string-concatenation `innerHTML`.
+- **Font**: Montserrat (Google Fonts; weights 400/600/700/800/900), system-sans fallback.
+- **Offline**: works without internet EXCEPT the Share Image feature (loads html2canvas from cdnjs on demand).
+- **Persistence**: `localStorage`, key constant `STORAGE_KEY = 'hockeySquadSelection'`.
+- Init at bottom: `loadState()` then `switchView(state.ui.currentView)` (falls back to `renderSquad()`).
+
+## 3. Data Model
+```js
+state = {
+  squad:   [ Player ],
+  matches: [ Match ],
+  ui: { currentView: 'squad', currentMatchId: null, currentQuarter: 0 }
+}
+```
+**Player** (`addPlayer()` defaults):
+```js
+{ id, name: '', jersey: '', posGroup: 'MID', caps: '', photo: '' }
+```
+- `id`: from `uid()` (`Date.now().toString(36) + random`).
+- `posGroup`: one of `'GK' | 'DEF' | 'MID' | 'STR'`.
+- `jersey`, `caps`: stored as **strings** (text inputs) — important for `esc()` (see Gotchas).
+- `photo`: data URL (JPEG, resized to max 128px, quality 0.7) or `''`.
+
+**Match** (`createMatch()` defaults):
+```js
+{
+  id,
+  title: 'NZ vs ',
+  date: <today en-GB>,   // e.g. "28/06/2026"
+  time: '',
+  venue: '',
+  competition: '',
+  teamName: 'BLACK STICKS MEN',
+  notes: '',
+  selected: [ playerId, ... ],
+  roles: { playerId: 'starter' | 'interchange' },
+  formations: [ {}, {}, {}, {} ]   // index = quarter 0–3
+}
+```
+Each `formations[q]` is a map `{ playerId: { x, y, zone } }` where `zone` is `'field' | 'bench' | 'injured'`; `x`/`y` are percentage coordinates (numbers) on the pitch. Players in `selected` with no entry in a quarter are auto-categorised by role (interchange → bench, else → field at 50/50).
+
+**Constants**
+```js
+POS_ORDER  = ['GK','DEF','MID','STR'];
+POS_GROUPS = { GK:'Goalkeepers', DEF:'Defenders', MID:'Midfielders', STR:'Strikers' };
+QUARTER_LABELS = ['1st Quarter','2nd Quarter','3rd Quarter','4th Quarter'];
+```
+`dragState = { playerId, originZone }` is module-level and **not persisted**.
+
+## 4. State & Persistence
+- `saveState()` writes `JSON.stringify(state)` to `STORAGE_KEY`. Called after virtually every mutation.
+- `loadState()` reads + `Object.assign(state, parsed)` inside try/catch; backfills `state.ui.currentQuarter` if missing.
+- `exportData()` downloads the whole `state` as `squad-selection-data.json` (pretty-printed).
+- `importData()`: if JSON has `.squad`, replaces `state.squad` and `state.matches` (matches default `[]`); if it's a bare array, appends to existing squad.
+
+## 5. Views & Navigation
+`switchView(v)` toggles `.active` on the matching `#view-<v>` and nav button (button matched by lowercased text), persists `ui.currentView`, then calls the view's renderer:
+- **Squad** (`renderSquad`) — roster table, the home view.
+- **Matches** (`renderMatches`) — match list; if `ui.currentMatchId` set, defers to `renderSelection`.
+- **Formation** (`renderFormation`) — pitch builder; if no current match, shows a match `<select>`.
+- **Preview / Print** (`renderPreview` → `renderPreviewContent`) — printable documents.
+
+## 6. Key Functions
+| Function | Purpose |
+|---|---|
+| `renderSquad` | Roster table sorted by `POS_ORDER` then name; inline-editable jersey/name/pos/caps; photo cell. |
+| `addPlayer` / `addMultiplePlayers` | Add one blank player / bulk-add from prompted newline list. |
+| `updatePlayer(id,field,value)` | Mutate one field + save. |
+| `removePlayerById` / `uploadPhotoById` | Delete (with confirm) / file-pick + canvas-resize photo to data URL. |
+| `exportData` / `importData` | JSON download / file import (see §4). |
+| `renderMatches` | Match cards (title, date · venue · N selected) with Dup/Delete. |
+| `createMatch` | New match (requires non-empty squad) → opens selection. |
+| `openMatch` / `dupMatch` / `delMatch` / `getMatch` | Open / deep-copy / delete / lookup current match. |
+| `renderSelection` | Match-details form + per-position selectable player rows with role dropdowns; live counts. |
+| `toggleSelect(playerId)` | Add/remove from `selected`; sets/deletes `roles[id]` (default `'starter'` on add). |
+| `renderFormation` | Quarter tabs, pitch, bench/injured bars, sidebar pool; renders one quarter. |
+| `ensureFormations` / `getQuarterData` | Guarantee 4 quarter maps / fetch one quarter. |
+| `getFormationCounts` / `getFormationString` | Tally field/bench/injured / build `DEF-MID-STR` string (GK excluded). |
+| `getDisplayName(player)` | Surname only; adds first initial when surname collides with another squad member. |
+| `startDrag`/`allowDrop`/`dropToField`/`dropToZone` | HTML5 drag-drop; `dropToField` converts pointer to clamped %; `dropToZone` sends to bench/injured at 50/50. |
+| `setupTouchDrag` | Mobile touch fallback: clones a ghost element, drops via `elementFromPoint`. |
+| `autoPlaceAll` | Auto-position starters by group (x-zones GK 6 / DEF 25 / MID 45 / STR 65, spread vertically); interchange → bench. |
+| `copyQuarter(from,to)` / `clearQuarter(q)` / `toggleCopyMenu` | Copy one quarter's layout / clear it / copy-menu dropdown. |
+| `renderPreview` | Print toolbar (match select, Formation/Team Sheet checkboxes, Share Image, Print) + `#preview-content`. |
+| `renderPreviewContent` | Builds the `.ts-output` documents into `#preview-content` (see §7). |
+| `ensureHtml2Canvas(cb)` | Lazy-load html2canvas 1.4.1 from cdnjs; alert + Print fallback on error. |
+| `shareImage` | `html2canvas(#preview-content, scale:2, white bg)` → PNG download `squad-sheet.png`. |
+| `genDateNZ` | `toLocaleDateString('en-NZ', dd-Mon-yyyy)` for footer. |
+| `fieldSVG` / `fieldSVGPrint` | Editor pitch SVG / separate refined print pitch SVG (gradient turf, fainter lines). |
+
+## 7. The Printable Documents (`renderPreviewContent`)
+Reads the selected match (`#preview-match`), plus two checkboxes (`#preview-formation`, `#preview-teamsheet`, both default checked). Emits up to two `.ts-output` blocks into `#preview-content`:
+
+**FORMATION pages** (`.ts-output.fo-page`, when Formation checked): masthead (kicker "Formation", title, competition value right), meta strip (Team/Date/Time/Venue), then a `.fo-quarter` per quarter (0–3) each with a head (`fo-q-name` + `fo-q-form` formation string), optional `.fo-injured-bar` (tag "Unavailable"), `.fo-field` containing `fieldSVGPrint()` + `.fo-player` roundels (`.fo-label`, gold left border) at `x%/y%`, and a `.fo-bench-bar` (tag "Interchange"). Charcoal footer.
+
+**TEAM SHEET** (`.ts-output`, when Team Sheet checked): masthead (kicker "Team Sheet"), meta strip, then **Starting XI** — a `.ts-table` with a `colgroup` and per-group sub-header rows (`tr.group-header` with coloured `.pos-dot`) followed by player rows (`tr[data-pos]`, cells `jersey-num` gold / `player-name` / `player-pos` / `cap-num`, tabular nums). Then **Interchange** (`.ts-interchange-title` + table, jersey numbers dimmed via `.interchange-row`) if any. Optional `.ts-notes` block (gold left border, `escHtml` preserves line breaks). Charcoal footer.
+
+Footer text both docs: `<teamLabel> · Team Sheet` left, `Generated <genDateNZ> · Private & Confidential` right (`teamLabel` = `match.teamName` or `'Performance Programme'`).
+
+**Position-group colours** (dots / accent bars): GK `#7bc47f`, DEF `#f3c012`, MID `#3aa7e0`, STR `#f4a259`. Accent bar drawn as `inset 3px 0 0 var(--accent)` on the jersey cell, keyed by `tr[data-pos]`.
+
+Key classes: `ts-output`, `ts-header`, `mast-left/mast-kicker/team-name`, `mast-right/mast-eyebrow/mast-value`, `ts-match-info`/`info-item`/`info-label`/`info-value`, `ts-body`, `ts-section-title`, `ts-table`/`group-header`/`pos-dot`/`jersey-num`/`player-name`/`player-pos`/`cap-num`, `ts-interchange-title`/`interchange-row`, `ts-notes`, `ts-footer`/`brand`/`values`; formation: `fo-page`/`fo-quarter`/`fo-quarter-head`/`fo-q-name`/`fo-q-form`/`fo-field`/`fo-player`/`fo-label`/`fo-bench-bar`/`fo-injured-bar`/`fo-bar-tag`.
+
+## 8. ELV8 Premium Design System
+VERBATIM: Font Montserrat. App chrome bg #1c1c1c, panel #262626, panel2 #2f2f2f, inset #161616, borders #3c3c3c/#4a4a4a, gold #D4AF37 (hover #b8952e; DARK #1c1c1c text on gold), text #fff, muted #c4c4c4, dim #8c8c8c; functional good #2a9d3a, bad #e23b2e, blue #3aa7e0, orange #f4a259, yellow #f3c012, gk-green #7bc47f. NO "ELV8" wordmark (Black Sticks tool). Premium document: white #fff body, ink #15171a; charcoal #1c1c1c masthead + 3px gold bottom border (kicker #8c8c8c + bold white title + eyebrow+gold value right); eyebrow meta strip (9px uppercase #9a9a9a labels + bold values, hairlines #eef0f1/#e7e7e7); NO heavy gridlines (hairlines + zebra #fafbfc); colour as signal not blocks; section headers 11px uppercase letter-spacing 2px charcoal + 2px gold underline; charcoal footer (team/programme · "Generated <date> · Private & Confidential"); @media print A4, ~8mm, remove shadow/radius, print-color-adjust:exact. Share Image: ensureHtml2Canvas(cb) loads html2canvas from cdnjs; shareImage() targets `#preview-content` → PNG; needs internet, falls back to Print.
+
+## 9. Conventions & Gotchas
+- **`esc()` chokes on non-strings**: `esc(s)` does `(s||'').replace(...)` — passing a number throws. Keep `jersey` and `caps` as STRINGS everywhere (the inputs already store them as strings).
+- `escHtml()` is the notes-only variant: escapes `& < >` and converts `\n` → `<br>`.
+- **Two escape funcs, two purposes**: `esc` for attributes/cells, `escHtml` for multi-line notes.
+- Roles default to `'starter'`; a selected player with no `roles[id]` is treated as a starter throughout.
+- Formation zones are `'field' | 'bench' | 'injured'`; the team-sheet "Unavailable" wording only appears as the injured-bar tag on formation pages — **the team sheet itself has no Unavailable section** (only Starting XI + Interchange).
+- The **print pitch SVG (`fieldSVGPrint`) is separate** from the editor pitch (`fieldSVG`), so restyling the printable formation never touches the live builder (and vice versa).
+- `getFormationString` excludes GK from the `DEF-MID-STR` count.
+- Drop coordinates are clamped: x 2–98, y 3–97.
+- Photos are resized to ≤128px / JPEG 0.7 to keep localStorage small; large rosters with photos can still bloat storage.
+- Quarter index is 0-based in code (`currentQuarter` 0–3) but labelled "1st…4th Quarter".
+
+## 10. How to Extend / Common Tasks
+- **Add a player field** (e.g. DOB): extend `addPlayer`/`addMultiplePlayers` defaults, add a column in `renderSquad`, and surface it in `renderPreviewContent` if it should print. Keep new numeric-looking fields as strings or wrap reads against `esc`.
+- **New position group**: add to `POS_ORDER` + `POS_GROUPS`, add `.pos-*` colour + `tr[data-pos=...]` accent, and an `xZones` entry in `autoPlaceAll`.
+- **Change document layout**: edit only `renderPreviewContent` + the `.ts-*` / `.fo-*` CSS. The on-screen builder is independent.
+- **Restyle the print pitch**: edit `fieldSVGPrint()` only.
+- **Add a meta field to docs**: add an `.info-item` in both masthead meta strips.
+
+## 11. Driving It in the Preview Harness
+`state` lives in lexical scope, reachable from `preview_eval` (it is **not** on `window`). To seed and render a document:
+```js
+state.squad = [
+  { id:'p1', name:'Sam King',  jersey:'1',  posGroup:'GK',  caps:'120', photo:'' },
+  { id:'p2', name:'Joe Blake', jersey:'4',  posGroup:'DEF', caps:'88',  photo:'' },
+  { id:'p3', name:'Tane Reed', jersey:'10', posGroup:'MID', caps:'45',  photo:'' },
+  { id:'p4', name:'Eli Frost', jersey:'9',  posGroup:'STR', caps:'12',  photo:'' }
+]; // jersey + caps MUST be strings
+state.matches = [{
+  id:'m1', title:'NZ vs AUS', date:'28/06/2026', time:'19:00',
+  venue:'North Harbour', competition:'Pro League', teamName:'BLACK STICKS MEN',
+  notes:'C: King', selected:['p1','p2','p3','p4'],
+  roles:{ p1:'starter', p2:'starter', p3:'starter', p4:'interchange' },
+  formations:[{},{},{},{}]
+}];
+state.ui.currentMatchId = 'm1';
+saveState();
+switchView('preview');
+// select the match in the dropdown, then re-render:
+document.getElementById('preview-match').value = 'm1';
+renderPreview();
+```
+Output blocks land in `#preview-content .ts-output` (formation page first, then team sheet, per checkbox state). Screenshot the preview view to verify.
+
+## 12. Full Source Code
+The complete source is appended below this line verbatim.
+
+<!--FULL_SOURCE_BELOW-->
+
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Squad Selection Sheet</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#d4a843">
-<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; }
+body { font-family: 'Montserrat', -apple-system, 'Segoe UI', Arial, sans-serif; background: #1c1c1c; color: #fff; min-height: 100vh; }
 
-nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; }
-nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #d4a843; letter-spacing: 1px; }
-nav button { background: none; border: none; color: #8899aa; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+nav { background: #262626; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #3c3c3c; }
+nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #D4AF37; letter-spacing: 1px; }
+nav button { background: none; border: none; color: #8c8c8c; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
 nav button:hover { color: #fff; }
-nav button.active { color: #fff; border-bottom-color: #d4a843; }
+nav button.active { color: #fff; border-bottom-color: #D4AF37; }
 
 .view { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
 .view.active { display: block; }
 
-h2 { font-size: 22px; margin-bottom: 16px; color: #d4a843; }
-h3 { font-size: 16px; margin-bottom: 10px; color: #ccc; }
+h2 { font-size: 22px; margin-bottom: 16px; color: #D4AF37; }
+h3 { font-size: 16px; margin-bottom: 10px; color: #c4c4c4; }
 .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
-.btn-primary { background: #d4a843; color: #000; }
-.btn-primary:hover { background: #e6bc5a; }
-.btn-secondary { background: #0f3460; color: #fff; }
-.btn-secondary:hover { background: #1a4a8a; }
-.btn-danger { background: #722; color: #fff; }
-.btn-danger:hover { background: #933; }
-.btn-success { background: #2a7a3a; color: #fff; }
+.btn-primary { background: #D4AF37; color: #1c1c1c; }
+.btn-primary:hover { background: #b8952e; }
+.btn-secondary { background: #2f2f2f; color: #fff; }
+.btn-secondary:hover { background: #3c3c3c; }
+.btn-danger { background: #e23b2e; color: #fff; }
+.btn-danger:hover { background: #b8302a; }
+.btn-success { background: #2a9d3a; color: #fff; }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
-input, select, textarea { padding: 6px 10px; border: 1px solid #334; border-radius: 4px; background: #0d1b2a; color: #fff; font-size: 13px; }
-input:focus, select:focus { outline: none; border-color: #d4a843; }
-label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
+input, select, textarea { padding: 6px 10px; border: 1px solid #3c3c3c; border-radius: 4px; background: #161616; color: #fff; font-size: 13px; }
+input:focus, select:focus { outline: none; border-color: #D4AF37; }
+label { font-size: 13px; color: #8c8c8c; display: block; margin-bottom: 4px; }
 .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
 .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: flex-end; }
 .form-group { display: flex; flex-direction: column; }
-.section { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
-.section h3 { color: #d4a843; margin-bottom: 12px; }
+.section { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+.section h3 { color: #D4AF37; margin-bottom: 12px; }
 
 /* SQUAD TABLE */
 .squad-table { width: 100%; border-collapse: collapse; }
-.squad-table th { background: #0f3460; padding: 8px 10px; text-align: left; font-size: 12px; color: #8cf; }
-.squad-table td { padding: 6px 10px; border-bottom: 1px solid #1a2a4a; font-size: 13px; }
-.squad-table tr:hover { background: #1a2a4a; }
+.squad-table th { background: #D4AF37; padding: 8px 10px; text-align: left; font-size: 12px; color: #1c1c1c; }
+.squad-table td { padding: 6px 10px; border-bottom: 1px solid #3c3c3c; font-size: 13px; }
+.squad-table tr:hover { background: #2f2f2f; }
 .squad-table td input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; padding: 4px 6px; font-size: 13px; }
-.squad-table td input:focus { border-color: #d4a843; background: #0d1b2a; }
+.squad-table td input:focus { border-color: #D4AF37; background: #161616; }
 .squad-table td img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; vertical-align: middle; }
-.squad-table td .initials { width: 32px; height: 32px; border-radius: 50%; background: #1f3864; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #d4a843; vertical-align: middle; }
+.squad-table td .initials { width: 32px; height: 32px; border-radius: 50%; background: #2f2f2f; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #D4AF37; vertical-align: middle; }
 
 /* MATCH CARDS */
-.match-card { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 14px; margin-bottom: 8px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
-.match-card:hover { border-color: #d4a843; }
+.match-card { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 14px; margin-bottom: 8px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
+.match-card:hover { border-color: #D4AF37; }
 .match-card .info h4 { color: #fff; font-size: 14px; margin-bottom: 2px; }
-.match-card .info small { color: #889; font-size: 12px; }
+.match-card .info small { color: #8c8c8c; font-size: 12px; }
 
 /* SELECTION GRID */
 .selection-group { margin-bottom: 16px; }
-.selection-group h4 { font-size: 13px; color: #d4a843; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; padding-bottom: 4px; border-bottom: 1px solid #334; }
+.selection-group h4 { font-size: 13px; color: #D4AF37; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; padding-bottom: 4px; border-bottom: 1px solid #3c3c3c; }
 .selection-row { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 4px; margin-bottom: 3px; transition: all .15s; cursor: pointer; }
-.selection-row:hover { background: #1a2a4a; }
-.selection-row.selected { background: #1a3a2a; border-left: 3px solid #4a8c3f; }
-.selection-row .sel-check { width: 22px; height: 22px; border: 2px solid #445; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #4a8c3f; flex-shrink: 0; }
-.selection-row.selected .sel-check { border-color: #4a8c3f; background: #2a5a2a; }
-.selection-row .sel-jersey { font-size: 14px; font-weight: 700; color: #d4a843; width: 30px; text-align: center; }
+.selection-row:hover { background: #2f2f2f; }
+.selection-row.selected { background: #1a3a2a; border-left: 3px solid #2a9d3a; }
+.selection-row .sel-check { width: 22px; height: 22px; border: 2px solid #4a4a4a; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #2a9d3a; flex-shrink: 0; }
+.selection-row.selected .sel-check { border-color: #2a9d3a; background: #2a5a2a; }
+.selection-row .sel-jersey { font-size: 14px; font-weight: 700; color: #D4AF37; width: 30px; text-align: center; }
 .selection-row .sel-name { font-size: 13px; flex: 1; }
-.selection-row .sel-pos { font-size: 12px; color: #889; width: 80px; }
+.selection-row .sel-pos { font-size: 12px; color: #8c8c8c; width: 80px; }
 .selection-row .sel-role { width: 120px; }
 .selection-row .sel-role select { width: 100%; font-size: 11px; padding: 3px 4px; }
-.selection-count { font-size: 13px; color: #889; margin-bottom: 12px; }
-.selection-count span { color: #d4a843; font-weight: 700; }
+.selection-count { font-size: 13px; color: #8c8c8c; margin-bottom: 12px; }
+.selection-count span { color: #D4AF37; font-weight: 700; }
 
-/* ======================== */
-/* OUTPUT / TEAM SHEET      */
-/* ======================== */
-.ts-output { background: #1e1e1e; color: #c8c8c8; font-family: 'Segoe UI', Arial, sans-serif; width: 100%; max-width: 960px; margin: 0 auto 30px; overflow: hidden; }
-.ts-output * { color: #c8c8c8; }
+/* ============================================ */
+/* OUTPUT / TEAM SHEET — ELV8 PREMIUM DOCUMENT  */
+/* ============================================ */
+.ts-output { background: #fff; color: #15171a; font-family: 'Montserrat', -apple-system, 'Segoe UI', Arial, sans-serif; width: 100%; max-width: 820px; margin: 0 auto 30px; overflow: hidden; border-radius: 6px; box-shadow: 0 18px 50px rgba(0,0,0,.45); }
+.ts-output * { color: inherit; }
 
-.ts-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #1a1a1a; border-bottom: 3px solid #d4a843; }
-.ts-header .team-name { font-size: 16px; font-weight: 900; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; }
-.ts-header .doc-type { font-size: 12px; letter-spacing: 3px; color: #888 !important; text-transform: uppercase; }
+/* MASTHEAD */
+.ts-header { display: flex; justify-content: space-between; align-items: center; padding: 22px 30px; background: #1c1c1c; border-bottom: 3px solid #D4AF37; }
+.ts-header .mast-left { display: flex; flex-direction: column; gap: 4px; }
+.ts-header .mast-kicker { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #8c8c8c !important; text-transform: uppercase; }
+.ts-header .team-name { font-size: 21px; font-weight: 800; letter-spacing: .5px; color: #fff !important; text-transform: uppercase; line-height: 1.1; }
+.ts-header .mast-right { text-align: right; display: flex; flex-direction: column; gap: 3px; }
+.ts-header .mast-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: #8c8c8c !important; text-transform: uppercase; }
+.ts-header .mast-value { font-size: 14px; font-weight: 800; letter-spacing: 1px; color: #D4AF37 !important; text-transform: uppercase; }
 
-.ts-match-info { display: flex; padding: 16px 24px; gap: 0; background: #1e1e1e; border-bottom: 1px solid #333; }
-.ts-match-info .info-item { flex: 1; padding: 0 16px; border-right: 1px solid #333; }
+/* META STRIP */
+.ts-match-info { display: flex; padding: 12px 30px; gap: 0; background: #fff; border-bottom: 1px solid #e7e7e7; }
+.ts-match-info .info-item { flex: 1; padding: 0 18px; border-right: 1px solid #f0f0f0; }
+.ts-match-info .info-item:first-child { padding-left: 0; }
 .ts-match-info .info-item:last-child { border-right: none; }
-.ts-match-info .info-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 4px; }
-.ts-match-info .info-value { font-size: 15px; color: #fff !important; font-weight: 600; }
+.ts-match-info .info-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #9a9a9a !important; text-transform: uppercase; margin-bottom: 4px; }
+.ts-match-info .info-value { font-size: 15px; color: #15171a !important; font-weight: 800; }
 
-.ts-body { padding: 20px 24px; }
-.ts-section-title { font-size: 12px; font-weight: 700; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #d4a843; }
+/* BODY */
+.ts-body { padding: 24px 30px; }
+.ts-section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #1c1c1c !important; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 5px; border-bottom: 2px solid #D4AF37; display: inline-block; }
+.ts-section-title.alt { margin-top: 26px; }
 
-/* Starting XI table */
-.ts-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-.ts-table th { background: #2a2a2a; padding: 8px 12px; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #d4a843 !important; text-transform: uppercase; text-align: left; border-bottom: 1px solid #444; }
-.ts-table td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #2a2a2a; }
-.ts-table tr:nth-child(even) { background: #222; }
-.ts-table .jersey-num { font-weight: 800; font-size: 16px; color: #d4a843 !important; width: 50px; text-align: center; }
-.ts-table .player-name { font-weight: 600; color: #fff !important; }
-.ts-table .player-pos { color: #888 !important; font-size: 13px; }
-.ts-table .player-role { font-size: 12px; color: #aaa !important; font-style: italic; }
-.ts-table .cap-num { font-size: 12px; color: #666 !important; text-align: center; width: 60px; }
+/* Tables — hairlines + zebra, no heavy gridlines */
+.ts-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
+.ts-table th { background: #1c1c1c; padding: 9px 14px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #cfcfcf !important; text-transform: uppercase; text-align: left; }
+.ts-table td { padding: 13px 14px; font-size: 14px; border-bottom: 1px solid #eef0f1; vertical-align: middle; }
+.ts-table tbody tr:nth-child(even) { background: #fafbfc; }
+.ts-table tbody tr:last-child td { border-bottom: none; }
+.ts-table .jersey-num { font-weight: 800; font-size: 15px; color: #D4AF37 !important; text-align: center; font-variant-numeric: tabular-nums; }
+.ts-table .player-name { font-weight: 700; font-size: 14px; color: #15171a !important; }
+.ts-table .player-pos { color: #6b6f74 !important; font-size: 12px; font-weight: 600; }
+.ts-table .cap-num { font-size: 13px; font-weight: 800; color: #15171a !important; text-align: center; font-variant-numeric: tabular-nums; }
 
-/* Position group headers in table */
-.ts-table .group-header td { background: #1a1a1a; padding: 6px 12px; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #4a8c3f !important; text-transform: uppercase; border-bottom: 1px solid #333; }
+/* Position group sub-headers inside table — slim, dot signal */
+.ts-table .group-header td { background: #fff; padding: 14px 14px 6px; font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #1c1c1c !important; text-transform: uppercase; border-bottom: 1px solid #e7e7e7; }
+.ts-table .group-header .pos-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.pos-gk { background: #7bc47f; }
+.pos-def { background: #f3c012; }
+.pos-mid { background: #3aa7e0; }
+.pos-str { background: #f4a259; }
+/* Slim accent bar on the first cell, coloured by group */
+.ts-table tbody tr[data-pos] td.jersey-num { box-shadow: inset 3px 0 0 var(--accent); }
+.ts-table tbody tr[data-pos="GK"] { --accent: #7bc47f; }
+.ts-table tbody tr[data-pos="DEF"] { --accent: #f3c012; }
+.ts-table tbody tr[data-pos="MID"] { --accent: #3aa7e0; }
+.ts-table tbody tr[data-pos="STR"] { --accent: #f4a259; }
 
-/* Interchange section */
-.ts-interchange-title { font-size: 12px; font-weight: 700; letter-spacing: 4px; color: #c0392b !important; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #c0392b; }
-
-.ts-table .interchange-row td { }
-.ts-table .interchange-row .jersey-num { color: #c0392b !important; }
+/* Interchange — same restraint, gold underline like other sections */
+.ts-interchange-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #1c1c1c !important; text-transform: uppercase; margin: 26px 0 12px; padding-bottom: 5px; border-bottom: 2px solid #D4AF37; display: inline-block; }
+.ts-table .interchange-row .jersey-num { color: #9a9a9a !important; }
 
 /* Notes */
-.ts-notes { margin-top: 20px; padding: 16px; border: 1px solid #333; border-top: 2px solid #d4a843; }
-.ts-notes .notes-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 8px; }
-.ts-notes .notes-text { font-size: 13px; font-style: italic; color: #aaa !important; line-height: 1.6; white-space: pre-wrap; }
+.ts-notes { margin-top: 24px; padding: 16px 18px; background: #fafbfc; border: 1px solid #eef0f1; border-left: 3px solid #D4AF37; border-radius: 3px; }
+.ts-notes .notes-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #1c1c1c !important; text-transform: uppercase; margin-bottom: 8px; }
+.ts-notes .notes-text { font-size: 13px; color: #3a3d42 !important; line-height: 1.6; white-space: pre-wrap; }
 
-.ts-footer { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid #333; }
-.ts-footer .values { font-size: 11px; color: #555 !important; letter-spacing: 1px; }
-.ts-footer .brand { font-size: 11px; color: #555 !important; letter-spacing: 2px; text-transform: uppercase; }
+/* FOOTER — slim charcoal band */
+.ts-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 30px; background: #1c1c1c; }
+.ts-footer .brand { font-size: 10px; color: #cfcfcf !important; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.ts-footer .values { font-size: 9px; color: #8c8c8c !important; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
 
 /* ======================== */
 /* FORMATION VIEW           */
@@ -128,17 +311,17 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .formation-sidebar { width: 220px; flex-shrink: 0; }
 
 /* Quarter tabs */
-.quarter-tabs { display: flex; gap: 0; margin-bottom: 16px; background: #0d1b2a; border-radius: 6px; overflow: hidden; border: 1px solid #334; }
-.quarter-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #667; transition: all .2s; letter-spacing: 1px; }
-.quarter-tab:hover { color: #aaa; background: #16213e; }
-.quarter-tab.active { background: #d4a843; color: #000; }
-.quarter-tab + .quarter-tab { border-left: 1px solid #334; }
+.quarter-tabs { display: flex; gap: 0; margin-bottom: 16px; background: #161616; border-radius: 6px; overflow: hidden; border: 1px solid #3c3c3c; }
+.quarter-tab { flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #8c8c8c; transition: all .2s; letter-spacing: 1px; }
+.quarter-tab:hover { color: #c4c4c4; background: #262626; }
+.quarter-tab.active { background: #D4AF37; color: #1c1c1c; }
+.quarter-tab + .quarter-tab { border-left: 1px solid #3c3c3c; }
 
 /* Formation label */
-.formation-label { font-size: 20px; font-weight: 900; color: #fff; background: #0d1b2a; border: 2px solid #334; display: inline-block; padding: 6px 16px; border-radius: 4px; margin-bottom: 12px; letter-spacing: 2px; }
+.formation-label { font-size: 20px; font-weight: 900; color: #fff; background: #161616; border: 2px solid #3c3c3c; display: inline-block; padding: 6px 16px; border-radius: 4px; margin-bottom: 12px; letter-spacing: 2px; }
 
 /* Hockey field */
-.field-wrapper { position: relative; width: 100%; aspect-ratio: 1.45 / 1; background: #4a8c3f; border-radius: 4px; overflow: hidden; border: 3px solid #2d6627; }
+.field-wrapper { position: relative; width: 100%; aspect-ratio: 1.45 / 1; background: #2a9d3a; border-radius: 4px; overflow: hidden; border: 3px solid #1f7a2c; }
 
 /* Field markings via SVG overlay */
 .field-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -152,65 +335,71 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .field-player:hover { z-index: 50; }
 .field-player .fp-label { background: #fff; color: #111; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 3px; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.4); text-align: center; min-width: 70px; border: 2px solid #fff; }
 .field-player.status-bench .fp-label { background: #111; color: #fff; border-color: #333; }
-.field-player.status-injured .fp-label { background: #d4644a; color: #fff; border-color: #c0392b; }
+.field-player.status-injured .fp-label { background: #e85c4f; color: #fff; border-color: #e23b2e; }
 
 /* Bench bar */
-.bench-bar { display: flex; gap: 4px; padding: 8px; background: #111; border-radius: 0 0 4px 4px; border: 2px solid #333; border-top: none; min-height: 44px; flex-wrap: wrap; justify-content: center; align-items: center; }
-.bench-bar .fp-label { background: #111; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: grab; user-select: none; white-space: nowrap; border: 1px solid #444; transition: all .15s; }
-.bench-bar .fp-label:hover { border-color: #888; }
+.bench-bar { display: flex; gap: 4px; padding: 8px; background: #161616; border-radius: 0 0 4px 4px; border: 2px solid #3c3c3c; border-top: none; min-height: 44px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.bench-bar .fp-label { background: #2f2f2f; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: grab; user-select: none; white-space: nowrap; border: 1px solid #4a4a4a; transition: all .15s; }
+.bench-bar .fp-label:hover { border-color: #8c8c8c; }
 
 /* Injured bar */
-.injured-bar { display: flex; gap: 4px; padding: 8px; background: rgba(192,57,43,.15); border-radius: 4px 4px 0 0; border: 2px solid #c0392b; border-bottom: none; min-height: 44px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 0; }
-.injured-bar .fp-label { background: #d4644a; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: grab; user-select: none; white-space: nowrap; border: 1px solid #c0392b; transition: all .15s; }
+.injured-bar { display: flex; gap: 4px; padding: 8px; background: rgba(226,59,46,.15); border-radius: 4px 4px 0 0; border: 2px solid #e23b2e; border-bottom: none; min-height: 44px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 0; }
+.injured-bar .fp-label { background: #e85c4f; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: grab; user-select: none; white-space: nowrap; border: 1px solid #e23b2e; transition: all .15s; }
 .injured-bar .fp-label:hover { border-color: #ff7675; }
 
 /* Empty state labels */
-.bar-empty { font-size: 11px; color: #666; font-style: italic; letter-spacing: 1px; }
+.bar-empty { font-size: 11px; color: #8c8c8c; font-style: italic; letter-spacing: 1px; }
 
 /* Sidebar player pool */
-.pool-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #d4a843; text-transform: uppercase; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #334; }
-.pool-group-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #667; text-transform: uppercase; margin: 10px 0 4px; }
+.pool-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #D4AF37; text-transform: uppercase; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #3c3c3c; }
+.pool-group-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #8c8c8c; text-transform: uppercase; margin: 10px 0 4px; }
 .pool-player { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 4px; cursor: grab; user-select: none; font-size: 12px; transition: all .15s; margin-bottom: 2px; }
-.pool-player:hover { background: #1a2a4a; }
-.pool-player .pp-jersey { font-weight: 700; color: #d4a843; width: 24px; text-align: center; font-size: 11px; }
+.pool-player:hover { background: #2f2f2f; }
+.pool-player .pp-jersey { font-weight: 700; color: #D4AF37; width: 24px; text-align: center; font-size: 11px; }
 .pool-player .pp-name { flex: 1; font-weight: 600; }
 .pool-player .pp-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.pool-player .pp-status.on-field { background: #4a8c3f; }
-.pool-player .pp-status.on-bench { background: #555; }
-.pool-player .pp-status.is-injured { background: #c0392b; }
-.pool-player .pp-status.unassigned { background: transparent; border: 1px solid #445; }
+.pool-player .pp-status.on-field { background: #2a9d3a; }
+.pool-player .pp-status.on-bench { background: #8c8c8c; }
+.pool-player .pp-status.is-injured { background: #e23b2e; }
+.pool-player .pp-status.unassigned { background: transparent; border: 1px solid #4a4a4a; }
 
 /* Copy quarter button */
 .copy-quarter-menu { position: relative; display: inline-block; }
-.copy-quarter-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #16213e; border: 1px solid #334; border-radius: 4px; padding: 4px; z-index: 100; min-width: 140px; }
+.copy-quarter-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #262626; border: 1px solid #3c3c3c; border-radius: 4px; padding: 4px; z-index: 100; min-width: 140px; }
 .copy-quarter-dropdown.show { display: block; }
-.copy-quarter-dropdown button { display: block; width: 100%; text-align: left; padding: 6px 10px; background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; border-radius: 3px; }
-.copy-quarter-dropdown button:hover { background: #0f3460; color: #fff; }
+.copy-quarter-dropdown button { display: block; width: 100%; text-align: left; padding: 6px 10px; background: none; border: none; color: #c4c4c4; font-size: 12px; cursor: pointer; border-radius: 3px; }
+.copy-quarter-dropdown button:hover { background: #2f2f2f; color: #fff; }
 
-/* ======================== */
-/* FORMATION OUTPUT (PRINT) */
-/* ======================== */
-.fo-field { position: relative; width: 100%; aspect-ratio: 1.45 / 1; background: #4a8c3f; overflow: hidden; margin-bottom: 0; }
+/* ======================================= */
+/* FORMATION OUTPUT (PRINT) — ELV8 PREMIUM  */
+/* ======================================= */
+.fo-quarter { margin-bottom: 22px; }
+.fo-quarter-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid #D4AF37; }
+.fo-quarter-head .fo-q-name { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #1c1c1c; text-transform: uppercase; }
+.fo-quarter-head .fo-q-form { font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #D4AF37; font-variant-numeric: tabular-nums; }
+.fo-field { position: relative; width: 100%; aspect-ratio: 1.55 / 1; background: #3c8f4e; overflow: hidden; border-radius: 4px; }
 .fo-field .field-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.fo-player { position: absolute; transform: translate(-50%, -50%); }
-.fo-player .fo-label { background: #fff; color: #111; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 3px; white-space: nowrap; text-align: center; min-width: 60px; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
-.fo-bench-bar { display: flex; gap: 3px; padding: 6px 8px; background: #111; flex-wrap: wrap; justify-content: center; }
-.fo-bench-bar .fo-label { background: #111; color: #fff; font-size: 10px; font-weight: 700; padding: 5px 12px; border-radius: 3px; white-space: nowrap; border: 1px solid #444; }
-.fo-injured-bar { display: flex; gap: 3px; padding: 6px 8px; background: rgba(192,57,43,.15); flex-wrap: wrap; justify-content: center; border-bottom: 2px solid #c0392b; }
-.fo-injured-bar .fo-label { background: #d4644a; color: #fff; font-size: 10px; font-weight: 700; padding: 5px 12px; border-radius: 3px; white-space: nowrap; border: 1px solid #c0392b; }
-.fo-quarter-label { position: absolute; top: 8px; left: 12px; font-size: 16px; font-weight: 900; color: #fff; background: rgba(0,0,0,.5); padding: 4px 12px; border-radius: 3px; z-index: 5; border: 2px solid rgba(255,255,255,.3); }
+.fo-player { position: absolute; transform: translate(-50%, -50%); z-index: 5; }
+.fo-player .fo-label { background: #fff; color: #15171a; font-size: 10px; font-weight: 700; padding: 4px 9px; border-radius: 3px; white-space: nowrap; text-align: center; min-width: 54px; border-left: 3px solid #D4AF37; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+.fo-bench-bar { display: flex; gap: 5px; padding: 8px 10px; background: #fafbfc; flex-wrap: wrap; align-items: center; border: 1px solid #eef0f1; border-top: none; border-radius: 0 0 4px 4px; }
+.fo-bench-bar .fo-bar-tag { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #9a9a9a; text-transform: uppercase; margin-right: 4px; }
+.fo-bench-bar .fo-label { background: #fff; color: #3a3d42; font-size: 10px; font-weight: 700; padding: 5px 11px; border-radius: 3px; white-space: nowrap; border: 1px solid #e7e7e7; }
+.fo-injured-bar { display: flex; gap: 5px; padding: 8px 10px; background: #fff5f4; flex-wrap: wrap; align-items: center; border: 1px solid #f3d6d3; border-bottom: none; border-radius: 4px 4px 0 0; }
+.fo-injured-bar .fo-bar-tag { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #c0473c; text-transform: uppercase; margin-right: 4px; }
+.fo-injured-bar .fo-label { background: #fff; color: #c0473c; font-size: 10px; font-weight: 700; padding: 5px 11px; border-radius: 3px; white-space: nowrap; border: 1px solid #f3d6d3; }
 
 /* PRINT */
 @media print {
-  body { background: #1e1e1e; }
+  body { background: #fff; }
   nav, .view:not(#view-preview), .no-print { display: none !important; }
   #view-preview { display: block !important; padding: 0; max-width: none; }
-  .ts-output { page-break-after: always; margin: 0; box-shadow: none; }
+  .ts-output { page-break-after: always; margin: 0 auto; max-width: 100%; box-shadow: none !important; border-radius: 0 !important; }
   .ts-output:last-child { page-break-after: avoid; }
   .fo-page { page-break-after: always; }
   .fo-page:last-child { page-break-after: avoid; }
+  .ts-table tr, .fo-quarter { page-break-inside: avoid; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  @page { margin: 8mm; }
+  @page { size: A4 portrait; margin: 8mm; }
 }
 </style>
 </head>
@@ -294,6 +483,31 @@ function fieldSVG(idPrefix) {
     <!-- Penalty spots -->
     <circle cx="80" cy="345" r="4" fill="rgba(255,255,255,.5)"/>
     <circle cx="920" cy="345" r="4" fill="rgba(255,255,255,.5)"/>
+  </svg>`;
+}
+
+// Refined pitch for the printable formation output — subtle markings, clean tone
+function fieldSVGPrint() {
+  const line = 'rgba(255,255,255,.65)';
+  const faint = 'rgba(255,255,255,.32)';
+  return `<svg class="field-svg" viewBox="0 0 1000 645" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="foTurf" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#43995a"/>
+        <stop offset="1" stop-color="#358049"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="1000" height="645" fill="url(#foTurf)"/>
+    <rect x="6" y="6" width="988" height="633" fill="none" stroke="${line}" stroke-width="2.5" rx="3"/>
+    <line x1="500" y1="6" x2="500" y2="639" stroke="${line}" stroke-width="2"/>
+    <line x1="250" y1="6" x2="250" y2="639" stroke="${faint}" stroke-width="1.5" stroke-dasharray="9,7"/>
+    <line x1="750" y1="6" x2="750" y2="639" stroke="${faint}" stroke-width="1.5" stroke-dasharray="9,7"/>
+    <path d="M 6 135 Q 215 322 6 510" fill="none" stroke="${line}" stroke-width="2.5"/>
+    <rect x="0" y="295" width="7" height="55" fill="${line}" rx="1"/>
+    <path d="M 994 135 Q 785 322 994 510" fill="none" stroke="${line}" stroke-width="2.5"/>
+    <rect x="993" y="295" width="7" height="55" fill="${line}" rx="1"/>
+    <circle cx="78" cy="322" r="3.5" fill="${faint}"/>
+    <circle cx="922" cy="322" r="3.5" fill="${faint}"/>
   </svg>`;
 }
 
@@ -629,7 +843,7 @@ function renderFormation() {
     // Show match selector
     let html = `<h2>Formation Layout</h2>`;
     if (state.matches.length === 0) {
-      html += `<p style="color:#889;">Create a match first in the Matches tab.</p>`;
+      html += `<p style="color:#8c8c8c;">Create a match first in the Matches tab.</p>`;
     } else {
       html += `<div class="toolbar"><select id="formation-match-select" onchange="selectFormationMatch(this.value)" style="padding:8px 12px;">
         <option value="">Select match...</option>
@@ -666,7 +880,7 @@ function renderFormation() {
 
   let html = `<div class="toolbar">
     <button class="btn btn-secondary btn-sm" onclick="state.ui.currentMatchId=null;saveState();renderFormation();">← Back</button>
-    <span style="color:#d4a843; font-weight:700; font-size:14px; margin: 0 8px;">${esc(match.title)}</span>
+    <span style="color:#D4AF37; font-weight:700; font-size:14px; margin: 0 8px;">${esc(match.title)}</span>
     <button class="btn btn-success btn-sm" onclick="switchView('preview')">Preview / Print →</button>
   </div>`;
 
@@ -731,11 +945,11 @@ function renderFormation() {
   // Sidebar: player pool
   html += `<div class="formation-sidebar">
     <div class="pool-title">Squad (${selected.length} selected)</div>
-    <div style="font-size:11px; color:#667; margin-bottom:8px;">
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4a8c3f;vertical-align:middle;"></span> Field &nbsp;
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#555;vertical-align:middle;"></span> Bench &nbsp;
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c0392b;vertical-align:middle;"></span> Injured &nbsp;
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;border:1px solid #445;vertical-align:middle;"></span> Unplaced
+    <div style="font-size:11px; color:#8c8c8c; margin-bottom:8px;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2a9d3a;vertical-align:middle;"></span> Field &nbsp;
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8c8c8c;vertical-align:middle;"></span> Bench &nbsp;
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e23b2e;vertical-align:middle;"></span> Injured &nbsp;
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;border:1px solid #4a4a4a;vertical-align:middle;"></span> Unplaced
     </div>`;
 
   POS_ORDER.forEach(group => {
@@ -762,7 +976,7 @@ function renderFormation() {
   // Unselected players
   const unselectedPlayers = state.squad.filter(p => !selected.includes(p.id));
   if (unselectedPlayers.length > 0) {
-    html += `<div class="pool-group-title" style="margin-top:16px; color:#c0392b;">Not Selected</div>`;
+    html += `<div class="pool-group-title" style="margin-top:16px; color:#e23b2e;">Not Selected</div>`;
     unselectedPlayers.forEach(p => {
       const surname = getDisplayName(p);
       html += `<div class="pool-player" style="opacity:.4;">
@@ -776,9 +990,9 @@ function renderFormation() {
 
   // Unassigned players info
   if (unassigned.length > 0) {
-    html += `<div style="margin-top:12px; padding:10px 14px; background:#1a2a4a; border-radius:4px; border-left:3px solid #d4a843;">
-      <span style="font-size:12px; color:#d4a843; font-weight:700;">UNPLACED (${unassigned.length}):</span>
-      <span style="font-size:12px; color:#aaa;"> ${unassigned.map(p => esc(getDisplayName(p))).join(', ')} — drag them to the field, bench, or injured bar</span>
+    html += `<div style="margin-top:12px; padding:10px 14px; background:#2f2f2f; border-radius:4px; border-left:3px solid #D4AF37;">
+      <span style="font-size:12px; color:#D4AF37; font-weight:700;">UNPLACED (${unassigned.length}):</span>
+      <span style="font-size:12px; color:#c4c4c4;"> ${unassigned.map(p => esc(getDisplayName(p))).join(', ')} — drag them to the field, bench, or injured bar</span>
     </div>`;
   }
 
@@ -1009,10 +1223,27 @@ function setupTouchDrag() {
 // =============================================
 // PREVIEW / PRINT
 // =============================================
+function ensureHtml2Canvas(cb) {
+  if (window.html2canvas) return cb();
+  const sc = document.createElement('script');
+  sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  sc.onload = () => cb();
+  sc.onerror = () => alert('Could not load the image tool — it needs an internet connection. Use Print instead.');
+  document.head.appendChild(sc);
+}
+function shareImage() {
+  const node = document.querySelector('#preview-content');
+  if (!node) { alert('Build/select a team sheet first.'); return; }
+  ensureHtml2Canvas(() => {
+    html2canvas(node, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      .then(canvas => { const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = 'squad-sheet.png'; a.click(); })
+      .catch(e => alert('Image export failed: ' + e.message));
+  });
+}
 function renderPreview() {
   const el = document.getElementById('view-preview');
   let html = `<div class="no-print" style="margin-bottom:16px; display:flex; gap:8px; align-items:center;">
-    <select id="preview-match" onchange="renderPreviewContent()" style="padding:6px 10px; background:#0d1b2a; color:#fff; border:1px solid #334; border-radius:4px;">
+    <select id="preview-match" onchange="renderPreviewContent()" style="padding:6px 10px; background:#161616; color:#fff; border:1px solid #3c3c3c; border-radius:4px;">
       <option value="">Select match...</option>
       ${state.matches.map(m => `<option value="${m.id}" ${m.id===state.ui.currentMatchId?'selected':''}>${esc(m.title)} - ${esc(m.date)}</option>`).join('')}
     </select>
@@ -1022,39 +1253,55 @@ function renderPreview() {
     <label style="display:flex; align-items:center; gap:4px; margin:0; cursor:pointer;">
       <input type="checkbox" id="preview-teamsheet" checked onchange="renderPreviewContent()" style="width:auto;"> Team Sheet
     </label>
-    <button class="btn btn-primary" onclick="window.print()">Print</button>
+    <button class="btn btn-primary" onclick="shareImage()">📷 Share Image</button>
+    <button class="btn btn-secondary" onclick="window.print()">Print</button>
   </div>
   <div id="preview-content"></div>`;
   el.innerHTML = html;
   renderPreviewContent();
 }
 
+function genDateNZ() {
+  try { return new Date().toLocaleDateString('en-NZ', { day:'2-digit', month:'short', year:'numeric' }); }
+  catch(e) { return new Date().toDateString(); }
+}
+
 function renderPreviewContent() {
   const matchId = document.getElementById('preview-match').value;
   const match = state.matches.find(m => m.id === matchId);
   const content = document.getElementById('preview-content');
-  if (!match) { content.innerHTML = '<p style="color:#889;">Select a match to preview.</p>'; return; }
+  if (!match) { content.innerHTML = '<p style="color:#8c8c8c;">Select a match to preview.</p>'; return; }
 
   const showFormation = document.getElementById('preview-formation').checked;
   const showTeamSheet = document.getElementById('preview-teamsheet').checked;
 
   let html = '';
 
+  const teamLabel = (match.teamName && match.teamName.trim()) ? match.teamName : 'Performance Programme';
+  const genDate = genDateNZ();
+
   // Formation output
   if (showFormation) {
     ensureFormations(match);
+    const compRight = esc(match.competition).toUpperCase() || 'FORMATION';
     html += `<div class="ts-output fo-page">
       <div class="ts-header">
-        <span class="team-name">${esc(match.teamName)}</span>
-        <span class="doc-type">FORMATION · ${esc(match.competition).toUpperCase()}</span>
+        <div class="mast-left">
+          <span class="mast-kicker">Formation</span>
+          <span class="team-name">${esc(match.title)}</span>
+        </div>
+        <div class="mast-right">
+          <span class="mast-eyebrow">Competition</span>
+          <span class="mast-value">${compRight}</span>
+        </div>
       </div>
       <div class="ts-match-info">
-        <div class="info-item"><div class="info-label">Match</div><div class="info-value">${esc(match.title)}</div></div>
+        <div class="info-item"><div class="info-label">Team</div><div class="info-value">${esc(match.teamName)}</div></div>
         <div class="info-item"><div class="info-label">Date</div><div class="info-value">${esc(match.date)}</div></div>
-        <div class="info-item"><div class="info-label">Time</div><div class="info-value">${esc(match.time)}</div></div>
-        <div class="info-item"><div class="info-label">Venue</div><div class="info-value">${esc(match.venue)}</div></div>
+        <div class="info-item"><div class="info-label">Time</div><div class="info-value">${esc(match.time) || '—'}</div></div>
+        <div class="info-item"><div class="info-label">Venue</div><div class="info-value">${esc(match.venue) || '—'}</div></div>
       </div>
-      <div style="padding: 16px 24px;">`;
+      <div class="ts-body">`;
 
     for (let q = 0; q < 4; q++) {
       const qd = getQuarterData(match, q);
@@ -1077,11 +1324,15 @@ function renderPreviewContent() {
         else fieldPs.push({ ...player, x: 50, y: 50 });
       });
 
-      html += `<div style="margin-bottom: ${q<3 ? '20px' : '0'};">`;
+      html += `<div class="fo-quarter">
+        <div class="fo-quarter-head">
+          <span class="fo-q-name">${QUARTER_LABELS[q]}</span>
+          <span class="fo-q-form">${formStr}</span>
+        </div>`;
 
       // Injured bar
       if (injuredPs.length > 0) {
-        html += `<div class="fo-injured-bar">`;
+        html += `<div class="fo-injured-bar"><span class="fo-bar-tag">Unavailable</span>`;
         injuredPs.forEach(p => {
           html += `<span class="fo-label">${esc(getDisplayName(p))}</span>`;
         });
@@ -1089,9 +1340,8 @@ function renderPreviewContent() {
       }
 
       // Field
-      html += `<div class="fo-field" style="${injuredPs.length === 0 ? 'border-radius:4px 4px 0 0;' : ''}">
-        ${fieldSVG('fo'+q)}
-        <div class="fo-quarter-label">${QUARTER_LABELS[q]} = ${formStr}</div>`;
+      html += `<div class="fo-field">
+        ${fieldSVGPrint()}`;
 
       fieldPs.forEach(p => {
         html += `<div class="fo-player" style="left:${p.x}%;top:${p.y}%;">
@@ -1102,11 +1352,11 @@ function renderPreviewContent() {
       html += `</div>`;
 
       // Bench bar
-      html += `<div class="fo-bench-bar" style="border-radius: 0 0 4px 4px;">`;
+      html += `<div class="fo-bench-bar"><span class="fo-bar-tag">Interchange</span>`;
       benchPs.forEach(p => {
         html += `<span class="fo-label">${esc(getDisplayName(p))}</span>`;
       });
-      if (benchPs.length === 0) html += `<span style="font-size:10px;color:#555;font-style:italic;">No bench players</span>`;
+      if (benchPs.length === 0) html += `<span style="font-size:10px;color:#9a9a9a;font-style:italic;">No bench players</span>`;
       html += `</div>`;
 
       html += `</div>`;
@@ -1114,8 +1364,8 @@ function renderPreviewContent() {
 
     html += `</div>
       <div class="ts-footer">
-        <span class="values">Accountability · Consistency · Action</span>
-        <span class="brand">CONFIDENTIAL</span>
+        <span class="brand">${esc(teamLabel)} · Team Sheet</span>
+        <span class="values">Generated ${genDate} · Private &amp; Confidential</span>
       </div>
     </div>`;
   }
@@ -1130,36 +1380,47 @@ function renderPreviewContent() {
     const starterGroups = {};
     POS_ORDER.forEach(g => { starterGroups[g] = starters.filter(p => p.posGroup === g); });
 
+    const tsCompRight = esc(match.competition).toUpperCase() || 'TEAM SHEET';
+    const colgroup = `<colgroup><col style="width:54px;"><col><col style="width:130px;"><col style="width:64px;"></colgroup>`;
+
     html += `<div class="ts-output">
       <div class="ts-header">
-        <span class="team-name">${esc(match.teamName)}</span>
-        <span class="doc-type">TEAM SHEET · ${esc(match.competition).toUpperCase()}</span>
+        <div class="mast-left">
+          <span class="mast-kicker">Team Sheet</span>
+          <span class="team-name">${esc(match.title)}</span>
+        </div>
+        <div class="mast-right">
+          <span class="mast-eyebrow">Competition</span>
+          <span class="mast-value">${tsCompRight}</span>
+        </div>
       </div>
 
       <div class="ts-match-info">
-        <div class="info-item"><div class="info-label">Match</div><div class="info-value">${esc(match.title)}</div></div>
+        <div class="info-item"><div class="info-label">Team</div><div class="info-value">${esc(match.teamName)}</div></div>
         <div class="info-item"><div class="info-label">Date</div><div class="info-value">${esc(match.date)}</div></div>
-        <div class="info-item"><div class="info-label">Time</div><div class="info-value">${esc(match.time)}</div></div>
-        <div class="info-item"><div class="info-label">Venue</div><div class="info-value">${esc(match.venue)}</div></div>
+        <div class="info-item"><div class="info-label">Time</div><div class="info-value">${esc(match.time) || '—'}</div></div>
+        <div class="info-item"><div class="info-label">Venue</div><div class="info-value">${esc(match.venue) || '—'}</div></div>
       </div>
 
       <div class="ts-body">
-        <div class="ts-section-title">STARTING XI</div>
+        <div class="ts-section-title">Starting XI</div>
         <table class="ts-table">
+          ${colgroup}
           <thead><tr>
-            <th style="width:50px; text-align:center;">No.</th>
+            <th style="text-align:center;">No.</th>
             <th>Player</th>
-            <th style="width:120px;">Position</th>
-            <th style="width:60px; text-align:center;">Caps</th>
+            <th>Position</th>
+            <th style="text-align:center;">Caps</th>
           </tr></thead>
           <tbody>`;
 
     POS_ORDER.forEach(group => {
       const players = starterGroups[group];
       if (players.length === 0) return;
-      html += `<tr class="group-header"><td colspan="4">${POS_GROUPS[group].toUpperCase()}</td></tr>`;
+      const dotClass = 'pos-' + group.toLowerCase();
+      html += `<tr class="group-header"><td colspan="4"><span class="pos-dot ${dotClass}"></span>${POS_GROUPS[group].toUpperCase()}</td></tr>`;
       players.forEach(p => {
-        html += `<tr>
+        html += `<tr data-pos="${esc(p.posGroup)}">
           <td class="jersey-num">${esc(p.jersey)}</td>
           <td class="player-name">${esc(p.name)}</td>
           <td class="player-pos">${esc(POS_GROUPS[p.posGroup])}</td>
@@ -1171,17 +1432,18 @@ function renderPreviewContent() {
     html += `</tbody></table>`;
 
     if (interchange.length > 0) {
-      html += `<div class="ts-interchange-title">INTERCHANGE</div>
+      html += `<div class="ts-interchange-title">Interchange</div>
         <table class="ts-table">
+          ${colgroup}
           <thead><tr>
-            <th style="width:50px; text-align:center;">No.</th>
+            <th style="text-align:center;">No.</th>
             <th>Player</th>
-            <th style="width:120px;">Position</th>
-            <th style="width:60px; text-align:center;">Caps</th>
+            <th>Position</th>
+            <th style="text-align:center;">Caps</th>
           </tr></thead>
           <tbody>`;
       interchange.forEach(p => {
-        html += `<tr class="interchange-row">
+        html += `<tr class="interchange-row" data-pos="${esc(p.posGroup)}">
           <td class="jersey-num">${esc(p.jersey)}</td>
           <td class="player-name">${esc(p.name)}</td>
           <td class="player-pos">${esc(POS_GROUPS[p.posGroup])}</td>
@@ -1193,15 +1455,15 @@ function renderPreviewContent() {
 
     if (match.notes) {
       html += `<div class="ts-notes">
-        <div class="notes-label">NOTES</div>
+        <div class="notes-label">Notes</div>
         <div class="notes-text">${escHtml(match.notes)}</div>
       </div>`;
     }
 
     html += `</div>
       <div class="ts-footer">
-        <span class="values">Accountability · Consistency · Action</span>
-        <span class="brand">CONFIDENTIAL</span>
+        <span class="brand">${esc(teamLabel)} · Team Sheet</span>
+        <span class="values">Generated ${genDate} · Private &amp; Confidential</span>
       </div>
     </div>`;
   }
@@ -1215,8 +1477,8 @@ function renderPreviewContent() {
 loadState();
 if (state.ui.currentView) switchView(state.ui.currentView);
 else renderSquad();
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
+
+```

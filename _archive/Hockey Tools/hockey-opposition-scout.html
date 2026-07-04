@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#d4a843">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Opposition Scout | HNZ</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+      background: #1a1a2e;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* ============================================
+   NAV
+   ============================================ */
+    nav {
+      background: #16213e;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      border-bottom: 2px solid #0f3460;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    nav .logo {
+      font-weight: 900;
+      font-size: 18px;
+      padding: 14px 0;
+      margin-right: 30px;
+      color: #d4a843;
+      letter-spacing: 1px;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: #8899aa;
+      font-size: 14px;
+      padding: 14px 18px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all .2s;
+    }
+
+    nav button:hover {
+      color: #fff;
+    }
+
+    nav button.active {
+      color: #fff;
+      border-bottom-color: #d4a843;
+    }
+
+    .view {
+      display: none;
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 16px;
+      color: #d4a843;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all .2s;
+    }
+
+    .btn-primary {
+      background: #d4a843;
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #e6bc5a;
+    }
+
+    .btn-secondary {
+      background: #0f3460;
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: #1a4a8a;
+    }
+
+    .btn-danger {
+      background: #722;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #933;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 6px 10px;
+      border: 1px solid #334;
+      border-radius: 4px;
+      background: #0d1b2a;
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #d4a843;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      width: 100%;
+    }
+
+    label {
+      font-size: 13px;
+      color: #99a;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ============================================
+   TEAM SELECTOR TABS
+   ============================================ */
+    .team-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      background: #0d1b2a;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #334;
+    }
+
+    .team-tab {
+      flex: 1;
+      padding: 12px 0;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #667;
+      transition: all .2s;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .team-tab:hover {
+      color: #aaa;
+      background: #16213e;
+    }
+
+    .team-tab.active {
+      font-weight: 700;
+    }
+
+    .team-tab+.team-tab {
+      border-left: 1px solid #334;
+    }
+
+    /* ============================================
+   PDF-STYLE SCOUTING PANELS
+   ============================================ */
+    .page-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: #2a2a2a;
+      border-bottom: 2px solid #555;
+      margin-bottom: 24px;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .page-bar-left {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ccc;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .page-bar-right {
+      font-size: 12px;
+      color: #888;
+      letter-spacing: 1px;
+    }
+
+    .doc-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .doc-subtitle {
+      font-size: 14px;
+      color: #888;
+      font-style: italic;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .info-box {
+      background: #2a2a2a;
+      border-radius: 4px;
+      padding: 14px 16px;
+    }
+
+    .info-box-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .info-box textarea,
+    .info-box input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      width: 100%;
+      resize: none;
+      min-height: 40px;
+      padding: 0;
+    }
+
+    .info-box textarea:focus,
+    .info-box input:focus {
+      outline: none;
+    }
+
+    .scout-panel {
+      background: #2a2a2a;
+      border-left: 3px solid #555;
+      border-radius: 0 4px 4px 0;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+    }
+
+    .scout-panel.accent-green {
+      border-left-color: #4a8c3f;
+    }
+
+    .scout-panel.accent-red {
+      border-left-color: #e74c3c;
+    }
+
+    .scout-panel.accent-gold {
+      border-left-color: #d4a843;
+    }
+
+    .scout-panel-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ccc;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .scout-panel textarea {
+      background: transparent;
+      border: none;
+      color: #bbb;
+      font-size: 13px;
+      width: 100%;
+      min-height: 60px;
+      line-height: 1.7;
+      font-style: italic;
+      padding: 0;
+      resize: none;
+    }
+
+    .scout-panel textarea:focus {
+      outline: none;
+      color: #fff;
+      font-style: normal;
+    }
+
+    .scout-panel textarea::placeholder {
+      color: #666;
+      font-style: italic;
+    }
+
+    .threat-card {
+      display: flex;
+      gap: 0;
+      margin-bottom: 14px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .threat-num {
+      background: #c0616b;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
+      padding: 20px 0;
+    }
+
+    .threat-body {
+      background: #2a2a2a;
+      flex: 1;
+      padding: 16px 20px;
+    }
+
+    .threat-body input {
+      background: transparent;
+      border: none;
+      color: #ccc;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      width: 100%;
+      margin-bottom: 6px;
+      padding: 0;
+    }
+
+    .threat-body input:focus {
+      outline: none;
+      color: #fff;
+    }
+
+    .threat-body textarea {
+      background: transparent;
+      border: none;
+      color: #bbb;
+      font-size: 13px;
+      width: 100%;
+      min-height: 50px;
+      line-height: 1.7;
+      font-style: italic;
+      padding: 0;
+      resize: none;
+    }
+
+    .threat-body textarea:focus {
+      outline: none;
+      color: #fff;
+      font-style: normal;
+    }
+
+    .sv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .log-table th {
+      background: #8faab8;
+      color: #1a1a2e;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    .log-table td {
+      padding: 8px 12px;
+      background: #2a2a2a;
+      border-bottom: 2px solid #1a1a2e;
+      vertical-align: middle;
+    }
+
+    .log-table td input,
+    .log-table td textarea {
+      background: transparent;
+      border: none;
+      color: #ccc;
+      font-size: 12px;
+      width: 100%;
+      padding: 0;
+      resize: none;
+      min-height: 36px;
+    }
+
+    .log-table td input:focus,
+    .log-table td textarea:focus {
+      outline: none;
+      color: #fff;
+    }
+
+    .section-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      background: #1e1e1e;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+
+    .section-tab {
+      flex: 1;
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #667;
+      transition: all .2s;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .section-tab:hover {
+      color: #ccc;
+      background: #2a2a2a;
+    }
+
+    .section-tab.active {
+      background: #2a2a2a;
+      color: #d4a843;
+      border-bottom: 2px solid #d4a843;
+    }
+
+    .section-tab+.section-tab {
+      border-left: 1px solid #333;
+    }
+
+    .sec {
+      display: none;
+    }
+
+    .sec.active {
+      display: block;
+    }
+
+    .doc-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      margin-top: 24px;
+      border-top: 1px solid #333;
+    }
+
+    .doc-footer .page-num {
+      font-size: 11px;
+      color: #555;
+    }
+
+    .doc-footer .brand {
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .section {
+      background: #16213e;
+      border: 1px solid #334;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section h3 {
+      color: #d4a843;
+      margin-bottom: 12px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ============================================
+   EXPANDABLE TEXT
+   ============================================ */
+    .expandable-wrap {
+      position: relative;
+    }
+
+    .expandable-wrap textarea {
+      overflow: hidden;
+      transition: max-height .3s ease;
+    }
+
+    .expandable-wrap.collapsed textarea {
+      max-height: 5.6em;
+    }
+
+    .expandable-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: #d4a843;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 0;
+      letter-spacing: .5px;
+    }
+
+    .expandable-wrap.collapsed .expandable-toggle,
+    .expandable-wrap.expanded .expandable-toggle {
+      display: inline-block;
+    }
+
+    /* ============================================
+   VIDEO BUTTON
+   ============================================ */
+    .video-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: #d4a843;
+      border: none;
+      color: #000;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+      letter-spacing: .5px;
+    }
+
+    .video-link-btn:hover {
+      background: #e6bc5a;
+    }
+
+    .video-link-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* ============================================
+   USER ID MODAL
+   ============================================ */
+    .user-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .user-modal {
+      background: #16213e;
+      border: 1px solid #334;
+      border-radius: 8px;
+      padding: 32px;
+      max-width: 360px;
+      width: 90%;
+    }
+
+    .user-modal h3 {
+      color: #d4a843;
+      margin-bottom: 16px;
+    }
+
+    .user-modal input {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 10px;
+    }
+
+    .user-modal .btn {
+      width: 100%;
+      padding: 10px;
+    }
+
+    /* ============================================
+   PLAYER SCOUTING CARDS
+   ============================================ */
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .player-card {
+      background: #2a2a2a;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-card-header {
+      position: relative;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+      cursor: pointer;
+    }
+
+    .player-card-header img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .player-card-header .upload-placeholder {
+      text-align: center;
+      padding: 20px;
+      color: #555;
+    }
+
+    .player-card-header .upload-placeholder svg {
+      width: 48px;
+      height: 48px;
+      fill: #444;
+      margin-bottom: 8px;
+    }
+
+    .player-card-header .upload-placeholder div {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .player-card-body {
+      padding: 14px 16px;
+      flex: 1;
+    }
+
+    .player-card-body input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #444;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      width: 100%;
+      padding: 4px 0;
+      margin-bottom: 8px;
+      border-radius: 0;
+    }
+
+    .player-card-body input:focus {
+      outline: none;
+      border-bottom-color: #d4a843;
+    }
+
+    .player-card-body .player-meta {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .player-card-body .player-meta input {
+      font-size: 12px;
+      font-weight: 600;
+      color: #aaa;
+      flex: 1;
+    }
+
+    .player-card-body label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      margin-top: 6px;
+    }
+
+    .player-card-body textarea {
+      background: transparent;
+      border: 1px solid #333;
+      color: #bbb;
+      font-size: 12px;
+      width: 100%;
+      min-height: 50px;
+      line-height: 1.6;
+      padding: 6px 8px;
+      border-radius: 3px;
+      resize: vertical;
+    }
+
+    .player-card-body textarea:focus {
+      outline: none;
+      border-color: #d4a843;
+      color: #fff;
+    }
+
+    .player-card-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 8px 12px;
+      border-top: 1px solid #333;
+    }
+
+    .player-posted-by {
+      font-size: 9px;
+      color: #556;
+      padding: 4px 16px;
+    }
+
+    /* ============================================
+   LINKIFIED URLS
+   ============================================ */
+    .linkify-links {
+      padding: 2px 0 0;
+    }
+
+    .linkify-links a {
+      display: inline-block;
+      font-size: 11px;
+      color: #3498db;
+      text-decoration: none;
+      margin-right: 10px;
+      word-break: break-all;
+    }
+
+    .linkify-links a:hover {
+      text-decoration: underline;
+      color: #5dade2;
+    }
+
+    .video-placeholder {
+      font-size: 11px;
+      color: #556;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    /* ============================================
+   AUTH LOGIN SCREEN
+   ============================================ */
+    .auth-screen {
+      position: fixed;
+      inset: 0;
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .auth-card {
+      background: #16213e;
+      border: 1px solid #334;
+      border-radius: 8px;
+      padding: 40px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .auth-card h2 {
+      color: #d4a843;
+      margin-bottom: 8px;
+      font-size: 24px;
+      letter-spacing: 2px;
+    }
+
+    .auth-card .auth-subtitle {
+      color: #889;
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .auth-card input {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 12px;
+    }
+
+    .auth-card .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .auth-card .auth-toggle {
+      color: #3498db;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 16px;
+      display: inline-block;
+      border: none;
+      background: none;
+    }
+
+    .auth-card .auth-toggle:hover {
+      text-decoration: underline;
+    }
+
+    .auth-error {
+      color: #e74c3c;
+      font-size: 12px;
+      margin-bottom: 12px;
+      min-height: 16px;
+    }
+
+    /* ============================================
+   AI EXECUTIVE BRIEFING
+   ============================================ */
+    .ai-card {
+      background: #16213e;
+      border: 2px solid #d4a843;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+
+    .ai-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .ai-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #d4a843;
+      text-transform: uppercase;
+    }
+
+    .ai-card-time {
+      font-size: 10px;
+      color: #667;
+    }
+
+    .ai-card-body {
+      font-size: 13px;
+      color: #ccc;
+      line-height: 1.8;
+    }
+
+    .ai-card-body h2,
+    .ai-card-body h3,
+    .ai-card-body h4 {
+      color: #d4a843;
+      margin: 14px 0 6px;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .ai-card-body strong {
+      color: #fff;
+    }
+
+    .ai-card-body .ai-bullet {
+      padding-left: 18px;
+      margin: 3px 0;
+      position: relative;
+    }
+
+    .ai-card-body .ai-bullet::before {
+      content: '\2022';
+      position: absolute;
+      left: 4px;
+      color: #d4a843;
+    }
+
+    .ai-card-empty {
+      color: #667;
+      font-size: 12px;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+
+    .ai-loading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 0;
+      color: #d4a843;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    @keyframes aispin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .ai-spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #334;
+      border-top-color: #d4a843;
+      border-radius: 50%;
+      animation: aispin .8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    /* ============================================
+   TACTICAL BOARD
+   ============================================ */
+    .tactical-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .tactical-item {
+      background: #2a2a2a;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+
+    .tactical-canvas-wrap {
+      position: relative;
+      background: #111;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .tactical-canvas-wrap img {
+      display: block;
+      width: 100%;
+    }
+
+    .tactical-canvas-wrap canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tactical-toolbar {
+      display: flex;
+      gap: 6px;
+      padding: 10px 12px;
+      background: #1e1e1e;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #555;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+
+    .color-btn.active {
+      border-color: #fff;
+      box-shadow: 0 0 6px rgba(255, 255, 255, .3);
+    }
+
+    .color-btn[data-color="red"] {
+      background: #e74c3c;
+    }
+
+    .color-btn[data-color="blue"] {
+      background: #3498db;
+    }
+
+    .color-btn[data-color="yellow"] {
+      background: #d4a843;
+    }
+
+    .color-btn[data-color="white"] {
+      background: #fff;
+    }
+
+    .tactical-item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-top: 1px solid #333;
+    }
+
+    .tactical-item-footer input {
+      background: transparent;
+      border: none;
+      color: #ccc;
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+      padding: 4px 0;
+    }
+
+    .tactical-item-footer input:focus {
+      outline: none;
+      color: #fff;
+    }
+
+    .tactical-upload-zone {
+      border: 2px dashed #444;
+      border-radius: 6px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+
+    .tactical-upload-zone:hover {
+      border-color: #d4a843;
+    }
+
+    .tactical-upload-zone svg {
+      width: 40px;
+      height: 40px;
+      fill: #555;
+      margin-bottom: 8px;
+    }
+
+    .tactical-upload-zone div {
+      font-size: 12px;
+      color: #667;
+      font-weight: 600;
+      letter-spacing: .5px;
+    }
+
+    @media print {
+      body {
+        background: #1e1e1e !important;
+      }
+
+      nav,
+      .team-tabs,
+      .section-tabs,
+      .toolbar,
+      .doc-footer .page-num,
+      .view:not(.print-active),
+      .no-print {
+        display: none !important;
+      }
+
+      .view.print-active {
+        display: block !important;
+        padding: 0 16px;
+      }
+
+      .sec {
+        display: block !important;
+        page-break-inside: avoid;
+        margin-bottom: 24px;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      @page {
+        size: landscape;
+        margin: 10mm;
+      }
+
+      textarea,
+      input {
+        border: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 10px;
+      }
+
+      nav .logo {
+        font-size: 14px;
+        margin-right: 10px;
+      }
+
+      nav button {
+        font-size: 12px;
+        padding: 10px 8px;
+      }
+
+      .view {
+        padding: 12px;
+      }
+
+      .sv-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .threat-num {
+        min-width: 50px;
+        font-size: 22px;
+      }
+
+      .section-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .section-tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .section-tab {
+        min-width: 0;
+        flex: 0 0 auto;
+        font-size: 10px;
+        letter-spacing: 0;
+        padding: 10px 12px;
+        white-space: nowrap;
+      }
+
+      .team-tab {
+        font-size: 11px;
+        letter-spacing: 0;
+        padding: 10px 4px;
+      }
+
+      .player-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .tactical-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <h2>OPPOSITION SCOUT</h2>
+      <div class="auth-subtitle">Black Sticks Men | Hockey New Zealand</div>
+      <div id="auth-error" class="auth-error"></div>
+      <div id="auth-login-fields">
+        <input type="email" id="auth-email" placeholder="Email">
+        <input type="password" id="auth-pass" placeholder="Password" onkeydown="if(event.key==='Enter')handleAuth()">
+        <button class="btn btn-primary" id="auth-submit" onclick="handleAuth()">Sign In</button>
+        <div style="display:flex;justify-content:space-between;margin-top:12px;">
+          <button class="auth-toggle" id="auth-toggle" onclick="toggleAuthMode()">Need an account? Sign Up</button>
+          <button class="auth-toggle" id="auth-forgot" onclick="showForgotPassword()">Forgot Password?</button>
+        </div>
+      </div>
+      <div id="auth-forgot-fields" style="display:none;">
+        <input type="email" id="forgot-email" placeholder="Email">
+        <button class="btn btn-primary" onclick="sendPasswordReset()">Send Reset Link</button>
+        <button class="auth-toggle" onclick="showLoginFields()" style="margin-top:12px;">Back to Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="update-password-screen" class="auth-screen" style="display:none;">
+    <div class="auth-card">
+      <h2>SET NEW PASSWORD</h2>
+      <div class="auth-subtitle">Enter your new password below</div>
+      <div id="update-pw-error" class="auth-error"></div>
+      <input type="password" id="new-pass" placeholder="New password"
+        onkeydown="if(event.key==='Enter')submitNewPassword()">
+      <input type="password" id="new-pass-confirm" placeholder="Confirm new password"
+        onkeydown="if(event.key==='Enter')submitNewPassword()">
+      <button class="btn btn-primary" id="update-pw-btn" onclick="submitNewPassword()">Update Password</button>
+    </div>
+  </div>
+
+  <nav id="main-nav" style="display:none;">
+    <span class="logo">OPPOSITION SCOUT</span>
+    <span id="sync-badge"
+      style="font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:3px;margin-right:auto;color:#667;">...</span>
+    <button class="active" onclick="showView('scout')">Scouting</button>
+    <button onclick="showView('live')">Live Mode</button>
+    <button onclick="showView('data')">Data</button>
+    <button onclick="handleSignOut()" style="color:#e74c3c;margin-left:8px;">Logout</button>
+  </nav>
+
+  <div id="view-scout" class="view active"></div>
+  <div id="view-live" class="view"></div>
+  <div id="view-data" class="view"></div>
+
+  <script>
+    const STORE = 'hockeyOppoScoutV4';
+    const USER_STORE = 'hockeyScoutUser';
+
+    /* ============================================
+       SUPABASE CLIENT
+       ============================================ */
+    const SB_URL = 'https://rqqjqoyjaiphsfhyyvka.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcWpxb3lqYWlwaHNmaHl5dmthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTEyMTksImV4cCI6MjA4OTQyNzIxOX0.kIZI3gNv3kfaWOsZhQ6k2B1Me4Q-zZMaaIcQTHD3Tuc';
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+    let sbOnline = true;
+
+    function blankTeamData() {
+      return {
+        worldRanking: '', headCoach: '', keyPlayersOverview: '', lastResultVsNZ: '',
+        videoLink: '',
+        playingIdentity: '', strengthsTop3: '', vulnerabilitiesTop3: '',
+        defensiveFormation: '', pressTriggers: '', defensiveBlock: '',
+        setPieceDefence: '', transitionLosingPossession: '',
+        buildUpPattern: '', attackTransition: '', dangerousZones: '',
+        setPieceAttack: '', keyAttackingPlayers: '',
+        threats: [{ title: '', description: '' }, { title: '', description: '' }, { title: '', description: '' }],
+        ourAttackingPriority: '', ourDefensivePriority: '',
+        setPieceStrategy: '', psychologicalEdge: '',
+        players: [],
+        tacticalImages: [],
+        log: [],
+        aiBriefing: '',
+        aiBriefingTime: ''
+      };
+    }
+
+    function blankTeam(name, country, competition) {
+      return { id: uid(), name, country, competition: competition || 'Hockey World Cup', ...blankTeamData() };
+    }
+
+    /* ---- Convert between app format and DB format ---- */
+    function teamToRow(t) {
+      const { id, name, country, competition, ...rest } = t;
+      return { id, name, country, competition, team_data: rest, updated_at: new Date().toISOString() };
+    }
+    function rowToTeam(r) {
+      const defaults = blankTeamData();
+      const td = r.team_data || {};
+      // Remove core fields from team_data to prevent legacy overrides
+      delete td.name; delete td.country; delete td.competition; delete td.id;
+      return { id: r.id, name: r.name, country: r.country, competition: r.competition, ...defaults, ...td };
+    }
+
+    let data = { teams: [], currentTeamIdx: 0, currentSection: 0 };
+    let currentUser = null;
+    let currentRole = 'contributor'; // 'admin', 'coach', or 'contributor'
+    let currentAuthUid = null;
+
+    /* ---- Drawing state ---- */
+    let drawingState = {};
+
+    /* ---- User Identity ---- */
+    function getUser() {
+      const stored = localStorage.getItem(USER_STORE);
+      if (stored) { currentUser = JSON.parse(stored); return currentUser; }
+      return null;
+    }
+    function setUser(name, initials) {
+      currentUser = { name, initials };
+      localStorage.setItem(USER_STORE, JSON.stringify(currentUser));
+    }
+    function promptUserIdentity(cb) {
+      // Remove any existing identity modal to prevent duplicates
+      const existing = document.querySelector('.user-modal-overlay');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'user-modal-overlay';
+      overlay.innerHTML = `<div class="user-modal">
+    <h3>Who are you?</h3>
+    <label>Full Name</label><input type="text" class="uid-name-input" placeholder="e.g. Shea McAleese">
+    <label>Initials</label><input type="text" class="uid-init-input" placeholder="e.g. SM" maxlength="4">
+    <button class="btn btn-primary uid-go-btn">Continue</button>
+  </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('.uid-go-btn').onclick = function () {
+        const n = overlay.querySelector('.uid-name-input').value.trim();
+        const i = overlay.querySelector('.uid-init-input').value.trim().toUpperCase();
+        if (!n || !i) return;
+        setUser(n, i);
+        overlay.remove();
+        if (cb) cb();
+      };
+    }
+    function postedByStamp() {
+      if (!currentUser) return '';
+      const now = new Date();
+      const d = now.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
+      const t = now.toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' });
+      return `${currentUser.initials} \u2014 ${d} ${t}`;
+    }
+    /* ============================================
+       AUTHENTICATION
+       ============================================ */
+    let authMode = 'login';
+
+    function showLoginScreen() {
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('main-nav').style.display = 'none';
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    }
+
+    function hideLoginScreen() {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('main-nav').style.display = '';
+    }
+
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'signup' : 'login';
+      document.getElementById('auth-submit').textContent = authMode === 'login' ? 'Sign In' : 'Sign Up';
+      document.getElementById('auth-toggle').textContent = authMode === 'login' ? 'Need an account? Sign Up' : 'Already have an account? Sign In';
+      document.getElementById('auth-error').textContent = '';
+      document.getElementById('auth-forgot').style.display = authMode === 'login' ? '' : 'none';
+    }
+
+    function showForgotPassword() {
+      document.getElementById('auth-login-fields').style.display = 'none';
+      document.getElementById('auth-forgot-fields').style.display = '';
+      document.getElementById('auth-error').textContent = '';
+      document.getElementById('forgot-email').value = document.getElementById('auth-email').value;
+    }
+
+    function showLoginFields() {
+      document.getElementById('auth-forgot-fields').style.display = 'none';
+      document.getElementById('auth-login-fields').style.display = '';
+      document.getElementById('auth-error').textContent = '';
+    }
+
+    async function sendPasswordReset() {
+      const email = document.getElementById('forgot-email').value.trim();
+      const errEl = document.getElementById('auth-error');
+      errEl.textContent = '';
+      if (!email) { errEl.style.color = '#e74c3c'; errEl.textContent = 'Enter your email address.'; return; }
+      try {
+        const { error } = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + window.location.pathname
+        });
+        if (error) throw error;
+        errEl.style.color = '#4a8c3f';
+        errEl.textContent = 'Reset link sent! Check your email.';
+      } catch (e) {
+        errEl.style.color = '#e74c3c';
+        errEl.textContent = e.message || 'Failed to send reset email.';
+      }
+    }
+
+    function showUpdatePasswordScreen() {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('update-password-screen').style.display = 'flex';
+      document.getElementById('main-nav').style.display = 'none';
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    }
+
+    async function submitNewPassword() {
+      const pass = document.getElementById('new-pass').value;
+      const confirm = document.getElementById('new-pass-confirm').value;
+      const errEl = document.getElementById('update-pw-error');
+      const btn = document.getElementById('update-pw-btn');
+      errEl.textContent = '';
+
+      if (!pass || pass.length < 6) { errEl.style.color = '#e74c3c'; errEl.textContent = 'Password must be at least 6 characters.'; return; }
+      if (pass !== confirm) { errEl.style.color = '#e74c3c'; errEl.textContent = 'Passwords do not match.'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+      try {
+        const { error } = await sb.auth.updateUser({ password: pass });
+        if (error) throw error;
+        errEl.style.color = '#4a8c3f';
+        errEl.textContent = 'Password updated! Redirecting...';
+        setTimeout(function () {
+          document.getElementById('update-password-screen').style.display = 'none';
+          // Clear the hash so we don't re-trigger on reload
+          history.replaceState(null, '', window.location.pathname);
+          hideLoginScreen();
+          proceedAfterAuth();
+        }, 1500);
+      } catch (e) {
+        errEl.style.color = '#e74c3c';
+        errEl.textContent = e.message || 'Failed to update password.';
+        btn.disabled = false;
+        btn.textContent = 'Update Password';
+      }
+    }
+
+    async function handleAuth() {
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      const errEl = document.getElementById('auth-error');
+      errEl.textContent = '';
+      if (!email || !pass) { errEl.textContent = 'Email and password required.'; return; }
+
+      const btn = document.getElementById('auth-submit');
+      btn.disabled = true;
+      btn.textContent = authMode === 'login' ? 'Signing in...' : 'Signing up...';
+
+      try {
+        if (authMode === 'login') {
+          const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+          if (error) throw error;
+        } else {
+          const { data: signUpData, error } = await sb.auth.signUp({
+            email, password: pass,
+            options: { emailRedirectTo: window.location.origin + window.location.pathname }
+          });
+          if (error) throw error;
+          if (signUpData.session) {
+            // Auto-confirmed — proceed directly
+          } else {
+            errEl.style.color = '#4a8c3f';
+            errEl.textContent = 'Account created! Check your email to confirm, then sign in.';
+            authMode = 'login';
+            btn.textContent = 'Sign In';
+            btn.disabled = false;
+            document.getElementById('auth-toggle').textContent = 'Need an account? Sign Up';
+            return;
+          }
+        }
+        hideLoginScreen();
+        await proceedAfterAuth();
+      } catch (e) {
+        errEl.style.color = '#e74c3c';
+        errEl.textContent = e.message || 'Authentication failed.';
+        btn.textContent = authMode === 'login' ? 'Sign In' : 'Sign Up';
+        btn.disabled = false;
+      }
+    }
+
+    async function handleSignOut() {
+      _proceeding = false;
+      await sb.auth.signOut();
+      location.reload();
+    }
+
+    let _proceeding = false;
+    async function proceedAfterAuth() {
+      if (_proceeding) return;
+      _proceeding = true;
+      try {
+        // Read role from Supabase user metadata
+        const { data: { session } } = await sb.auth.getSession();
+        if (session && session.user) {
+          currentAuthUid = session.user.id;
+          const meta = session.user.app_metadata || {};
+          currentRole = meta.role || 'contributor';
+        }
+        document.getElementById('view-scout').classList.add('active');
+        await load();
+        subscribeToRealtime();
+        if (!getUser()) {
+          promptUserIdentity(function () { renderScout(); });
+        } else {
+          renderScout();
+        }
+      } catch (e) {
+        console.error('proceedAfterAuth error:', e);
+      } finally {
+        _proceeding = false;
+      }
+    }
+
+    function canEdit(entry) {
+      if (currentRole === 'admin' || currentRole === 'coach') return true;
+      if (!entry || !entry.createdByUid) return true; // legacy entries without uid
+      return entry.createdByUid === currentAuthUid;
+    }
+
+    function isCoachOrAdmin() {
+      return currentRole === 'admin' || currentRole === 'coach';
+    }
+
+    /* ============================================
+       SAVE — localStorage immediately, Supabase debounced
+       ============================================ */
+    let _syncTimer = null;
+    let _isSyncing = false;
+    function save() {
+      localStorage.setItem(STORE, JSON.stringify(data));
+      clearTimeout(_syncTimer);
+      _syncTimer = setTimeout(syncToSupabase, 800);
+      updateSyncBadge('saving');
+    }
+
+    async function syncToSupabase() {
+      _isSyncing = true;
+      try {
+        for (const team of data.teams) {
+          const row = teamToRow(team);
+          const { error } = await sb.from('scout_teams').upsert(row);
+          if (error) throw error;
+        }
+        sbOnline = true;
+        updateSyncBadge('synced');
+      } catch (e) {
+        console.warn('Supabase sync failed:', e);
+        sbOnline = false;
+        updateSyncBadge('offline');
+      }
+      setTimeout(function () { _isSyncing = false; }, 500);
+    }
+
+    /* ============================================
+       REALTIME — Listen for changes from other users
+       ============================================ */
+    let _realtimeChannel = null;
+    function subscribeToRealtime() {
+      if (_realtimeChannel) return;
+      _realtimeChannel = sb.channel('scout-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'scout_teams' }, function (payload) {
+          if (_isSyncing) return;
+          handleRealtimeUpdate(payload);
+        })
+        .subscribe();
+    }
+
+    function handleRealtimeUpdate(payload) {
+      if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+        const row = payload.new;
+        const idx = data.teams.findIndex(function (t) { return t.id === row.id; });
+        if (idx >= 0) {
+          const isCurrentTeam = (idx === data.currentTeamIdx);
+          // Capture current DOM values into local data before merging
+          if (isCurrentTeam) captureDOMValues();
+          const localTeam = data.teams[idx];
+          const remoteTeam = rowToTeam(row);
+          // For the currently-viewed team, preserve any local field that
+          // differs from what we last synced (i.e. the user is actively editing)
+          if (isCurrentTeam) {
+            const merged = Object.assign({}, remoteTeam);
+            // Preserve locally-edited simple text fields
+            const textFields = ['worldRanking', 'headCoach', 'keyPlayersOverview', 'lastResultVsNZ', 'videoLink',
+              'playingIdentity', 'strengthsTop3', 'vulnerabilitiesTop3', 'defensiveFormation', 'pressTriggers',
+              'defensiveBlock', 'setPieceDefence', 'transitionLosingPossession', 'buildUpPattern', 'attackTransition',
+              'dangerousZones', 'setPieceAttack', 'keyAttackingPlayers', 'ourAttackingPriority', 'ourDefensivePriority',
+              'setPieceStrategy', 'psychologicalEdge'];
+            textFields.forEach(function (f) {
+              // If the user has local content that differs from remote, keep local
+              if (localTeam[f] && localTeam[f] !== remoteTeam[f]) merged[f] = localTeam[f];
+            });
+            data.teams[idx] = merged;
+          } else {
+            data.teams[idx] = remoteTeam;
+          }
+          localStorage.setItem(STORE, JSON.stringify(data));
+          if (isCurrentTeam) renderScout();
+        } else {
+          data.teams.push(rowToTeam(row));
+          localStorage.setItem(STORE, JSON.stringify(data));
+          renderScout();
+        }
+        updateSyncBadge('synced');
+      } else if (payload.eventType === 'DELETE') {
+        const oldId = payload.old.id;
+        const idx = data.teams.findIndex(function (t) { return t.id === oldId; });
+        if (idx >= 0) {
+          data.teams.splice(idx, 1);
+          if (data.currentTeamIdx >= data.teams.length) data.currentTeamIdx = Math.max(0, data.teams.length - 1);
+          localStorage.setItem(STORE, JSON.stringify(data));
+          renderScout();
+        }
+      }
+    }
+
+    /* Capture DOM values into data WITHOUT calling save() — prevents sync loops */
+    function captureDOMValues() {
+      const t = ct(); if (!t) return;
+      document.querySelectorAll('[data-field]').forEach(function (el) { t[el.dataset.field] = el.value; });
+      document.querySelectorAll('[data-threat]').forEach(function (el) {
+        const i = parseInt(el.dataset.threat);
+        if (t.threats && t.threats[i]) t.threats[i][el.dataset.tfield] = el.value;
+      });
+      document.querySelectorAll('[data-log]').forEach(function (el) {
+        const i = parseInt(el.dataset.log);
+        if (t.log && t.log[i]) t.log[i][el.dataset.lfield] = el.value;
+      });
+      document.querySelectorAll('[data-pidx]').forEach(function (el) {
+        const i = parseInt(el.dataset.pidx);
+        if (t.players && t.players[i] && el.dataset.pfield) t.players[i][el.dataset.pfield] = el.value;
+      });
+    }
+
+    async function syncDeleteTeam(id) {
+      try { await sb.from('scout_teams').delete().eq('id', id); } catch (e) { console.warn('Delete sync failed:', e); }
+    }
+
+    async function syncInsertTeam(team) {
+      try {
+        const row = teamToRow(team);
+        row.created_at = new Date().toISOString();
+        await sb.from('scout_teams').upsert(row);
+      } catch (e) { console.warn('Insert sync failed:', e); }
+    }
+
+    function updateSyncBadge(state) {
+      const el = document.getElementById('sync-badge');
+      if (!el) return;
+      if (state === 'synced') { el.textContent = 'Synced'; el.style.color = '#4a8c3f'; }
+      else if (state === 'saving') { el.textContent = 'Saving...'; el.style.color = '#d4a843'; }
+      else if (state === 'offline') { el.textContent = 'Offline'; el.style.color = '#e74c3c'; }
+      else if (state === 'loading') { el.textContent = 'Loading...'; el.style.color = '#3498db'; }
+    }
+
+    /* ============================================
+       LOAD — Supabase first, localStorage fallback
+       ============================================ */
+    async function load() {
+      updateSyncBadge('loading');
+      // Try Supabase first
+      try {
+        const { data: rows, error } = await sb.from('scout_teams').select('*').order('created_at');
+        if (!error && rows && rows.length > 0) {
+          data.teams = rows.map(rowToTeam);
+          data.currentTeamIdx = 0;
+          data.currentSection = 0;
+          localStorage.setItem(STORE, JSON.stringify(data));
+          sbOnline = true;
+          updateSyncBadge('synced');
+          return;
+        }
+      } catch (e) {
+        console.warn('Supabase load failed, using localStorage:', e);
+        sbOnline = false;
+      }
+
+      // Fall back to localStorage
+      try {
+        const r = localStorage.getItem(STORE);
+        if (r) data = JSON.parse(r);
+        if (!data.teams) data.teams = [];
+        if (data.currentTeamIdx === undefined) data.currentTeamIdx = 0;
+        if (data.currentSection === undefined) data.currentSection = 0;
+      } catch (e) { data = { teams: [], currentTeamIdx: 0, currentSection: 0 }; }
+
+      // Ensure new fields exist on legacy data
+      data.teams.forEach(t => {
+        if (!t.videoLink) t.videoLink = '';
+        if (!t.players) t.players = [];
+        if (!t.tacticalImages) t.tacticalImages = [];
+      });
+
+      if (data.teams.length === 0) {
+        data.teams.push(blankTeam('Netherlands', 'Netherlands', 'Hockey World Cup'));
+        data.teams.push(blankTeam('Argentina', 'Argentina', 'Hockey World Cup'));
+        data.teams.push(blankTeam('Japan', 'Japan', 'Hockey World Cup'));
+        localStorage.setItem(STORE, JSON.stringify(data));
+        // Try to seed Supabase
+        for (const t of data.teams) await syncInsertTeam(t);
+      }
+      updateSyncBadge(sbOnline ? 'synced' : 'offline');
+    }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
+    function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    /* ---- Country banner colours ---- */
+    function getColorFromText(text) {
+      var t = (text || '').toLowerCase();
+      if (t.indexOf('netherland') !== -1) return { bg: '#FF4F00', text: '#fff' };
+      if (t.indexOf('argentin') !== -1) return { bg: '#74ACDF', text: '#000' };
+      if (t.indexOf('japan') !== -1) return { bg: '#BC002D', text: '#fff' };
+      return { bg: '#d4a843', text: '#000' };
+    }
+    function getTeamColor(team) {
+      if (!team) return { bg: '#d4a843', text: '#000' };
+      return getColorFromText((team.country || '') + ' ' + (team.name || ''));
+    }
+    function ct() { return data.teams[data.currentTeamIdx]; }
+
+    /* ---- Image compression utility ---- */
+    function compressImage(file, maxW, maxH, quality, cb) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = h * maxW / w; w = maxW; }
+          if (h > maxH) { w = w * maxH / h; h = maxH; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          cb(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function showView(name) {
+      document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); v.classList.remove('print-active'); });
+      document.getElementById('view-' + name).classList.add('active');
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => {
+        if ((name === 'scout' && b.textContent === 'Scouting') ||
+          (name === 'live' && b.textContent === 'Live Mode') ||
+          (name === 'data' && b.textContent === 'Data')) b.classList.add('active');
+      });
+      if (name === 'scout') renderScout();
+      if (name === 'live') renderLive();
+      if (name === 'data') renderData();
+    }
+
+    const SECTIONS = [
+      { key: 'overview', label: 'Team Overview' },
+      { key: 'defend', label: 'How They Defend' },
+      { key: 'attack', label: 'How They Attack' },
+      { key: 'threats', label: 'Key Threats' },
+      { key: 'players', label: 'Player Scouting' },
+      { key: 'tactical', label: 'Tactical Board' },
+      { key: 'gameplan', label: 'Our Game Plan' },
+      { key: 'log', label: 'Scouting Log' }
+    ];
+
+    function renderScout() {
+      const el = document.getElementById('view-scout');
+      const t = ct();
+      if (!t) {
+        el.innerHTML = `<div style="text-align:center;padding:60px 20px;">
+      <h2 style="color:#d4a843;">No Teams Loaded</h2>
+      <p style="color:#999;margin:16px 0;">Could not load scouting data. Check your connection and try again.</p>
+      <button class="btn btn-primary" onclick="location.reload()">Reload</button>
+      <button class="btn btn-secondary" onclick="addNewTeam()" style="margin-left:8px;">+ Add Team</button>
+    </div>`;
+        return;
+      }
+
+      el.innerHTML = `
+    <div class="toolbar no-print" style="justify-content:space-between;">
+      <h2 style="margin:0;">Opponent Scouting Report</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="addNewTeam()">+ Add Team</button>
+        <button class="btn btn-secondary" onclick="printScout()">Print Report</button>
+      </div>
+    </div>
+
+    <div class="team-tabs no-print">
+      ${data.teams.map(function (tm, i) {
+        var active = i === data.currentTeamIdx;
+        var tc = getColorFromText(tm.name);
+        var bg = active ? tc.bg : 'transparent';
+        var fg = active ? tc.text : '#667';
+        return '<button class="team-tab' + (active ? ' active' : '') + '" style="background:' + bg + ';color:' + fg + ';" onclick="switchTeam(' + i + ')">' + esc(tm.name) + '</button>';
+      }).join('')}
+    </div>
+
+    <div class="section-tabs no-print">
+      ${SECTIONS.map((s, i) => `<button class="section-tab ${i === data.currentSection ? 'active' : ''}" onclick="switchSection(${i})">${s.label}</button>`).join('')}
+    </div>
+
+    ${renderOverview(t)}
+    ${renderDefend(t)}
+    ${renderAttack(t)}
+    ${renderThreats(t)}
+    ${renderPlayers(t)}
+    ${renderTactical(t)}
+    ${renderGameplan(t)}
+    ${renderLog(t)}
+
+    <div class="doc-footer">
+      <span class="page-num">${data.currentSection + 1} / ${SECTIONS.length}</span>
+      <span class="brand">HNZ | BLACK STICKS MEN</span>
+    </div>`;
+    }
+
+    function switchTeam(idx) { autoSave(); data.currentTeamIdx = idx; save(); renderScout(); }
+    function switchSection(idx) { autoSave(); data.currentSection = idx; save(); renderScout(); }
+
+    function renderOverview(t) {
+      return `<div class="sec ${data.currentSection === 0 ? 'active' : ''}" id="sec-overview">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Team Overview</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">Team Overview</div>
+    <div class="info-grid">
+      <div class="info-box"><div class="info-box-label">World Ranking</div><input type="text" data-field="worldRanking" value="${esc(t.worldRanking)}" placeholder="e.g. #3" onchange="fieldChange(this)"></div>
+      <div class="info-box"><div class="info-box-label">Head Coach</div><input type="text" data-field="headCoach" value="${esc(t.headCoach)}" placeholder="Name" onchange="fieldChange(this)"></div>
+      <div class="info-box"><div class="info-box-label">Key Players</div><textarea data-field="keyPlayersOverview" placeholder="Top names to watch" onchange="fieldChange(this)">${esc(t.keyPlayersOverview)}</textarea></div>
+      <div class="info-box"><div class="info-box-label">Last Result vs NZ</div><input type="text" data-field="lastResultVsNZ" value="${esc(t.lastResultVsNZ)}" placeholder="e.g. NZ 2-3 NED" onchange="fieldChange(this)"></div>
+    </div>
+    <div style="margin-bottom:16px;display:flex;gap:12px;align-items:center;">
+      <div style="flex:1;"><label>Video Folder (Google Drive Link)</label><input type="text" data-field="videoLink" value="${esc(t.videoLink)}" placeholder="https://drive.google.com/drive/folders/..." onchange="fieldChange(this)" style="width:100%;"></div>
+      ${t.videoLink ? `<a href="${esc(t.videoLink)}" target="_blank" rel="noopener" class="video-link-btn" style="margin-top:16px;"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>View Footage</a>` : '<div class="video-placeholder" style="margin-top:16px;">Add a Google Drive link to enable the video button</div>'}
+    </div>
+    <div class="scout-panel"><div class="scout-panel-label">Playing Identity / Style</div><textarea data-field="playingIdentity" placeholder="How do they play? High press, possession-based, direct, physical, technical? What's their identity?" onchange="fieldChange(this)">${esc(t.playingIdentity)}</textarea></div>
+    <div class="sv-grid">
+      <div><div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#ccc;text-transform:uppercase;margin-bottom:8px;">Strengths (Top 3)</div><div class="scout-panel accent-green" style="margin-bottom:0;"><textarea data-field="strengthsTop3" placeholder="Their three biggest weapons. Be specific." onchange="fieldChange(this)">${esc(t.strengthsTop3)}</textarea></div></div>
+      <div><div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#ccc;text-transform:uppercase;margin-bottom:8px;">Vulnerabilities (Top 3)</div><div class="scout-panel accent-red" style="margin-bottom:0;"><textarea data-field="vulnerabilitiesTop3" placeholder="Where can we hurt them?" onchange="fieldChange(this)">${esc(t.vulnerabilitiesTop3)}</textarea></div></div>
+    </div>
+  </div>`;
+    }
+
+    function renderDefend(t) {
+      const fields = [
+        { key: 'defensiveFormation', label: 'Defensive Formation', ph: 'Back line structure when defending.' },
+        { key: 'pressTriggers', label: 'Press Triggers', ph: 'When and what triggers their press?' },
+        { key: 'defensiveBlock', label: 'Defensive Block', ph: 'How do they sit in a mid-block? Where is space?' },
+        { key: 'setPieceDefence', label: 'Set Piece Defence', ph: 'How do they defend corners and short corners?' },
+        { key: 'transitionLosingPossession', label: 'Transition \u2014 Losing Possession', ph: 'What do they do immediately after losing the ball?' }
+      ];
+      return `<div class="sec ${data.currentSection === 1 ? 'active' : ''}" id="sec-defend">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Defensive Structure</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">How They Defend</div>
+    ${fields.map(f => `<div class="scout-panel"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
+  </div>`;
+    }
+
+    function renderAttack(t) {
+      const fields = [
+        { key: 'buildUpPattern', label: 'Build-Up Pattern', ph: 'How do they build from the back?' },
+        { key: 'attackTransition', label: 'Attack Transition', ph: 'Counter-attack patterns, runners, key threats in transition.' },
+        { key: 'dangerousZones', label: 'Dangerous Zones', ph: 'Where do most of their attacks come from?' },
+        { key: 'setPieceAttack', label: 'Set Piece Attack', ph: 'Corner and short corner structures. PC routine.' },
+        { key: 'keyAttackingPlayers', label: 'Key Attacking Player(s)', ph: 'Who is the danger man? Number, name, tendency.' }
+      ];
+      return `<div class="sec ${data.currentSection === 2 ? 'active' : ''}" id="sec-attack">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Attacking Structure</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">How They Attack</div>
+    ${fields.map(f => `<div class="scout-panel"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
+  </div>`;
+    }
+
+    function renderThreats(t) {
+      if (!t.threats || t.threats.length < 3) t.threats = [{ title: '', description: '' }, { title: '', description: '' }, { title: '', description: '' }];
+      return `<div class="sec ${data.currentSection === 3 ? 'active' : ''}" id="sec-threats">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Key Threats</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">The Three Biggest Threats</div>
+    <div class="doc-subtitle">These are the patterns we must have a plan for. Brief the team specifically.</div>
+    ${t.threats.map((th, i) => `<div class="threat-card"><div class="threat-num">0${i + 1}</div><div class="threat-body"><input type="text" data-threat="${i}" data-tfield="title" value="${esc(th.title)}" placeholder="THREAT TITLE" onchange="threatChange(this)"><textarea data-threat="${i}" data-tfield="description" placeholder="Description of the threat \u2014 who, where, how it develops, and our planned response" onchange="threatChange(this)">${esc(th.description)}</textarea>${th.postedBy ? `<div style="font-size:9px;color:#556;margin-top:4px;">${esc(th.postedBy)}</div>` : ''}</div></div>`).join('')}
+  </div>`;
+    }
+
+    /* ============================================
+       PLAYER SCOUTING — Section 5
+       ============================================ */
+    function renderPlayers(t) {
+      if (!t.players) t.players = [];
+      const cards = t.players.map((p, i) => `
+    <div class="player-card">
+      <div class="player-card-header" onclick="uploadPlayerHeadshot(${i})">
+        ${p.headshot
+          ? `<img src="${p.headshot}" alt="${esc(p.name)}">`
+          : `<div class="upload-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><div>Tap to add headshot</div></div>`
+        }
+      </div>
+      <div class="player-card-body">
+        <input type="text" value="${esc(p.name)}" placeholder="Player Name" data-pidx="${i}" data-pfield="name" onchange="playerChange(this)">
+        <div class="player-meta">
+          <input type="text" value="${esc(p.number)}" placeholder="#" data-pidx="${i}" data-pfield="number" onchange="playerChange(this)" style="max-width:50px;">
+          <input type="text" value="${esc(p.position)}" placeholder="Position" data-pidx="${i}" data-pfield="position" onchange="playerChange(this)">
+        </div>
+        <label>Scouting Profile</label>
+        <textarea data-pidx="${i}" data-pfield="scoutingProfile" placeholder="Playing style, role in team, strengths..." onchange="playerChange(this)">${esc(p.scoutingProfile)}</textarea>
+        <label>Key Tendencies</label>
+        <textarea data-pidx="${i}" data-pfield="keyTendencies" placeholder="Preferred side, drag flick speed, movement patterns, weaknesses..." onchange="playerChange(this)">${esc(p.keyTendencies)}</textarea>
+      </div>
+      ${p.postedBy ? `<div class="player-posted-by">${esc(p.postedBy)}</div>` : ''}
+      ${canEdit(p) ? `<div class="player-card-actions">
+        <button class="btn btn-danger btn-sm" onclick="deletePlayer(${i})">Remove</button>
+      </div>` : ''}
+    </div>`).join('');
+
+      return `<div class="sec ${data.currentSection === 4 ? 'active' : ''}" id="sec-players">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Player Scouting</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">Player Scouting Profiles</div>
+    <div class="doc-subtitle">Upload headshots and document individual scouting profiles for key opposition players.</div>
+    <button class="btn btn-primary no-print" onclick="addPlayer()" style="margin-bottom:4px;">+ Add Player</button>
+    <div class="player-grid">${cards || '<div style="color:#667;font-size:13px;grid-column:1/-1;text-align:center;padding:40px;">No players added yet.</div>'}</div>
+  </div>`;
+    }
+
+    function addPlayer() {
+      autoSave();
+      ct().players.push({ id: uid(), name: '', number: '', position: '', headshot: '', scoutingProfile: '', keyTendencies: '', postedBy: postedByStamp(), createdByUid: currentAuthUid });
+      save(); renderScout();
+    }
+    function deletePlayer(i) {
+      if (!canEdit(ct().players[i])) return alert('You can only delete entries you created.');
+      if (!confirm('Are you sure you want to remove this player?')) return;
+      autoSave(); ct().players.splice(i, 1); save(); renderScout();
+    }
+    function playerChange(el) {
+      const i = parseInt(el.dataset.pidx);
+      ct().players[i][el.dataset.pfield] = el.value;
+      ct().players[i].postedBy = postedByStamp();
+      save();
+    }
+    function uploadPlayerHeadshot(idx) {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*';
+      inp.onchange = function () {
+        if (!inp.files[0]) return;
+        compressImage(inp.files[0], 400, 400, 0.8, function (dataUrl) {
+          ct().players[idx].headshot = dataUrl;
+          ct().players[idx].postedBy = postedByStamp();
+          save(); renderScout();
+        });
+      };
+      inp.click();
+    }
+
+    /* ============================================
+       TACTICAL BOARD — Section 6
+       ============================================ */
+    function renderTactical(t) {
+      if (!t.tacticalImages) t.tacticalImages = [];
+      const items = t.tacticalImages.map((ti, i) => `
+    <div class="tactical-item" id="tac-item-${i}">
+      <div class="tactical-toolbar">
+        <button class="color-btn active" data-color="red" data-tidx="${i}" onclick="setDrawColor(this,'#e74c3c')"></button>
+        <button class="color-btn" data-color="blue" data-tidx="${i}" onclick="setDrawColor(this,'#3498db')"></button>
+        <button class="color-btn" data-color="yellow" data-tidx="${i}" onclick="setDrawColor(this,'#d4a843')"></button>
+        <button class="color-btn" data-color="white" data-tidx="${i}" onclick="setDrawColor(this,'#ffffff')"></button>
+        <span style="flex:1;"></span>
+        <button class="btn btn-secondary btn-sm" onclick="undoDrawing(${i})">Undo</button>
+        <button class="btn btn-danger btn-sm" onclick="clearDrawing(${i})">Clear All</button>
+      </div>
+      <div class="tactical-canvas-wrap" id="tac-wrap-${i}">
+        <img src="${ti.image}" id="tac-img-${i}" onload="initCanvas(${i})" data-tac-idx="${i}">
+        <canvas id="tac-canvas-${i}"></canvas>
+      </div>
+      <div class="tactical-item-footer">
+        <input type="text" value="${esc(ti.title)}" placeholder="Image title..." data-tidx="${i}" onchange="tacTitleChange(this)">
+        <span style="font-size:9px;color:#556;margin:0 8px;white-space:nowrap;">${esc(ti.postedBy || '')}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteTactical(${i})">Delete</button>
+      </div>
+    </div>`).join('');
+
+      return `<div class="sec ${data.currentSection === 5 ? 'active' : ''}" id="sec-tactical">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Tactical Board</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">Game Images & Tactical Analysis</div>
+    <div class="doc-subtitle">Upload screenshots, diagrams, or photos of tactics. Draw annotations with the colour-coded tools.</div>
+    <div class="tactical-upload-zone no-print" onclick="uploadTacticalImage()">
+      <svg viewBox="0 0 24 24"><path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/></svg>
+      <div>Upload Image / Screenshot / Diagram</div>
+    </div>
+    <div class="tactical-grid">${items}</div>
+  </div>`;
+    }
+
+    function uploadTacticalImage() {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*';
+      inp.onchange = function () {
+        if (!inp.files[0]) return;
+        compressImage(inp.files[0], 1200, 900, 0.85, function (dataUrl) {
+          autoSave();
+          ct().tacticalImages.push({ id: uid(), image: dataUrl, annotations: '', title: '', strokes: [], postedBy: postedByStamp(), createdByUid: currentAuthUid });
+          save(); renderScout();
+        });
+      };
+      inp.click();
+    }
+    function deleteTactical(i) {
+      if (!canEdit(ct().tacticalImages[i])) return alert('You can only delete entries you created.');
+      if (!confirm('Are you sure you want to delete this tactical image?')) return;
+      autoSave(); ct().tacticalImages.splice(i, 1); save(); renderScout();
+    }
+    function tacTitleChange(el) {
+      ct().tacticalImages[parseInt(el.dataset.tidx)].title = el.value;
+      save();
+    }
+
+    /* ---- Canvas Drawing Engine ---- */
+    function initCanvas(idx) {
+      const img = document.getElementById('tac-img-' + idx);
+      const canvas = document.getElementById('tac-canvas-' + idx);
+      if (!img || !canvas) return;
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+
+      const state = {
+        drawing: false,
+        color: '#e74c3c',
+        lineWidth: 3,
+        currentStroke: [],
+        ctx: canvas.getContext('2d')
+      };
+      state.ctx.lineCap = 'round';
+      state.ctx.lineJoin = 'round';
+      drawingState[idx] = state;
+
+      // Restore saved strokes
+      const ti = ct().tacticalImages[idx];
+      if (ti && ti.strokes && ti.strokes.length > 0) {
+        ti.strokes.forEach(s => drawStroke(state.ctx, s));
+      }
+
+      // Mouse events
+      canvas.onmousedown = function (e) { startDraw(e, idx, canvas); };
+      canvas.onmousemove = function (e) { moveDraw(e, idx, canvas); };
+      canvas.onmouseup = function () { endDraw(idx); };
+      canvas.onmouseleave = function () { endDraw(idx); };
+
+      // Touch events — lock body scroll while drawing
+      canvas.ontouchstart = function (e) { e.preventDefault(); document.body.style.overflow = 'hidden'; startDraw(e.touches[0], idx, canvas); };
+      canvas.ontouchmove = function (e) { e.preventDefault(); moveDraw(e.touches[0], idx, canvas); };
+      canvas.ontouchend = function (e) { e.preventDefault(); document.body.style.overflow = ''; endDraw(idx); };
+      canvas.ontouchcancel = function () { document.body.style.overflow = ''; endDraw(idx); };
+    }
+
+    function getCanvasPos(e, canvas) {
+      const r = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / r.width;
+      const scaleY = canvas.height / r.height;
+      return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY };
+    }
+
+    function startDraw(e, idx, canvas) {
+      const state = drawingState[idx];
+      if (!state) return;
+      state.drawing = true;
+      const pos = getCanvasPos(e, canvas);
+      state.currentStroke = { color: state.color, lineWidth: state.lineWidth, points: [pos] };
+      state.ctx.beginPath();
+      state.ctx.strokeStyle = state.color;
+      state.ctx.lineWidth = state.lineWidth;
+      state.ctx.moveTo(pos.x, pos.y);
+    }
+
+    function moveDraw(e, idx, canvas) {
+      const state = drawingState[idx];
+      if (!state || !state.drawing) return;
+      const pos = getCanvasPos(e, canvas);
+      state.currentStroke.points.push(pos);
+      state.ctx.lineTo(pos.x, pos.y);
+      state.ctx.stroke();
+    }
+
+    function endDraw(idx) {
+      const state = drawingState[idx];
+      if (!state || !state.drawing) return;
+      state.drawing = false;
+      if (state.currentStroke.points.length > 1) {
+        const ti = ct().tacticalImages[idx];
+        if (!ti.strokes) ti.strokes = [];
+        ti.strokes.push(state.currentStroke);
+        save();
+      }
+      state.currentStroke = [];
+    }
+
+    function drawStroke(ctx, stroke) {
+      if (!stroke.points || stroke.points.length < 2) return;
+      ctx.beginPath();
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.lineWidth;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+      for (let i = 1; i < stroke.points.length; i++) {
+        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      }
+      ctx.stroke();
+    }
+
+    function setDrawColor(btn, color) {
+      const idx = parseInt(btn.dataset.tidx);
+      if (drawingState[idx]) drawingState[idx].color = color;
+      const toolbar = btn.closest('.tactical-toolbar');
+      toolbar.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function undoDrawing(idx) {
+      const ti = ct().tacticalImages[idx];
+      if (!ti.strokes || ti.strokes.length === 0) return;
+      ti.strokes.pop();
+      save();
+      redrawCanvas(idx);
+    }
+
+    function clearDrawing(idx) {
+      const ti = ct().tacticalImages[idx];
+      if (!ti.strokes || ti.strokes.length === 0) return;
+      if (!confirm('Clear all annotations?')) return;
+      ti.strokes = [];
+      save();
+      redrawCanvas(idx);
+    }
+
+    function redrawCanvas(idx) {
+      const canvas = document.getElementById('tac-canvas-' + idx);
+      const state = drawingState[idx];
+      if (!canvas || !state) return;
+      state.ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const ti = ct().tacticalImages[idx];
+      if (ti && ti.strokes) ti.strokes.forEach(s => drawStroke(state.ctx, s));
+    }
+
+    /* ============================================
+       GAME PLAN — Section 7
+       ============================================ */
+    function renderGameplan(t) {
+      const fields = [
+        { key: 'ourAttackingPriority', label: 'Our Attacking Priority', ph: 'Where and how will we create? What spaces will we target?' },
+        { key: 'ourDefensivePriority', label: 'Our Defensive Priority', ph: 'How will we neutralise their biggest threat? Our structure / press plan.' },
+        { key: 'setPieceStrategy', label: 'Set Piece Strategy', ph: 'PC routine selected. Corner and free hit plan.' },
+        { key: 'psychologicalEdge', label: 'The Psychological Edge', ph: 'What is our mental / cultural advantage in this match?' }
+      ];
+      const aiSwotHtml = isCoachOrAdmin() ? `
+    <div class="ai-card no-print" style="margin-top:20px;">
+      <div class="ai-card-header">
+        <span class="ai-card-title">Executive Briefing</span>
+        ${t.aiBriefingTime ? `<span class="ai-card-time">Generated ${esc(t.aiBriefingTime)}</span>` : ''}
+      </div>
+      <div id="ai-briefing-content">
+        ${t.aiBriefing
+          ? `<div class="ai-card-body">${renderMarkdown(t.aiBriefing)}</div>`
+          : '<div class="ai-card-empty">No AI analysis generated yet. Fill in scouting data then generate a SWOT briefing.</div>'}
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+        <button class="btn btn-primary" id="ai-swot-btn" onclick="generateAISwot()">${t.aiBriefing ? 'Regenerate AI SWOT' : 'Generate AI SWOT'}</button>
+        <span style="font-size:12px;color:#999;font-style:italic;">Coaches only — generates an AI tactical briefing</span>
+      </div>
+    </div>` : (t.aiBriefing ? `
+    <div class="ai-card" style="margin-top:20px;">
+      <div class="ai-card-header">
+        <span class="ai-card-title">Executive Briefing</span>
+        ${t.aiBriefingTime ? `<span class="ai-card-time">Generated ${esc(t.aiBriefingTime)}</span>` : ''}
+      </div>
+      <div class="ai-card-body">${renderMarkdown(t.aiBriefing)}</div>
+    </div>` : '');
+      return `<div class="sec ${data.currentSection === 6 ? 'active' : ''}" id="sec-gameplan">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Our Game Plan</span><span class="page-bar-right">${esc(t.competition)}</span></div>
+    <div class="doc-title">How We Will Approach This Game</div>
+    ${fields.map(f => `<div class="scout-panel accent-gold"><div class="scout-panel-label">${f.label}</div><textarea data-field="${f.key}" placeholder="${esc(f.ph)}" onchange="fieldChange(this)">${esc(t[f.key])}</textarea></div>`).join('')}
+    ${aiSwotHtml}
+  </div>`;
+    }
+
+    /* ============================================
+       SCOUTING LOG — Section 8
+       ============================================ */
+    function renderLog(t) {
+      if (!t.log) t.log = [];
+      let rows = t.log.map((e, i) => `<tr>
+    <td><input type="text" data-log="${i}" data-lfield="dateTournament" value="${esc(e.dateTournament)}" placeholder="Date / Tournament" onchange="logChange(this)"></td>
+    <td><input type="text" data-log="${i}" data-lfield="result" value="${esc(e.result)}" placeholder="Result" onchange="logChange(this)"></td>
+    <td><div class="expandable-wrap collapsed"><textarea data-log="${i}" data-lfield="observation" placeholder="Key observation" onchange="logChange(this)">${esc(e.observation)}</textarea><button class="expandable-toggle" onclick="toggleExpand(this)">See More</button></div></td>
+    <td><div class="expandable-wrap collapsed"><textarea data-log="${i}" data-lfield="action" placeholder="Action taken" onchange="logChange(this)">${esc(e.action)}</textarea><button class="expandable-toggle" onclick="toggleExpand(this)">See More</button></div></td>
+    <td style="font-size:10px;color:#667;white-space:nowrap;">${esc(e.postedBy || '')}</td>
+    <td style="width:40px;" class="no-print">${canEdit(e) ? `<button class="btn btn-danger btn-sm" onclick="deleteLogEntry(${i})">\u00D7</button>` : ''}</td>
+  </tr>`).join('');
+
+      return `<div class="sec ${data.currentSection === 7 ? 'active' : ''}" id="sec-log">
+    <div class="page-bar"><span class="page-bar-left">${esc(t.name)} | Scouting Log</span><span class="page-bar-right">Updated Each Tournament</span></div>
+    <div class="doc-title">Running Observations Log</div>
+    <div class="doc-subtitle">Add a row each time you play or watch this team. This becomes your living intelligence database.</div>
+    <button class="btn btn-primary btn-sm no-print" onclick="addLogEntry()" style="margin-bottom:12px;">+ Add Entry</button>
+    <div style="overflow-x:auto;"><table class="log-table"><thead><tr>
+      <th style="width:15%;">Date / Tournament</th><th style="width:8%;">Result</th>
+      <th style="width:30%;">Key Observation</th><th style="width:25%;">Action Taken</th>
+      <th style="width:12%;">Posted By</th>
+      <th class="no-print" style="width:5%;"></th>
+    </tr></thead><tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#667;padding:20px;">No entries yet.</td></tr>'}</tbody></table></div>
+  </div>`;
+    }
+
+    function fieldChange(el) { ct()[el.dataset.field] = el.value; ct().lastEditedBy = postedByStamp(); save(); }
+    function threatChange(el) { const i = parseInt(el.dataset.threat); ct().threats[i][el.dataset.tfield] = el.value; ct().threats[i].postedBy = postedByStamp(); save(); }
+    function logChange(el) { const i = parseInt(el.dataset.log); ct().log[i][el.dataset.lfield] = el.value; ct().log[i].postedBy = postedByStamp(); save(); }
+
+    /* ---- Live input sync — save while typing, not just on blur ---- */
+    let _liveInputTimer = null;
+    document.getElementById('view-scout').addEventListener('input', function (e) {
+      const el = e.target;
+      if (!el || !ct()) return;
+      if (el.dataset.field) { ct()[el.dataset.field] = el.value; }
+      else if (el.dataset.threat !== undefined && el.dataset.tfield) { const i = parseInt(el.dataset.threat); if (ct().threats && ct().threats[i]) ct().threats[i][el.dataset.tfield] = el.value; }
+      else if (el.dataset.log !== undefined && el.dataset.lfield) { const i = parseInt(el.dataset.log); if (ct().log && ct().log[i]) ct().log[i][el.dataset.lfield] = el.value; }
+      else if (el.dataset.pidx !== undefined && el.dataset.pfield) { const i = parseInt(el.dataset.pidx); if (ct().players && ct().players[i]) ct().players[i][el.dataset.pfield] = el.value; }
+      else return;
+      clearTimeout(_liveInputTimer);
+      _liveInputTimer = setTimeout(function () { save(); }, 600);
+    });
+
+    function autoSave() {
+      const t = ct(); if (!t) return;
+      document.querySelectorAll('[data-field]').forEach(el => { t[el.dataset.field] = el.value; });
+      document.querySelectorAll('[data-threat]').forEach(el => {
+        const i = parseInt(el.dataset.threat);
+        if (t.threats && t.threats[i]) t.threats[i][el.dataset.tfield] = el.value;
+      });
+      document.querySelectorAll('[data-log]').forEach(el => {
+        const i = parseInt(el.dataset.log);
+        if (t.log && t.log[i]) t.log[i][el.dataset.lfield] = el.value;
+      });
+      document.querySelectorAll('[data-pidx]').forEach(el => {
+        const i = parseInt(el.dataset.pidx);
+        if (t.players && t.players[i] && el.dataset.pfield) t.players[i][el.dataset.pfield] = el.value;
+      });
+      save();
+    }
+
+    function addLogEntry() { autoSave(); ct().log.push({ dateTournament: '', result: '', observation: '', action: '', postedBy: postedByStamp(), createdByUid: currentAuthUid }); save(); renderScout(); }
+    function deleteLogEntry(i) { if (!canEdit(ct().log[i])) return alert('You can only delete entries you created.'); if (!confirm('Are you sure you want to delete this log entry?')) return; autoSave(); ct().log.splice(i, 1); save(); renderScout(); }
+    function addNewTeam() { const n = prompt('Team name:'); if (!n) return; autoSave(); const t = blankTeam(n.trim(), n.trim(), 'Hockey World Cup'); data.teams.push(t); data.currentTeamIdx = data.teams.length - 1; data.currentSection = 0; save(); syncInsertTeam(t); renderScout(); }
+
+    function printScout() {
+      autoSave();
+      document.getElementById('view-scout').classList.add('print-active');
+      window.print();
+      setTimeout(() => document.getElementById('view-scout').classList.remove('print-active'), 500);
+    }
+
+    // ============================================
+    // LIVE SCOUTING MODE
+    // ============================================
+    let liveFeed = [], liveTags = new Set();
+    const LIVE_TAGS = ['Attack Pattern', 'Defensive Shape', 'PC Routine', 'Key Player', 'Weakness', 'Formation', 'Press Trigger', 'Transition', 'General'];
+
+    function renderLive() {
+      const el = document.getElementById('view-live');
+      const opts = data.teams.map((t, i) => `<option value="${i}">${esc(t.name)}</option>`).join('');
+      el.innerHTML = `
+    <h2>Live Scouting Mode</h2>
+    <div class="section"><h3>Match Context</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;min-width:160px;"><label>Team</label><select id="live-team">${opts}</select></div>
+        <div style="display:flex;flex-direction:column;min-width:140px;"><label>Date</label><input type="date" id="live-date" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div style="display:flex;flex-direction:column;flex:1;min-width:160px;"><label>Competition</label><input type="text" id="live-comp" placeholder="e.g. FIH Pro League"></div>
+      </div>
+    </div>
+    <div class="section"><h3>Quick Tags</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;" id="live-tags-wrap">
+        ${LIVE_TAGS.map(t => `<div style="padding:6px 12px;border:1px solid #334;border-radius:4px;background:#0d1b2a;color:#889;font-size:12px;font-weight:600;cursor:pointer;" data-ltag="${t}" onclick="toggleLiveTag(this)">${t}</div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;">
+        <div style="display:flex;flex-direction:column;width:80px;"><label>Min</label><input type="number" id="live-min" placeholder="15" min="0" max="120"></div>
+        <button class="btn btn-secondary btn-sm" onclick="insertLiveMin()">Insert</button>
+      </div>
+      <div style="display:flex;flex-direction:column;"><label>Observation</label><textarea id="live-notes" placeholder="Write your observation..." style="min-height:60px;"></textarea></div>
+      <button class="btn btn-primary" onclick="addLiveEntry()" style="margin-top:8px;">+ Add to Feed</button>
+    </div>
+    <div class="section"><h3>Feed</h3><div id="live-feed"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="processLiveFeed()">Process & Add to Log</button>
+        <button class="btn btn-secondary" onclick="liveFeed=[];liveTags.clear();renderLiveFeed();">Clear</button>
+      </div>
+    </div>`;
+      renderLiveFeed();
+    }
+
+    function toggleLiveTag(el) {
+      const tag = el.dataset.ltag;
+      if (liveTags.has(tag)) { liveTags.delete(tag); el.style.background = '#0d1b2a'; el.style.color = '#889'; el.style.borderColor = '#334'; }
+      else { liveTags.add(tag); el.style.background = '#d4a843'; el.style.color = '#000'; el.style.borderColor = '#d4a843'; }
+    }
+    function insertLiveMin() { const m = document.getElementById('live-min').value; if (!m) return; const ta = document.getElementById('live-notes'); ta.value += `[${m}'] `; ta.focus(); }
+
+    function addLiveEntry() {
+      const text = document.getElementById('live-notes').value.trim();
+      if (!text) return alert('Write an observation.');
+      const tags = Array.from(liveTags); if (tags.length === 0) tags.push('General');
+      liveFeed.push({ id: uid(), tags, text, time: new Date().toLocaleTimeString() });
+      document.getElementById('live-notes').value = '';
+      renderLiveFeed();
+    }
+
+    function renderLiveFeed() {
+      const el = document.getElementById('live-feed'); if (!el) return;
+      if (liveFeed.length === 0) { el.innerHTML = '<div style="color:#667;font-size:12px;">No observations yet.</div>'; return; }
+      el.innerHTML = liveFeed.map(e => `<div style="background:#0d1b2a;border-left:3px solid #d4a843;padding:10px 14px;border-radius:0 4px 4px 0;margin-bottom:8px;">
+    <div>${e.tags.map(t => `<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;background:#d4a843;color:#000;margin-right:4px;">${esc(t)}</span>`).join('')}</div>
+    <div style="font-size:11px;color:#667;margin:4px 0;">${e.time}</div>
+    <div style="font-size:13px;color:#ccc;line-height:1.5;">${esc(e.text)}</div>
+  </div>`).join('');
+    }
+
+    function processLiveFeed() {
+      const idx = parseInt(document.getElementById('live-team').value);
+      if (liveFeed.length === 0) return alert('No entries.');
+      const t = data.teams[idx]; if (!t.log) t.log = [];
+      const d = document.getElementById('live-date').value, c = document.getElementById('live-comp').value;
+      liveFeed.forEach(e => { t.log.push({ dateTournament: `${d} ${c}`.trim(), result: '', observation: `[${e.tags.join(', ')}] ${e.text}`, action: '', postedBy: postedByStamp(), createdByUid: currentAuthUid }); });
+      save();
+      alert(`${liveFeed.length} entries added to ${t.name}'s scouting log.`);
+      liveFeed = []; liveTags.clear(); renderLiveFeed();
+    }
+
+    // ============================================
+    // DATA MANAGEMENT
+    // ============================================
+    function renderData() {
+      const el = document.getElementById('view-data');
+      const size = (JSON.stringify(data).length / 1024).toFixed(1);
+      el.innerHTML = `<h2>Data Management</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+      <div class="section"><h3>Export</h3><p style="color:#889;font-size:12px;margin-bottom:12px;">Download all scouting data as JSON.</p><button class="btn btn-primary" onclick="exportData()">Export All</button></div>
+      <div class="section"><h3>Import</h3><input type="file" id="import-file" accept=".json" style="margin-bottom:8px;"><button class="btn btn-primary" onclick="importData()">Import</button></div>
+      <div class="section"><h3>Storage</h3><p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p><p style="color:#ccc;margin-bottom:4px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p><p style="color:#ccc;margin-bottom:12px;">Supabase: <strong style="color:${sbOnline ? '#4a8c3f' : '#e74c3c'};">${sbOnline ? 'Connected' : 'Offline'}</strong></p><button class="btn btn-secondary" onclick="forceSync()" style="margin-bottom:8px;">Force Sync</button><br><button class="btn btn-danger" onclick="clearAllData()">Clear All</button></div>
+      <div class="section"><h3>Your Identity</h3><p style="color:#ccc;margin-bottom:4px;">Logged in as: <strong style="color:#d4a843;">${currentUser ? esc(currentUser.name) + ' (' + esc(currentUser.initials) + ')' : 'Not set'}</strong></p><p style="color:#ccc;margin-bottom:12px;">Role: <strong style="color:#d4a843;text-transform:capitalize;">${esc(currentRole)}</strong></p><button class="btn btn-secondary" onclick="promptUserIdentity(function(){renderData();})">Change Name</button></div>
+      <div class="section"><h3>Manage Teams</h3>${data.teams.map((t, i) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334;"><span style="font-size:13px;">${esc(t.name)}</span><button class="btn btn-danger btn-sm" onclick="deleteTeam(${i})">Delete</button></div>`).join('')}<button class="btn btn-primary btn-sm" onclick="addNewTeam()" style="margin-top:12px;">+ Add Team</button></div>
+    </div>`;
+    }
+
+    function exportData() { autoSave(); const b = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `oppo-scout-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); }
+    function importData() { const f = document.getElementById('import-file').files[0]; if (!f) return alert('Select a file.'); const r = new FileReader(); r.onload = async function (e) { try { const d = JSON.parse(e.target.result); if (d.teams) { data = d; data.currentTeamIdx = 0; data.currentSection = 0; save(); await syncToSupabase(); alert('Imported & synced.'); showView('scout'); } else alert('Invalid.'); } catch (e) { alert('Error: ' + e.message); } }; r.readAsText(f); }
+    async function clearAllData() { if (!confirm('Delete ALL data?')) return; if (!confirm('Sure?')) return; for (const t of data.teams) await syncDeleteTeam(t.id); localStorage.removeItem(STORE); data = { teams: [], currentTeamIdx: 0, currentSection: 0 }; await load(); showView('scout'); }
+    function deleteTeam(i) { if (!confirm('Are you sure you want to delete ' + data.teams[i].name + '? This cannot be undone.')) return; const tid = data.teams[i].id; data.teams.splice(i, 1); if (data.currentTeamIdx >= data.teams.length) data.currentTeamIdx = Math.max(0, data.teams.length - 1); save(); syncDeleteTeam(tid); if (data.teams.length === 0) { renderScout(); renderData(); } else renderData(); }
+
+    /* ---- Expandable text toggle ---- */
+    function toggleExpand(btn) {
+      const wrap = btn.closest('.expandable-wrap');
+      if (wrap.classList.contains('collapsed')) {
+        wrap.classList.remove('collapsed');
+        wrap.classList.add('expanded');
+        btn.textContent = 'Show Less';
+        wrap.querySelector('textarea').style.maxHeight = 'none';
+      } else {
+        wrap.classList.remove('expanded');
+        wrap.classList.add('collapsed');
+        btn.textContent = 'See More';
+      }
+    }
+
+    function initExpandables() {
+      const LINE_THRESHOLD = 4;
+      const HEIGHT_THRESHOLD = 80;
+
+      // Check existing expandable wraps
+      document.querySelectorAll('.expandable-wrap').forEach(wrap => {
+        const ta = wrap.querySelector('textarea');
+        const btn = wrap.querySelector('.expandable-toggle');
+        if (!ta || !btn) return;
+        const lines = (ta.value || '').split('\n').length;
+        if (ta.scrollHeight > HEIGHT_THRESHOLD || lines > LINE_THRESHOLD) {
+          btn.style.display = 'inline-block';
+        } else {
+          btn.style.display = 'none';
+          wrap.classList.remove('collapsed');
+        }
+      });
+
+      // Wrap textareas that have enough content but aren't yet in an expandable-wrap
+      document.querySelectorAll('.scout-panel textarea, .threat-body textarea, .player-card-body textarea').forEach(ta => {
+        if (ta.closest('.expandable-wrap')) return;
+        const lines = (ta.value || '').split('\n').length;
+        if (ta.value && (ta.scrollHeight > HEIGHT_THRESHOLD || lines > LINE_THRESHOLD)) {
+          const parent = ta.parentNode;
+          const wrap = document.createElement('div');
+          wrap.className = 'expandable-wrap collapsed';
+          parent.insertBefore(wrap, ta);
+          wrap.appendChild(ta);
+          const btn = document.createElement('button');
+          btn.className = 'expandable-toggle';
+          btn.textContent = 'See More';
+          btn.onclick = function () { toggleExpand(this); };
+          wrap.appendChild(btn);
+        }
+      });
+    }
+
+    /* ---- Auto-linkify URLs in textareas ---- */
+    function linkifyTextareas() {
+      const urlRegex = /https?:\/\/[^\s<>"']+/g;
+      document.querySelectorAll('.scout-panel textarea, .threat-body textarea, .player-card-body textarea, .info-box textarea, .log-table textarea').forEach(ta => {
+        // Remove existing link containers
+        const existing = ta.parentNode.querySelector('.linkify-links');
+        if (existing) existing.remove();
+        const urls = (ta.value || '').match(urlRegex);
+        if (!urls || urls.length === 0) return;
+        const container = document.createElement('div');
+        container.className = 'linkify-links';
+        [...new Set(urls)].forEach(url => {
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          // Show truncated URL text
+          a.textContent = url.length > 60 ? url.substring(0, 57) + '...' : url;
+          container.appendChild(a);
+        });
+        ta.parentNode.appendChild(container);
+      });
+    }
+
+    // Re-check expandables + linkify after renders
+    const _origRenderScout = renderScout;
+    renderScout = function () {
+      _origRenderScout();
+      setTimeout(function () {
+        initExpandables();
+        linkifyTextareas();
+
+        // Tint page-bars with the active team's colour
+        var activeTC = getTeamColor(ct());
+        document.querySelectorAll('.page-bar').forEach(function (bar) {
+          bar.style.setProperty('border-bottom-color', activeTC.bg, 'important');
+        });
+
+        // Fallback: init any tactical canvases whose onload didn't fire
+        document.querySelectorAll('[data-tac-idx]').forEach(function (img) {
+          var idx = parseInt(img.dataset.tacIdx);
+          if (!drawingState[idx] && img.complete && img.naturalWidth > 0) initCanvas(idx);
+        });
+      }, 100);
+    };
+
+    async function forceSync() {
+      autoSave();
+      updateSyncBadge('saving');
+      await syncToSupabase();
+      renderData();
+    }
+
+    /* ---- Lightweight Markdown renderer ---- */
+    function renderMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/^### (.*)$/gm, '<h4>$1</h4>')
+        .replace(/^## (.*)$/gm, '<h3>$1</h3>')
+        .replace(/^# (.*)$/gm, '<h2>$1</h2>')
+        .replace(/^[\-\*] (.*)$/gm, '<div class="ai-bullet">$1</div>')
+        .replace(/\n{2,}/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+    }
+
+    /* ---- AI SWOT via Edge Function ---- */
+    async function generateAISwot() {
+      const t = ct();
+      const btn = document.getElementById('ai-swot-btn');
+      const contentEl = document.getElementById('ai-briefing-content');
+
+      // Show loading spinner
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+      contentEl.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div>Analyzing scouting entries across all sections...</div>';
+
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) throw new Error('Not authenticated. Please log in again.');
+
+        const response = await fetch(SB_URL + '/functions/v1/ai-swot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.access_token
+          },
+          body: JSON.stringify({ teamId: t.id, teamData: teamToRow(t) })
+        });
+
+        if (!response.ok) {
+          const errBody = await response.text();
+          throw new Error('Edge Function returned ' + response.status + ': ' + errBody);
+        }
+
+        const result = await response.json();
+        t.aiBriefing = result.briefing;
+        t.aiBriefingTime = new Date().toLocaleString('en-NZ');
+        save();
+        renderScout();
+      } catch (e) {
+        contentEl.innerHTML = '<div style="color:#e74c3c;font-size:13px;padding:8px 0;">Failed: ' + esc(e.message || 'Unknown error') + '</div>';
+        btn.disabled = false;
+        btn.textContent = 'Retry Generate AI SWOT';
+      }
+    }
+
+    window.addEventListener('beforeunload', function () { autoSave(); syncToSupabase(); });
+
+    // ---- Handle email confirmation & password recovery redirects ----
+    sb.auth.onAuthStateChange(function (event, session) {
+      if (event === 'PASSWORD_RECOVERY') {
+        // User clicked the password reset link — show the update password form
+        showUpdatePasswordScreen();
+        return;
+      }
+      if (event === 'SIGNED_IN' && session) {
+        // Don't auto-proceed if we're on the update-password screen
+        const updateScreen = document.getElementById('update-password-screen');
+        if (updateScreen && updateScreen.style.display === 'flex') return;
+
+        const authScreen = document.getElementById('auth-screen');
+        if (authScreen && authScreen.style.display === 'flex') {
+          hideLoginScreen();
+          proceedAfterAuth();
+        }
+      }
+    });
+
+    // ---- Boot ----
+    async function boot() {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+          showLoginScreen();
+          return;
+        }
+        hideLoginScreen();
+        await proceedAfterAuth();
+      } catch (e) {
+        console.error('Boot error:', e);
+        showLoginScreen();
+        const errEl = document.getElementById('auth-error');
+        if (errEl) { errEl.style.color = '#e74c3c'; errEl.textContent = 'Connection error. Please sign in again.'; }
+      }
+    }
+    boot();
+  </script>
+</body>
+
+</html>

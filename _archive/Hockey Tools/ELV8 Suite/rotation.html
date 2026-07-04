@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hockey Rotation Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Montserrat', -apple-system, 'Segoe UI', Arial, sans-serif; background: #1c1c1c; color: #fff; min-height: 100vh; }
+
+/* NAV */
+nav { background: #262626; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #3c3c3c; }
+nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #D4AF37; }
+nav button { background: none; border: none; color: #8c8c8c; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+nav button:hover { color: #fff; }
+nav button.active { color: #fff; border-bottom-color: #D4AF37; }
+
+/* VIEWS */
+.view { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+.view.active { display: block; }
+
+/* COMMON */
+h2 { font-size: 22px; margin-bottom: 16px; color: #D4AF37; }
+h3 { font-size: 16px; margin-bottom: 10px; color: #c4c4c4; }
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
+.btn-primary { background: #D4AF37; color: #1c1c1c; }
+.btn-primary:hover { background: #b8952e; }
+.btn-secondary { background: #2f2f2f; color: #fff; }
+.btn-secondary:hover { background: #3c3c3c; }
+.btn-danger { background: #e23b2e; color: #fff; }
+.btn-danger:hover { background: #b92e23; }
+.btn-success { background: #2a9d3a; color: #fff; }
+.btn-success:hover { background: #34b847; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+input, select, textarea { padding: 6px 10px; border: 1px solid #3c3c3c; border-radius: 4px; background: #161616; color: #fff; font-size: 13px; }
+input:focus, select:focus { outline: none; border-color: #D4AF37; }
+select { cursor: pointer; }
+label { font-size: 13px; color: #c4c4c4; display: block; margin-bottom: 4px; }
+.row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mt-16 { margin-top: 16px; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+
+/* ROSTER TABLE */
+.roster-table { width: 100%; border-collapse: collapse; }
+.roster-table th { background: #D4AF37; padding: 8px 12px; text-align: left; font-size: 13px; color: #1c1c1c; }
+.roster-table td { padding: 4px 6px; border-bottom: 1px solid #3c3c3c; }
+.roster-table td input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; padding: 4px 6px; }
+.roster-table td input:hover { border-color: #3c3c3c; }
+.roster-table td input:focus { border-color: #D4AF37; background: #161616; }
+.roster-table tr:hover { background: #2f2f2f; }
+.roster-table td select { background: #161616; width: 80px; }
+
+/* GAME LIST */
+.game-card { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: all .2s; }
+.game-card:hover { border-color: #D4AF37; }
+.game-card.active { border-color: #D4AF37; background: #2f2f2f; }
+.game-card h4 { color: #fff; margin-bottom: 4px; }
+.game-card small { color: #8c8c8c; }
+
+/* SHEET LIST */
+.sheet-card { background: #161616; border: 1px solid #3c3c3c; border-radius: 4px; padding: 10px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all .2s; }
+.sheet-card:hover { border-color: #D4AF37; }
+.sheet-card.active { border-color: #D4AF37; background: #2f2f2f; }
+.sheet-card .info { display: flex; flex-direction: column; }
+.sheet-card .info span:first-child { font-weight: 600; font-size: 14px; }
+.sheet-card .info span:last-child { font-size: 12px; color: #8c8c8c; }
+.sheet-actions { display: flex; gap: 4px; }
+
+/* BUILDER */
+.builder-layout { display: flex; gap: 20px; }
+.builder-sidebar { width: 280px; flex-shrink: 0; }
+.builder-main { flex: 1; min-width: 0; }
+.group-panel { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 12px; margin-bottom: 10px; }
+.group-panel .group-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.group-panel .group-header input[type="text"] { width: 100px; font-weight: 700; }
+.group-panel .players-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.group-panel .players-row select { width: 140px; }
+.group-panel .players-row input[type="text"] { width: 50px; font-size: 12px; }
+.group-panel .config-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.group-panel .config-row input[type="number"] { width: 55px; }
+.group-panel .config-row input[type="text"] { width: 130px; }
+.rotation-desc { font-size: 12px; color: #3aa7e0; margin-top: 6px; padding: 4px 8px; background: #161616; border-radius: 3px; }
+.usage-panel { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 12px; }
+.usage-panel .player-chip { display: inline-block; padding: 3px 8px; margin: 2px; border-radius: 3px; font-size: 12px; font-weight: 600; }
+.usage-panel .player-chip.assigned { background: #2a9d3a; color: #fff; }
+.usage-panel .player-chip.unassigned { background: #e23b2e; color: #fff; }
+
+/* SECTION LABEL */
+.section-divider { text-align: center; font-size: 11px; font-weight: 700; color: #D4AF37; letter-spacing: 2px; margin: 14px 0 6px; text-transform: uppercase; }
+
+/* ===================================================== */
+/* OUTPUT / PREVIEW — ELV8 PREMIUM DOCUMENT SYSTEM        */
+/* ===================================================== */
+.sub-sheet-output {
+  background: #fff; color: #15171a; margin: 0 auto 30px; max-width: 1180px;
+  font-family: 'Montserrat', -apple-system, 'Segoe UI', Arial, sans-serif;
+  border: 1px solid #e7e7e7; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.32);
+}
+
+/* MASTHEAD */
+.doc-masthead { display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 30px; background: #1c1c1c; border-bottom: 3px solid #D4AF37; }
+.doc-masthead .mh-left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.doc-masthead .mh-kicker { font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  font-weight: 700; color: #8c8c8c; }
+.doc-masthead .mh-title { font-size: 21px; font-weight: 800; color: #fff; line-height: 1.1;
+  text-transform: uppercase; letter-spacing: 0.5px; }
+.doc-masthead .mh-right { display: flex; gap: 26px; flex-shrink: 0; }
+.doc-masthead .mh-item { display: flex; flex-direction: column; gap: 2px; text-align: right; }
+.doc-masthead .mh-eyebrow { font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  font-weight: 600; color: #7a7a7a; }
+.doc-masthead .mh-value { font-size: 13px; font-weight: 700; color: #D4AF37;
+  text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* META STRIP */
+.doc-meta { display: flex; align-items: stretch; background: #fff; padding: 0 30px;
+  border-bottom: 1px solid #e7e7e7; }
+.doc-meta .meta-cell { display: flex; flex-direction: column; gap: 3px; padding: 13px 26px 13px 0;
+  margin-right: 26px; border-right: 1px solid #ededed; }
+.doc-meta .meta-cell:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+.doc-meta .meta-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  font-weight: 600; color: #9a9a9a; }
+.doc-meta .meta-value { font-size: 15px; font-weight: 700; color: #15171a; }
+
+/* TABLE WRAP */
+.doc-tablewrap { padding: 20px 30px 8px; }
+
+/* SECTION HEADER (within tbody as a banded row) */
+.rotation-table tr.section-head td { border: none; padding: 18px 4px 6px; text-align: left; }
+.rotation-table tr.section-head:first-child td { padding-top: 4px; }
+.rotation-table tr.section-head .sec-label { display: inline-block; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 2px; font-weight: 800; color: #1c1c1c;
+  padding-bottom: 3px; border-bottom: 2px solid #D4AF37; }
+
+/* TABLE BASE — no heavy gridlines */
+.rotation-table { width: 100%; border-collapse: collapse; table-layout: fixed;
+  font-variant-numeric: tabular-nums; }
+.rotation-table th, .rotation-table td { border: none; padding: 9px 8px; font-size: 13px;
+  text-align: center; vertical-align: middle; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+
+/* Header row — charcoal band */
+.rotation-table thead th { background: #1c1c1c; color: #cfcfcf; font-weight: 700; font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 11px 6px; }
+.rotation-table thead th.col-pos { text-align: left; padding-left: 14px; }
+.rotation-table thead th.col-start { color: #6fce7d; }
+.rotation-table thead th.col-interchange { color: #f08a82; }
+.rotation-table thead th.col-1st-rot { color: #8fcdf0; }
+.rotation-table thead th.col-rotation { color: #cfcfcf; }
+.rotation-table thead th.col-timing { color: #f0d36a; }
+.rotation-table thead th:first-child { border-top-left-radius: 6px; }
+.rotation-table thead th:last-child { border-top-right-radius: 6px; }
+
+/* Data rows — hairline separators + zebra */
+.rotation-table tr.data-row td { border-bottom: 1px solid #eef0f1; }
+.rotation-table tr.data-row.zebra td { background: #fafbfc; }
+
+/* POS cell — gold left accent bar + dark label */
+.rotation-table td.cell-pos { text-align: left; font-weight: 800; font-size: 13px; color: #15171a;
+  padding-left: 14px; border-left: 3px solid #D4AF37; letter-spacing: 0.3px; }
+
+/* Starter cells — refined: white cell, green dot + bold dark name, gold tag */
+.rotation-table td.cell-starter { font-weight: 700; font-size: 13px; color: #15171a; }
+.rotation-table td.cell-starter .starter-name { display: inline-flex; align-items: center; gap: 6px; }
+.rotation-table td.cell-starter .starter-name::before { content: ''; width: 6px; height: 6px;
+  border-radius: 50%; background: #2a9d3a; flex-shrink: 0; }
+.rotation-table td.cell-starter .pos-tag { display: inline-block; margin-left: 5px;
+  font-size: 10px; font-weight: 800; color: #b8952e; letter-spacing: 0.5px; }
+.rotation-table td.cell-starter-empty { color: #d4d4d4; }
+
+/* Interchange — refined red pill */
+.rotation-table td.cell-interchange { font-size: 13px; }
+.rotation-table td.cell-interchange .inter-pill { display: inline-block; padding: 4px 12px;
+  background: #fdeceb; color: #c5271c; border: 1px solid #f3b6b1; border-radius: 100px;
+  font-weight: 700; font-size: 12px; letter-spacing: 0.3px; }
+
+/* 1st rotation — charcoal minute chip */
+.rotation-table td.cell-1st-rot { font-weight: 800; font-size: 14px; color: #1c1c1c; }
+.rotation-table td.cell-1st-rot .min-chip { display: inline-block; min-width: 26px; padding: 3px 8px;
+  background: #f1f2f3; border-radius: 5px; font-variant-numeric: tabular-nums; }
+
+/* Rotation description */
+.rotation-table td.cell-rotation { font-size: 11.5px; font-weight: 600; color: #45494e;
+  text-align: center; white-space: normal; word-wrap: break-word; line-height: 1.4; }
+
+/* Timing — blue accent */
+.rotation-table td.cell-timing { font-weight: 700; font-size: 12px; color: #1f6f9c; }
+
+/* GK row */
+.rotation-table tr.gk-row td { border-bottom: none; }
+.rotation-table td.cell-gk-start { font-weight: 700; font-size: 13px; text-align: left;
+  padding-left: 14px; color: #15171a; }
+.rotation-table td.cell-gk-start .starter-name::before { content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%; background: #2a9d3a; margin-right: 6px; }
+
+/* Position notes row */
+.rotation-table tr.pos-notes-row td { border-bottom: 1px solid #eef0f1; padding: 0 0 9px; }
+.rotation-table tr.pos-notes-row .notes-text { display: inline-block; font-size: 10.5px;
+  font-weight: 600; color: #8a6d1a; text-align: left; letter-spacing: 0.2px; }
+.rotation-table tr.pos-notes-row .notes-text::before { content: 'NOTE'; display: inline-block;
+  margin-right: 8px; font-size: 8.5px; letter-spacing: 1.5px; font-weight: 800; color: #c2a23e; }
+
+/* FOOTER */
+.doc-footer { display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 30px; background: #1c1c1c; margin-top: 14px; }
+.doc-footer .ft-left { font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  font-weight: 700; color: #d8d8d8; }
+.doc-footer .ft-left .ft-accent { color: #D4AF37; }
+.doc-footer .ft-right { font-size: 9.5px; letter-spacing: 0.8px; color: #8c8c8c; font-weight: 500; }
+
+/* PREVIEW CONTROLS */
+.preview-controls { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 100; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: #262626; border: 1px solid #3c3c3c; border-radius: 8px; padding: 24px; min-width: 400px; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+.modal h3 { margin-bottom: 16px; }
+.modal .form-group { margin-bottom: 12px; }
+.modal .form-group input, .modal .form-group select { width: 100%; }
+.modal .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+/* CHECKBOX GRID */
+.player-checkbox-grid { display: flex; flex-direction: column; gap: 0; margin: 12px 0; }
+.player-checkbox-grid label { display: flex; align-items: center; gap: 0; font-size: 15px; font-weight: 600; padding: 8px 12px; background: #161616; cursor: pointer; border-bottom: 1px solid #2f2f2f; }
+.player-checkbox-grid label:hover { background: #2f2f2f; }
+.player-checkbox-grid label .player-num { width: 36px; font-size: 14px; color: #8c8c8c; font-weight: 400; flex-shrink: 0; }
+.player-checkbox-grid label input[type="checkbox"] { cursor: pointer; width: 20px; height: 20px; margin-right: 14px; flex-shrink: 0; accent-color: #D4AF37; }
+.player-checkbox-grid label .player-label { flex: 1; }
+
+/* PRINT */
+@media print {
+  body { background: #fff; }
+  nav, .view:not(#view-preview), .preview-controls, .no-print { display: none !important; }
+  #view-preview { display: block !important; padding: 0; }
+  .sub-sheet-output { page-break-after: always; margin: 0; max-width: none; width: 100%;
+    border: none; border-radius: 0; box-shadow: none; }
+  .sub-sheet-output:last-child { page-break-after: avoid; }
+  .rotation-table thead th:first-child, .rotation-table thead th:last-child { border-radius: 0; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { size: A4 landscape; margin: 8mm; }
+}
+
+/* SCROLLABLE */
+.builder-sidebar { max-height: calc(100vh - 100px); overflow-y: auto; position: sticky; top: 80px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">🏑 HOCKEY ROTATION GENERATOR</span>
+  <button class="active" onclick="switchView('roster')">Squad Roster</button>
+  <button onclick="switchView('games')">Game Manager</button>
+  <button onclick="switchView('builder')">Sub Sheet Builder</button>
+  <button onclick="switchView('preview')">Preview / Print</button>
+</nav>
+
+<div id="view-roster" class="view active">
+  <h2>Squad Roster</h2>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="addPlayer()">+ Add Player</button>
+    <button class="btn btn-secondary" onclick="exportSquad()">Export JSON</button>
+    <button class="btn btn-secondary" onclick="importSquad()">Import JSON</button>
+  </div>
+  <table class="roster-table">
+    <thead><tr><th>#</th><th>Player Name</th><th>Primary Pos</th><th>Alt Pos</th><th></th></tr></thead>
+    <tbody id="roster-body"></tbody>
+  </table>
+</div>
+
+<div id="view-games" class="view">
+  <h2>Game Manager</h2>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="showNewGameModal()">+ New Game</button>
+  </div>
+  <div class="row">
+    <div style="width:300px;">
+      <h3>Games</h3>
+      <div id="game-list"></div>
+    </div>
+    <div style="flex:1; min-width:0;">
+      <div id="game-detail"></div>
+    </div>
+  </div>
+</div>
+
+<div id="view-builder" class="view">
+  <div id="builder-content"></div>
+</div>
+
+<div id="view-preview" class="view">
+  <div class="preview-controls no-print">
+    <select id="preview-game-select" onchange="renderPreview()">
+      <option value="">Select a game...</option>
+    </select>
+    <label style="display:inline; margin: 0;"><input type="checkbox" id="preview-all" checked onchange="renderPreview()"> Show all sheets</label>
+    <select id="preview-sheet-select" onchange="renderPreview()">
+      <option value="">All sheets</option>
+    </select>
+    <button class="btn btn-primary" onclick="shareImage()">📷 Share Image</button>
+    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+  </div>
+  <div id="preview-output"></div>
+</div>
+
+<!-- NEW GAME MODAL -->
+<div class="modal-overlay" id="modal-new-game">
+  <div class="modal">
+    <h3>New Game</h3>
+    <div class="form-group">
+      <label>Game Name</label>
+      <input type="text" id="new-game-name" placeholder="vs Australia - Match 1">
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="new-game-date">
+    </div>
+    <div class="form-group">
+      <label>Select Squad</label>
+      <div id="new-game-players" class="player-checkbox-grid"></div>
+    </div>
+    <div class="form-group">
+      <label>GK Option 1</label>
+      <select id="new-game-gk1"></select>
+    </div>
+    <div class="form-group">
+      <label>GK Option 2</label>
+      <select id="new-game-gk2"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="createGame()">Create Game</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-new-game')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// POSITIONS
+// =============================================
+const POSITIONS = ['RS','CS','LS','CM','RM','LM','LH','RH','CB','FM','FD','WH','GK'];
+
+// =============================================
+// DEFAULT FORMATION PRESETS
+// =============================================
+const DEFAULT_PRESETS = [
+  {
+    id: 'p1', name: '6 @ BACK - 5 MF - 5 STR',
+    groups: [
+      { posLabel: 'RS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'LS / CS', section: 'STR', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'CM', section: 'MF', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'RM / LM', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'LH / RH', section: 'DEF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'CB / FD', section: 'DEF', starterCount: 2, rotationType: '3-player-cycle' },
+    ]
+  },
+  {
+    id: 'p2', name: '5 DEF - 5 MF - 6 STR',
+    groups: [
+      { posLabel: 'RS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'CS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'LS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'RM', section: 'MF', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'CM / LM', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'FM / CB / WH', section: 'DEF', starterCount: 4, rotationType: '5-player-cycle' },
+    ]
+  },
+  {
+    id: 'p3', name: '3 @ BACK (5) - 6 MF - 5 STR',
+    groups: [
+      { posLabel: 'RS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'LS / CS', section: 'STR', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'RM / LM', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'FM / CM', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'LH / CB', section: 'DEF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'RH', section: 'DEF', starterCount: 1, rotationType: '1-for-1' },
+    ]
+  },
+  {
+    id: 'p4', name: '6 DEF - 4 MF - 6 STR',
+    groups: [
+      { posLabel: 'RS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'CS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'LS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'CM / LM / RM', section: 'MF', starterCount: 3, rotationType: '4-player-cycle' },
+      { posLabel: 'LH / RH', section: 'DEF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'CB / FD', section: 'DEF', starterCount: 2, rotationType: '3-player-cycle' },
+    ]
+  },
+  {
+    id: 'p5', name: '3 @ BACK - 2+2 MF - 6 STR',
+    groups: [
+      { posLabel: 'RS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'CS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'LS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'RM / LM', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'FM / CM', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'LH / CB / RH', section: 'DEF', starterCount: 3, rotationType: '4-player-cycle' },
+    ]
+  },
+  {
+    id: 'p8', name: '3 DEF - 2 DEEP MF - 2 HIGH MF - 3 STR',
+    groups: [
+      { posLabel: 'RS / CS', section: 'STR', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'LS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'AM1', section: 'MF', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'AM2', section: 'MF', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'DM1 / DM2', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'CB / LH / RH', section: 'DEF', starterCount: 3, rotationType: '4-player-cycle' },
+    ]
+  },
+  {
+    id: 'p9', name: '3 DEF - 2 DEEP MF - 2 HIGH MF - 3 STR (LOSE A PLAYER)',
+    groups: [
+      { posLabel: 'RS / CS', section: 'STR', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'LS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'AM1 / AM2', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'DM1 / DM2', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'CB / LH / RH', section: 'DEF', starterCount: 3, rotationType: '4-player-cycle' },
+    ]
+  },
+  {
+    id: 'p6', name: '5 DEF - 5 MF - 5 STR (LOSE A PLAYER)',
+    groups: [
+      { posLabel: 'RS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'CS / LS', section: 'STR', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'RM', section: 'MF', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'CM / LM', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'FM / CB / WH', section: 'DEF', starterCount: 4, rotationType: '5-player-cycle' },
+    ]
+  },
+];
+
+// =============================================
+// STATE
+// =============================================
+const STORAGE_KEY = 'hockeyRotationApp';
+
+let state = {
+  squad: [],
+  formationPresets: [...DEFAULT_PRESETS],
+  games: [],
+  ui: {
+    currentView: 'roster',
+    currentGameId: null,
+    currentSheetId: null,
+  }
+};
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    squad: state.squad,
+    formationPresets: state.formationPresets,
+    games: state.games,
+    ui: state.ui,
+  }));
+}
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try {
+      const data = JSON.parse(raw);
+      state.squad = data.squad || [];
+      const savedPresets = data.formationPresets || [];
+      const defaultIds = new Set(DEFAULT_PRESETS.map(p => p.id));
+      const customPresets = savedPresets.filter(p => !defaultIds.has(p.id));
+      state.formationPresets = [...DEFAULT_PRESETS, ...customPresets];
+      state.games = data.games || [];
+      if (data.ui) state.ui = { ...state.ui, ...data.ui };
+    } catch(e) { console.error('Failed to load state', e); }
+  }
+  if (state.squad.length === 0) loadDefaultSquad();
+}
+
+function loadDefaultSquad() {
+  const players = [
+    ['HIHA','RS',''],['HICKSON','RS',''],['LANE','CS','LS'],['THOMAS','LS','CS'],
+    ['BAKER','LS','CS'],['WOODS','CM','FM'],['BUSCHL','CM','RH'],['J.MORRISON','LM','RM'],
+    ['HOULBROOKE','RM',''],['SARIKAYA','RM','LM'],['C.MORRISON','LH','RH'],['CULHANE','RH','LH'],
+    ['NEILD','RH','CM'],['RUSSELL','CB',''],['YORSTON','FM','CB'],['READ','CB','FM'],
+    ['DIXON','GK',''],['RUETSCH','GK',''],['LETT','LH',''],['ELMES','RS','CS'],
+    ['NELSON','RM',''],
+  ];
+  state.squad = players.map((p, i) => ({ id: i+1, name: p[0], primaryPos: p[1], altPos: p[2] }));
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+
+// =============================================
+// VIEW SWITCHING
+// =============================================
+function switchView(view) {
+  state.ui.currentView = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => {
+    if (b.textContent.toLowerCase().includes(view === 'roster' ? 'squad' : view === 'games' ? 'game' : view === 'builder' ? 'sub sheet' : 'preview')) b.classList.add('active');
+  });
+  if (view === 'roster') renderRoster();
+  if (view === 'games') renderGames();
+  if (view === 'builder') renderBuilder();
+  if (view === 'preview') renderPreviewControls();
+  saveState();
+}
+
+// =============================================
+// ROSTER VIEW
+// =============================================
+function renderRoster() {
+  const tbody = document.getElementById('roster-body');
+  tbody.innerHTML = state.squad.map((p, i) => `
+    <tr>
+      <td style="width:40px; color:#8c8c8c;">${i+1}</td>
+      <td><input type="text" value="${p.name}" onchange="updatePlayer(${p.id},'name',this.value.toUpperCase())" style="font-weight:700;"></td>
+      <td><select onchange="updatePlayer(${p.id},'primaryPos',this.value)">${POSITIONS.map(pos => `<option value="${pos}" ${p.primaryPos===pos?'selected':''}>${pos}</option>`).join('')}</select></td>
+      <td><select onchange="updatePlayer(${p.id},'altPos',this.value)"><option value="">-</option>${POSITIONS.map(pos => `<option value="${pos}" ${p.altPos===pos?'selected':''}>${pos}</option>`).join('')}</select></td>
+      <td style="width:40px;"><button class="btn btn-danger btn-sm" onclick="removePlayer(${p.id})">×</button></td>
+    </tr>
+  `).join('');
+}
+
+function updatePlayer(id, field, value) {
+  const p = state.squad.find(p => p.id === id);
+  if (p) { p[field] = value; saveState(); }
+}
+
+function addPlayer() {
+  const maxId = state.squad.reduce((m, p) => Math.max(m, p.id), 0);
+  state.squad.push({ id: maxId + 1, name: '', primaryPos: 'RS', altPos: '' });
+  saveState(); renderRoster();
+}
+
+function removePlayer(id) {
+  state.squad = state.squad.filter(p => p.id !== id);
+  saveState(); renderRoster();
+}
+
+function exportSquad() {
+  const blob = new Blob([JSON.stringify(state.squad, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'squad-roster.json'; a.click();
+}
+
+function importSquad() {
+  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { state.squad = JSON.parse(ev.target.result); saveState(); renderRoster(); }
+      catch(e) { alert('Invalid JSON file'); }
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+  input.click();
+}
+
+// =============================================
+// GAMES VIEW
+// =============================================
+function renderGames() {
+  const list = document.getElementById('game-list');
+  list.innerHTML = state.games.map(g => `
+    <div class="game-card ${state.ui.currentGameId === g.id ? 'active' : ''}" onclick="selectGame('${g.id}')">
+      <h4>${g.name}</h4>
+      <small>${g.date || ''} · ${g.subSheets.length} sub sheet${g.subSheets.length !== 1 ? 's' : ''}</small>
+    </div>
+  `).join('') || '<p style="color:#8c8c8c;font-size:13px;">No games yet. Create one to get started.</p>';
+  renderGameDetail();
+}
+
+function selectGame(id) {
+  state.ui.currentGameId = id;
+  state.ui.currentSheetId = null;
+  saveState(); renderGames();
+}
+
+function renderGameDetail() {
+  const detail = document.getElementById('game-detail');
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) { detail.innerHTML = '<p style="color:#8c8c8c;">Select a game to manage sub sheets.</p>'; return; }
+
+  let html = `<h3>${game.name}</h3>
+    <p style="color:#8c8c8c;font-size:13px;margin-bottom:12px;">${game.date || 'No date'} · GK: ${game.gk1} / ${game.gk2}</p>
+    <div class="toolbar">
+      <button class="btn btn-primary btn-sm" onclick="addSubSheet('${game.id}')">+ Add Sub Sheet</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteGame('${game.id}')">Delete Game</button>
+    </div>
+    <div>`;
+
+  game.subSheets.forEach((s, i) => {
+    html += `<div class="sheet-card" onclick="editSheet('${game.id}','${s.id}')">
+      <div class="info">
+        <span>${s.quarterLabel}</span>
+        <span>${s.formationName || 'No formation selected'}</span>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();duplicateSheet('${game.id}','${s.id}')">Dup</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteSheet('${game.id}','${s.id}')">×</button>
+      </div>
+    </div>`;
+  });
+
+  html += '</div>';
+  detail.innerHTML = html;
+}
+
+function showNewGameModal() {
+  document.getElementById('new-game-name').value = '';
+  document.getElementById('new-game-date').value = '';
+  const playersDiv = document.getElementById('new-game-players');
+  playersDiv.innerHTML = state.squad.filter(p => p.primaryPos !== 'GK').map((p, i) => `
+    <label><span class="player-num">${i + 1}</span><input type="checkbox" value="${p.id}" checked><span class="player-label">${p.name} - ${p.primaryPos}</span></label>
+  `).join('');
+  const gkPlayers = state.squad.filter(p => p.primaryPos === 'GK');
+  document.getElementById('new-game-gk1').innerHTML = gkPlayers.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+  document.getElementById('new-game-gk2').innerHTML = gkPlayers.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+  if (gkPlayers.length > 1) document.getElementById('new-game-gk2').value = gkPlayers[1].name;
+  document.getElementById('modal-new-game').classList.add('active');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function createGame() {
+  const name = document.getElementById('new-game-name').value || 'New Game';
+  const date = document.getElementById('new-game-date').value;
+  const checked = [...document.querySelectorAll('#new-game-players input:checked')].map(c => parseInt(c.value));
+  const gk1 = document.getElementById('new-game-gk1').value;
+  const gk2 = document.getElementById('new-game-gk2').value;
+  const game = {
+    id: uid(), name, date, gk1, gk2,
+    selectedSquad: checked,
+    subSheets: [],
+  };
+  state.games.push(game);
+  state.ui.currentGameId = game.id;
+  closeModal('modal-new-game');
+  saveState(); renderGames();
+}
+
+function deleteGame(id) {
+  if (!confirm('Delete this game?')) return;
+  state.games = state.games.filter(g => g.id !== id);
+  if (state.ui.currentGameId === id) state.ui.currentGameId = null;
+  saveState(); renderGames();
+}
+
+function addSubSheet(gameId) {
+  const game = state.games.find(g => g.id === gameId);
+  if (!game) return;
+  const qNum = game.subSheets.length + 1;
+  const sheet = {
+    id: uid(),
+    quarterLabel: 'QUARTER ' + (qNum <= 4 ? qNum : qNum),
+    formationPresetId: '',
+    formationName: '',
+    groups: [],
+  };
+  game.subSheets.push(sheet);
+  saveState();
+  editSheet(gameId, sheet.id);
+}
+
+function duplicateSheet(gameId, sheetId) {
+  const game = state.games.find(g => g.id === gameId);
+  if (!game) return;
+  const original = game.subSheets.find(s => s.id === sheetId);
+  if (!original) return;
+  const copy = JSON.parse(JSON.stringify(original));
+  copy.id = uid();
+  copy.quarterLabel = original.quarterLabel + ' (copy)';
+  game.subSheets.push(copy);
+  saveState(); renderGames();
+}
+
+function deleteSheet(gameId, sheetId) {
+  const game = state.games.find(g => g.id === gameId);
+  if (!game) return;
+  game.subSheets = game.subSheets.filter(s => s.id !== sheetId);
+  saveState(); renderGames();
+}
+
+function editSheet(gameId, sheetId) {
+  state.ui.currentGameId = gameId;
+  state.ui.currentSheetId = sheetId;
+  saveState();
+  switchView('builder');
+}
+
+// =============================================
+// BUILDER VIEW
+// =============================================
+function renderBuilder() {
+  const container = document.getElementById('builder-content');
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) { container.innerHTML = '<p style="color:#8c8c8c;">Select a game and sub sheet from Game Manager first.</p>'; return; }
+  const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
+  if (!sheet) { container.innerHTML = '<p style="color:#8c8c8c;">Select a sub sheet to edit.</p>'; return; }
+
+  const availablePlayers = state.squad.filter(p => game.selectedSquad.includes(p.id) && p.primaryPos !== 'GK');
+  const assignedIds = new Set();
+  sheet.groups.forEach(g => {
+    (g.starters || []).forEach(s => { if (s.playerId) assignedIds.add(s.playerId); });
+    if (g.interchange && g.interchange.playerId) assignedIds.add(g.interchange.playerId);
+  });
+
+  let html = `
+    <div class="toolbar">
+      <button class="btn btn-secondary btn-sm" onclick="switchView('games')">← Back to Game</button>
+      <span style="color:#8c8c8c;font-size:13px;">${game.name} → ${sheet.quarterLabel}</span>
+    </div>
+    <div class="builder-layout">
+      <div class="builder-main">
+        <div class="row mb-16">
+          <div>
+            <label>Quarter Label</label>
+            <input type="text" value="${sheet.quarterLabel}" onchange="updateSheet('quarterLabel', this.value)" style="width:160px;">
+          </div>
+          <div>
+            <label>Formation</label>
+            <select onchange="applyFormationPreset(this.value)" style="width:280px;">
+              <option value="">Select formation...</option>
+              ${state.formationPresets.map(fp => `<option value="${fp.id}" ${sheet.formationPresetId === fp.id ? 'selected' : ''}>${fp.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>`;
+
+  // Group panels
+  let lastSection = '';
+  sheet.groups.forEach((group, gi) => {
+    if (group.section !== lastSection) {
+      const sectionLabels = { STR: 'STRIKERS', MF: 'MIDFIELD', DEF: 'DEFENDERS' };
+      html += `<div class="section-divider">${sectionLabels[group.section] || group.section}</div>`;
+      lastSection = group.section;
+    }
+    html += renderGroupPanel(group, gi, availablePlayers, sheet);
+  });
+
+  html += `</div>
+      <div class="builder-sidebar">
+        <div class="usage-panel">
+          <h3>Player Usage</h3>
+          ${availablePlayers.map(p => {
+            const assigned = assignedIds.has(p.id);
+            return `<span class="player-chip ${assigned ? 'assigned' : 'unassigned'}">${p.name}</span>`;
+          }).join('')}
+        </div>
+        <div class="mt-16">
+          <button class="btn btn-success" onclick="switchView('preview')" style="width:100%;">Preview Output →</button>
+        </div>
+      </div>
+    </div>`;
+
+  container.innerHTML = html;
+}
+
+function renderGroupPanel(group, gi, availablePlayers, sheet) {
+  const rotTypes = ['1-for-1','3-player-cycle','4-player-cycle','5-player-cycle'];
+  const sections = ['STR','MF','DEF'];
+  const starterCount = group.starters ? group.starters.length : 0;
+
+  // Determine assigned player IDs in OTHER groups
+  const otherAssigned = new Set();
+  sheet.groups.forEach((g, i) => {
+    if (i === gi) return;
+    (g.starters || []).forEach(s => { if (s.playerId) otherAssigned.add(s.playerId); });
+    if (g.interchange && g.interchange.playerId) otherAssigned.add(g.interchange.playerId);
+  });
+  // Also exclude this group's own assignments from each other dropdown
+  const thisStarters = (group.starters || []).map(s => s.playerId).filter(Boolean);
+  const thisInterchange = group.interchange?.playerId || null;
+  const allThisGroup = [...thisStarters, thisInterchange].filter(Boolean);
+
+  function playerOptions(currentId, excludeIds) {
+    const excl = new Set([...otherAssigned, ...excludeIds]);
+    if (currentId) excl.delete(currentId);
+    let opts = '<option value="">-</option>';
+    availablePlayers.forEach(p => {
+      if (excl.has(p.id) && p.id !== currentId) return;
+      opts += `<option value="${p.id}" ${p.id === currentId ? 'selected' : ''}>${p.name}</option>`;
+    });
+    return opts;
+  }
+
+  let starters = group.starters || [];
+  let html = `<div class="group-panel">
+    <div class="group-header">
+      <input type="text" value="${group.posLabel}" onchange="updateGroup(${gi},'posLabel',this.value)" placeholder="POS">
+      <select onchange="updateGroup(${gi},'section',this.value)">${sections.map(s => `<option value="${s}" ${group.section===s?'selected':''}>${s}</option>`).join('')}</select>
+      <select onchange="changeRotationType(${gi},this.value)">
+        ${rotTypes.map(rt => `<option value="${rt}" ${group.rotationType===rt?'selected':''}>${rt}</option>`).join('')}
+      </select>
+      <span style="color:#8c8c8c;font-size:11px;">1st Rot:</span>
+      <input type="number" value="${group.firstRotationMin || ''}" onchange="updateGroup(${gi},'firstRotationMin',parseInt(this.value)||0)" min="0" max="15" style="width:50px;">
+      <span style="color:#8c8c8c;font-size:11px;">Timing:</span>
+      <input type="text" value="${group.timing || ''}" onchange="updateGroup(${gi},'timing',this.value)" placeholder="e.g. 4 on 4 off" style="width:130px;">
+    </div>
+    <div class="players-row">
+      <span style="color:#2a9d3a;font-size:11px;width:60px;">STARTERS:</span>`;
+
+  for (let si = 0; si < starters.length; si++) {
+    const s = starters[si];
+    const excl = allThisGroup.filter(id => id !== s.playerId);
+    html += `<select onchange="updateStarter(${gi},${si},'playerId',parseInt(this.value)||0)">${playerOptions(s.playerId, excl)}</select>`;
+    html += `<input type="text" value="${s.posTag || ''}" onchange="updateStarter(${gi},${si},'posTag',this.value.toUpperCase())" placeholder="POS" style="width:45px;">`;
+  }
+
+  html += `</div><div class="players-row">
+    <span style="color:#f4a259;font-size:11px;width:60px;">INTER:</span>`;
+  const intExcl = allThisGroup.filter(id => id !== thisInterchange);
+  html += `<select onchange="updateInterchange(${gi},parseInt(this.value)||0)">${playerOptions(thisInterchange, intExcl)}</select>`;
+  html += `</div>
+    <div class="config-row">
+      <span style="color:#8c8c8c;font-size:11px;">Notes:</span>
+      <input type="text" value="${group.positionNotes || ''}" onchange="updateGroup(${gi},'positionNotes',this.value)" placeholder="Position notes..." style="width:300px;">
+    </div>
+    <div class="rotation-desc">${generateRotationDesc(group)}</div>
+  </div>`;
+
+  return html;
+}
+
+function updateSheet(field, value) {
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) return;
+  const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
+  if (!sheet) return;
+  sheet[field] = value;
+  saveState();
+}
+
+function updateGroup(gi, field, value) {
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) return;
+  const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
+  if (!sheet || !sheet.groups[gi]) return;
+  sheet.groups[gi][field] = value;
+  saveState(); renderBuilder();
+}
+
+function updateStarter(gi, si, field, value) {
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) return;
+  const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
+  if (!sheet || !sheet.groups[gi]) return;
+  if (!sheet.groups[gi].starters[si]) return;
+  sheet.groups[gi].starters[si][field] = value;
+  saveState(); renderBuilder();
+}
+
+function updateInterchange(gi, playerId) {
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) return;
+  const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
+  if (!sheet || !sheet.groups[gi]) return;
+  if (!sheet.groups[gi].interchange) sheet.groups[gi].interchange = {};
+  sheet.groups[gi].interchange.playerId = playerId;
+  saveState(); renderBuilder();
+}
+
+function changeRotationType(gi, rotType) {
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) return;
+  const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
+  if (!sheet || !sheet.groups[gi]) return;
+  const group = sheet.groups[gi];
+  group.rotationType = rotType;
+  const needed = rotType === '1-for-1' ? 1 : rotType === '3-player-cycle' ? 2 : rotType === '4-player-cycle' ? 3 : 4;
+  while (group.starters.length < needed) group.starters.push({ playerId: 0, posTag: '' });
+  while (group.starters.length > needed) group.starters.pop();
+  saveState(); renderBuilder();
+}
+
+function applyFormationPreset(presetId) {
+  const game = state.games.find(g => g.id === state.ui.currentGameId);
+  if (!game) return;
+  const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
+  if (!sheet) return;
+  const preset = state.formationPresets.find(fp => fp.id === presetId);
+  if (!preset) return;
+
+  sheet.formationPresetId = presetId;
+  sheet.formationName = preset.name;
+  sheet.groups = preset.groups.map(pg => {
+    const starterCount = pg.rotationType === '1-for-1' ? 1 : pg.rotationType === '3-player-cycle' ? 2 : pg.rotationType === '4-player-cycle' ? 3 : 4;
+    return {
+      posLabel: pg.posLabel,
+      section: pg.section,
+      rotationType: pg.rotationType,
+      starters: Array.from({ length: starterCount }, () => ({ playerId: 0, posTag: '' })),
+      interchange: { playerId: 0 },
+      firstRotationMin: 4,
+      timing: '',
+      positionNotes: '',
+    };
+  });
+  saveState(); renderBuilder();
+}
+
+// =============================================
+// ROTATION DESCRIPTION GENERATOR
+// =============================================
+function generateRotationDesc(group) {
+  if (!group.starters || !group.interchange) return '';
+  const getPlayerName = (id) => {
+    const p = state.squad.find(p => p.id === id);
+    return p ? p.name : '?';
+  };
+
+  const starters = group.starters.filter(s => s.playerId);
+  const inter = group.interchange.playerId;
+  if (starters.length === 0 || !inter) return '<span style="color:#8c8c8c;">Assign players to generate rotation</span>';
+
+  const intName = getPlayerName(inter);
+
+  if (group.rotationType === '1-for-1') {
+    return `1 for 1 ${intName} - ${getPlayerName(starters[0].playerId)}`;
+  }
+
+  // N-player cycle
+  const starterNames = starters.map(s => getPlayerName(s.playerId));
+  const parts = [];
+  parts.push(`${intName} for ${starterNames[starterNames.length - 1]}`);
+  for (let i = starterNames.length - 1; i > 0; i--) {
+    parts.push(`${starterNames[i]} for ${starterNames[i - 1]}`);
+  }
+  parts.push(`${starterNames[0]} for ${intName}`);
+  return parts.join(' / ');
+}
+
+// =============================================
+// PREVIEW / OUTPUT
+// =============================================
+function renderPreviewControls() {
+  const gameSel = document.getElementById('preview-game-select');
+  gameSel.innerHTML = '<option value="">Select a game...</option>' +
+    state.games.map(g => `<option value="${g.id}" ${state.ui.currentGameId === g.id ? 'selected' : ''}>${g.name}</option>`).join('');
+  renderPreview();
+}
+
+function renderPreview() {
+  const gameId = document.getElementById('preview-game-select').value;
+  const game = state.games.find(g => g.id === gameId);
+  const output = document.getElementById('preview-output');
+  const sheetSel = document.getElementById('preview-sheet-select');
+
+  if (!game) { output.innerHTML = '<p style="color:#8c8c8c;">Select a game to preview.</p>'; return; }
+
+  sheetSel.innerHTML = '<option value="">All sheets</option>' +
+    game.subSheets.map(s => `<option value="${s.id}">${s.quarterLabel} - ${s.formationName || 'No formation'}</option>`).join('');
+
+  const showAll = document.getElementById('preview-all').checked;
+  const selectedSheetId = document.getElementById('preview-sheet-select').value;
+
+  let sheets = game.subSheets;
+  if (!showAll && selectedSheetId) {
+    sheets = sheets.filter(s => s.id === selectedSheetId);
+  }
+
+  output.innerHTML = sheets.map(s => renderSubSheetOutput(s, game)).join('');
+  // Equalize row heights within each sheet
+  requestAnimationFrame(() => equalizeRowHeights());
+}
+
+function ensureHtml2Canvas(cb) {
+  if (window.html2canvas) return cb();
+  const sc = document.createElement('script');
+  sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  sc.onload = () => cb();
+  sc.onerror = () => alert('Could not load the image tool — it needs an internet connection. Use Print instead.');
+  document.head.appendChild(sc);
+}
+function shareImage() {
+  const node = document.querySelector('#preview-output');
+  if (!node) { alert('Build the rotation first.'); return; }
+  ensureHtml2Canvas(() => {
+    html2canvas(node, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      .then(canvas => { const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = 'rotation-sheet.png'; a.click(); })
+      .catch(e => alert('Image export failed: ' + e.message));
+  });
+}
+
+function equalizeRowHeights() {
+  document.querySelectorAll('.rotation-table').forEach(table => {
+    const dataRows = table.querySelectorAll('tr.data-row');
+    if (dataRows.length === 0) return;
+    // Reset heights first
+    dataRows.forEach(row => row.style.height = 'auto');
+    // Find the tallest row
+    let maxHeight = 0;
+    dataRows.forEach(row => {
+      const h = row.getBoundingClientRect().height;
+      if (h > maxHeight) maxHeight = h;
+    });
+    // Apply uniform height
+    dataRows.forEach(row => row.style.height = maxHeight + 'px');
+  });
+}
+
+function fmtNZDate(dateStr) {
+  try {
+    const d = dateStr ? new Date(dateStr + 'T00:00:00') : new Date();
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-NZ', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch (e) { return ''; }
+}
+
+function renderSubSheetOutput(sheet, game) {
+  const getPlayerName = (id) => {
+    const p = state.squad.find(p => p.id === id);
+    return p ? p.name : '';
+  };
+
+  const maxStarters = 4; // Always 4 columns for starters
+  const colSpanAll = maxStarters + 5;
+  const sectionLabels = { STR: 'STRIKERS', MF: 'MIDFIELD', DEF: 'DEFENDERS' };
+
+  // Derive masthead / meta context
+  const matchTitle = game.name || 'ROTATION SHEET';
+  const dateLabel = fmtNZDate(game.date);
+  const formation = sheet.formationName || 'NO FORMATION';
+  const gkPair = `${game.gk1 || 'DIXON'} / ${game.gk2 || 'RUETSCH'}`;
+
+  let html = `<div class="sub-sheet-output">
+    <div class="doc-masthead">
+      <div class="mh-left">
+        <span class="mh-kicker">Rotation Sheet</span>
+        <span class="mh-title">${matchTitle}</span>
+      </div>
+      <div class="mh-right">
+        <div class="mh-item"><span class="mh-eyebrow">Quarter</span><span class="mh-value">${sheet.quarterLabel || '—'}</span></div>
+        <div class="mh-item"><span class="mh-eyebrow">Date</span><span class="mh-value">${dateLabel || '—'}</span></div>
+        <div class="mh-item"><span class="mh-eyebrow">Formation</span><span class="mh-value">${formation}</span></div>
+      </div>
+    </div>
+
+    <div class="doc-meta">
+      <div class="meta-cell"><span class="meta-label">Formation</span><span class="meta-value">${formation}</span></div>
+      <div class="meta-cell"><span class="meta-label">Goalkeepers</span><span class="meta-value">${gkPair}</span></div>
+      <div class="meta-cell"><span class="meta-label">Quarter</span><span class="meta-value">${sheet.quarterLabel || '—'}</span></div>
+      <div class="meta-cell"><span class="meta-label">Key Rule</span><span class="meta-value">Take the same person off each time</span></div>
+    </div>
+
+    <div class="doc-tablewrap">
+    <table class="rotation-table">
+      <colgroup>
+        <col style="width:90px;">
+        <col style="width:128px;">
+        <col style="width:128px;">
+        <col style="width:128px;">
+        <col style="width:128px;">
+        <col style="width:120px;">
+        <col style="width:80px;">
+        <col>
+        <col style="width:120px;">
+      </colgroup>
+      <thead><tr>
+        <th class="col-pos">POS</th>
+        <th class="col-start" colspan="${maxStarters}">Start</th>
+        <th class="col-interchange">Interchange</th>
+        <th class="col-1st-rot">1st Rot</th>
+        <th class="col-rotation">Rotation</th>
+        <th class="col-timing">Timing</th>
+      </tr></thead>
+      <tbody>`;
+
+  let lastSection = '';
+
+  sheet.groups.forEach((group, gi) => {
+    // Section header row
+    if (group.section !== lastSection) {
+      html += `<tr class="section-head"><td colspan="${colSpanAll}"><span class="sec-label">${sectionLabels[group.section] || group.section}</span></td></tr>`;
+      lastSection = group.section;
+    }
+
+    const zebra = gi % 2 === 1 ? ' zebra' : '';
+
+    // Main row
+    html += `<tr class="data-row${zebra}">`;
+    html += `<td class="cell-pos">${group.posLabel}</td>`;
+
+    // Starter cells
+    const starters = group.starters || [];
+    for (let i = 0; i < maxStarters; i++) {
+      if (i < starters.length && starters[i].playerId) {
+        const name = getPlayerName(starters[i].playerId);
+        const tag = starters[i].posTag ? `<span class="pos-tag">${starters[i].posTag}</span>` : '';
+        html += `<td class="cell-starter"><span class="starter-name">${name}</span>${tag}</td>`;
+      } else {
+        html += `<td class="cell-starter-empty">—</td>`;
+      }
+    }
+
+    // Interchange
+    const interName = group.interchange?.playerId ? getPlayerName(group.interchange.playerId) : '';
+    html += `<td class="cell-interchange">${interName ? `<span class="inter-pill">${interName}</span>` : ''}</td>`;
+
+    // 1st rotation
+    html += `<td class="cell-1st-rot">${group.firstRotationMin ? `<span class="min-chip">${group.firstRotationMin}'</span>` : ''}</td>`;
+
+    // Rotation description
+    html += `<td class="cell-rotation">${generateRotationDesc(group)}</td>`;
+
+    // Timing
+    html += `<td class="cell-timing">${group.timing || ''}</td>`;
+    html += `</tr>`;
+
+    // Position notes row
+    if (group.positionNotes) {
+      html += `<tr class="pos-notes-row${zebra}">
+        <td></td>
+        <td colspan="${maxStarters + 4}" class="notes-text">${group.positionNotes}</td>
+      </tr>`;
+    }
+  });
+
+  // GK section
+  const gkName = `${game.gk1 || 'DIXON'} or ${game.gk2 || 'RUETSCH'}`;
+  html += `<tr class="section-head"><td colspan="${colSpanAll}"><span class="sec-label">Goalkeeper</span></td></tr>`;
+  html += `<tr class="data-row gk-row">
+    <td class="cell-pos">GK</td>
+    <td class="cell-gk-start" colspan="${maxStarters}"><span class="starter-name">${gkName}</span></td>
+    <td class="cell-interchange"></td>
+    <td class="cell-1st-rot"><span class="min-chip">15'</span></td>
+    <td class="cell-rotation">${gkName} — full quarter</td>
+    <td class="cell-timing">15 on</td>
+  </tr>`;
+
+  html += `</tbody></table>`;
+  html += `</div>`;
+
+  // FOOTER
+  const teamName = game.teamName || 'Performance Programme';
+  html += `<div class="doc-footer">
+    <div class="ft-left">${teamName} <span class="ft-accent">· Rotation Sheet</span></div>
+    <div class="ft-right">Generated ${fmtNZDate()} · Private &amp; Confidential</div>
+  </div>`;
+  html += `</div>`;
+  return html;
+}
+
+// =============================================
+// INIT
+// =============================================
+loadState();
+renderRoster();
+if (state.ui.currentView) switchView(state.ui.currentView);
+</script>
+</body>
+</html>

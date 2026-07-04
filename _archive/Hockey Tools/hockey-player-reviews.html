@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Review Generator</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; }
+
+/* NAV */
+nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; }
+nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #d4a843; letter-spacing: 1px; }
+nav button { background: none; border: none; color: #8899aa; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+nav button:hover { color: #fff; }
+nav button.active { color: #fff; border-bottom-color: #d4a843; }
+
+/* VIEWS */
+.view { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+.view.active { display: block; }
+
+/* COMMON */
+h2 { font-size: 22px; margin-bottom: 16px; color: #d4a843; }
+h3 { font-size: 16px; margin-bottom: 10px; color: #ccc; }
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
+.btn-primary { background: #d4a843; color: #000; }
+.btn-primary:hover { background: #e6bc5a; }
+.btn-secondary { background: #0f3460; color: #fff; }
+.btn-secondary:hover { background: #1a4a8a; }
+.btn-danger { background: #722; color: #fff; }
+.btn-danger:hover { background: #933; }
+.btn-success { background: #2a7a3a; color: #fff; }
+.btn-success:hover { background: #3a9a4a; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+input, select, textarea { padding: 6px 10px; border: 1px solid #334; border-radius: 4px; background: #0d1b2a; color: #fff; font-size: 13px; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #d4a843; }
+label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: flex-end; }
+.form-group { display: flex; flex-direction: column; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; }
+.section { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+.section h3 { color: #d4a843; margin-bottom: 12px; }
+
+/* SQUAD GRID */
+.squad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.squad-card { background: #0d1b2a; border: 1px solid #334; border-radius: 6px; padding: 10px; text-align: center; position: relative; }
+.squad-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #d4a843; margin-bottom: 6px; }
+.squad-card .no-photo { width: 80px; height: 80px; border-radius: 50%; background: #1f3864; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 28px; font-weight: 700; color: #d4a843; border: 2px solid #d4a843; }
+.squad-card h4 { font-size: 13px; color: #fff; margin-bottom: 2px; }
+.squad-card small { color: #889; font-size: 11px; }
+.squad-card .card-actions { position: absolute; top: 4px; right: 4px; display: flex; gap: 2px; }
+.squad-card .card-actions button { background: none; border: none; color: #667; cursor: pointer; font-size: 14px; padding: 2px 4px; }
+.squad-card .card-actions button:hover { color: #fff; }
+
+/* MATCH/REVIEW LIST */
+.review-card { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 14px; margin-bottom: 8px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
+.review-card:hover { border-color: #d4a843; }
+.review-card.active { border-color: #d4a843; background: #1a2a4a; }
+.review-card .info h4 { color: #fff; font-size: 14px; margin-bottom: 2px; }
+.review-card .info small { color: #889; font-size: 12px; }
+.review-actions { display: flex; gap: 4px; }
+
+/* PLAYER TABS */
+.player-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; }
+.player-tab { padding: 6px 14px; background: #0d1b2a; border: 1px solid #334; border-radius: 4px; cursor: pointer; font-size: 12px; color: #889; transition: all .2s; }
+.player-tab:hover { border-color: #d4a843; color: #fff; }
+.player-tab.active { background: #d4a843; color: #000; border-color: #d4a843; font-weight: 700; }
+.player-tab.filled { border-color: #2a7a3a; }
+
+/* ============================================= */
+/* OUTPUT - POST MATCH FEEDBACK (Page 1 style)   */
+/* ============================================= */
+.pm-output { background: #1e1e1e; color: #c8c8c8; font-family: 'Segoe UI', Arial, sans-serif; width: 100%; max-width: 960px; margin: 0 auto 30px; }
+.pm-output * { color: #c8c8c8; }
+
+/* Header bar */
+.pm-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #1a1a1a; border-bottom: 2px solid #d4a843; }
+.pm-header .team-name { font-size: 14px; font-weight: 700; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; }
+.pm-header .doc-type { font-size: 12px; letter-spacing: 3px; color: #888 !important; text-transform: uppercase; }
+
+/* Player profile section */
+.pm-profile { display: flex; padding: 24px; gap: 24px; border: 1px solid #333; margin: 20px 24px; }
+.pm-profile .photo-box { width: 220px; min-width: 220px; border: 1px solid #d4a843; overflow: hidden; }
+.pm-profile .photo-box img { width: 100%; height: 220px; object-fit: cover; display: block; }
+.pm-profile .photo-box .no-img { width: 100%; height: 220px; background: #2a2a2a; display: flex; align-items: center; justify-content: center; font-size: 60px; color: #d4a843 !important; font-weight: 700; }
+.pm-profile .profile-info { flex: 1; }
+.pm-profile .player-name { font-size: 36px; font-weight: 700; font-style: italic; color: #fff !important; margin-bottom: 12px; }
+.pm-profile .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pm-profile .meta-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 2px; }
+.pm-profile .meta-value { font-size: 14px; color: #c8c8c8 !important; }
+
+/* Score circle */
+.score-circle { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #d4a843; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; color: #d4a843 !important; margin-left: auto; flex-shrink: 0; }
+
+/* Feedback sections */
+.pm-section { margin: 0 24px 0; padding: 20px; border: 1px solid #333; }
+.pm-section-header { font-size: 12px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 4px; }
+.pm-section-header.green { color: #4a8c3f !important; border-bottom: 2px solid #4a8c3f; }
+.pm-section-header.red { color: #c0392b !important; border-bottom: 2px solid #c0392b; }
+.pm-section-header.gold { color: #d4a843 !important; border-bottom: 2px solid #d4a843; }
+
+/* Two column layout for going well / needs work */
+.pm-two-col { display: flex; gap: 0; margin: 0 24px; }
+.pm-two-col .pm-section { flex: 1; }
+.pm-two-col .pm-section:first-child { border-right: none; }
+
+.pm-item { padding: 10px 0 10px 14px; border-left: 3px solid #4a8c3f; margin-bottom: 10px; font-size: 13px; font-style: italic; color: #aaa !important; line-height: 1.5; }
+.pm-item.red-border { border-left-color: #c0392b; }
+
+/* Full width sections */
+.pm-focus-section { margin: 0 24px; padding: 16px 20px; border: 1px solid #333; border-top: 3px solid #c0392b; }
+.pm-focus-section .pm-section-header { color: #d4a843 !important; border-bottom: none; }
+.pm-focus-section .focus-text { font-size: 15px; font-style: italic; color: #bbb !important; line-height: 1.6; }
+
+.pm-data-section { margin: 0 24px; padding: 12px 20px; border: 1px solid #333; background: #1a1a1a; display: flex; align-items: center; gap: 16px; }
+.pm-data-section .data-label { font-size: 12px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; }
+.pm-data-section .data-content { font-size: 13px; font-style: italic; color: #aaa !important; }
+
+.pm-oty-section { margin: 0 24px; padding: 16px 20px; border: 1px solid #333; border-top: 3px solid #d4a843; }
+.pm-oty-section .pm-section-header { color: #c0392b !important; border-bottom: none; }
+.pm-oty-section .oty-text { font-size: 13px; font-style: italic; color: #aaa !important; line-height: 1.6; }
+
+/* Footer */
+.pm-footer { display: flex; justify-content: space-between; padding: 16px 24px; margin-top: 20px; }
+.pm-footer .values { font-size: 11px; color: #555 !important; letter-spacing: 1px; }
+.pm-footer .brand { font-size: 11px; color: #555 !important; letter-spacing: 2px; text-transform: uppercase; }
+
+/* ============================================= */
+/* OUTPUT - REVIEW DECK (3 pages)                */
+/* ============================================= */
+.rd-page { background: #1e1e1e; color: #c8c8c8; font-family: 'Segoe UI', Arial, sans-serif; width: 100%; max-width: 960px; margin: 0 auto 30px; page-break-after: always; }
+.rd-page * { color: #c8c8c8; }
+.rd-page:last-child { page-break-after: avoid; }
+
+/* Shared header */
+.rd-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #1a1a1a; border-bottom: 2px solid #d4a843; }
+.rd-header .team-name { font-size: 14px; font-weight: 700; letter-spacing: 4px; color: #d4a843 !important; text-transform: uppercase; }
+.rd-header .doc-info { font-size: 12px; letter-spacing: 3px; color: #888 !important; text-transform: uppercase; display: flex; gap: 16px; }
+
+/* Page 1 - Overview */
+.rd-p1-body { display: flex; padding: 24px; gap: 0; }
+.rd-p1-left { flex: 0 0 420px; padding-right: 24px; }
+.rd-p1-right { flex: 1; display: flex; flex-direction: column; gap: 0; }
+
+.rd-p1-left .player-section { border: 1px solid #333; border-top: 3px solid #d4a843; padding: 24px; margin-bottom: 0; }
+.rd-p1-left .rd-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 4px; }
+.rd-p1-left .rd-value { font-size: 14px; color: #c8c8c8 !important; margin-bottom: 16px; }
+.rd-p1-left .player-name-big { font-size: 36px; font-weight: 700; font-style: italic; color: #fff !important; margin-bottom: 20px; }
+.rd-p1-left hr { border: none; border-top: 1px solid #333; margin: 12px 0; }
+
+/* Overall rating pills */
+.rating-pills { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.rating-pill { padding: 8px 16px; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: 2px; border: 1px solid #333; color: #555 !important; text-transform: uppercase; }
+.rating-pill.active-green { background: #2d5a27; border-color: #4a8c3f; color: #fff !important; }
+.rating-pill.active-amber { background: #7a6a20; border-color: #d4a843; color: #fff !important; }
+.rating-pill.active-red { background: #6b2020; border-color: #c0392b; color: #fff !important; }
+
+/* Trajectory */
+.trajectory-boxes { display: flex; gap: 8px; margin-bottom: 8px; }
+.trajectory-box { flex: 1; border: 1px solid #333; padding: 12px 8px; text-align: center; }
+.trajectory-box.active { border-color: #4a8c3f; }
+.trajectory-box .arrow { font-size: 28px; margin-bottom: 4px; }
+.trajectory-box .arrow.up { color: #4a8c3f !important; }
+.trajectory-box .arrow.right { color: #d4a843 !important; }
+.trajectory-box .arrow.down { color: #c0392b !important; }
+.trajectory-box .traj-label { font-size: 10px; letter-spacing: 2px; color: #666 !important; text-transform: uppercase; }
+.trajectory-box.active .traj-label { color: #fff !important; }
+.trajectory-note { font-size: 11px; font-style: italic; color: #666 !important; }
+
+/* Foundation statement */
+.rd-foundation { border: 1px solid #333; border-top: 3px solid #d4a843; padding: 24px; }
+.rd-foundation .rd-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 12px; }
+.rd-foundation .foundation-text { font-size: 15px; font-style: italic; color: #bbb !important; line-height: 1.7; }
+
+/* Strengths / Focus areas bottom */
+.rd-p1-bottom { display: flex; gap: 0; padding: 0 24px 24px; }
+.rd-p1-bottom .bottom-box { flex: 1; border: 1px solid #333; padding: 20px; }
+.rd-p1-bottom .bottom-box:first-child { border-right: none; border-top: 3px solid #4a8c3f; }
+.rd-p1-bottom .bottom-box:last-child { border-top: 3px solid #c0392b; }
+.rd-p1-bottom .rd-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+.rd-p1-bottom .rd-label.green { color: #4a8c3f !important; }
+.rd-p1-bottom .rd-label.red { color: #c0392b !important; }
+
+/* Page 2 - Where You Stand */
+.rd-p2-title { padding: 24px 24px 8px; }
+.rd-p2-title h2 { font-size: 28px; font-weight: 900; color: #fff !important; margin-bottom: 4px; }
+.rd-p2-title .subtitle { font-size: 13px; color: #666 !important; }
+
+.rd-p2-body { display: flex; gap: 0; padding: 0 24px 16px; }
+.rd-p2-strengths { flex: 1; border: 1px solid #333; border-top: 3px solid #d4a843; padding: 20px; margin-right: 0; }
+.rd-p2-workons { flex: 1; border: 1px solid #333; border-top: 3px solid #c0392b; border-left: none; padding: 20px; }
+
+.strength-item { margin-bottom: 16px; }
+.strength-item .s-title { background: #333; padding: 6px 12px; font-size: 13px; font-weight: 700; color: #fff !important; display: flex; align-items: center; gap: 8px; }
+.strength-item .s-title .check { color: #4a8c3f !important; }
+.strength-item .s-detail { padding: 8px 12px; font-size: 12px; font-style: italic; color: #999 !important; line-height: 1.5; }
+
+.workon-item { display: flex; gap: 12px; margin-bottom: 16px; }
+.workon-num { background: #6b2020; width: 50px; min-width: 50px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff !important; }
+.workon-content .wo-title { font-size: 14px; font-weight: 700; color: #fff !important; margin-bottom: 4px; }
+.workon-content .wo-detail { font-size: 12px; font-style: italic; color: #888 !important; line-height: 1.4; margin-bottom: 4px; }
+.workon-content .wo-coaching { font-size: 12px; color: #d4a843 !important; font-style: italic; }
+
+/* JD Alignment */
+.rd-jd { margin: 0 24px 24px; border: 1px solid #333; border-top: 3px solid #d4a843; padding: 20px; }
+.rd-jd .rd-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 14px; }
+.jd-grid { display: flex; gap: 16px; }
+.jd-item { flex: 1; }
+.jd-claimed { font-size: 10px; letter-spacing: 2px; color: #666 !important; text-transform: uppercase; margin-bottom: 4px; }
+.jd-claim-text { font-size: 13px; color: #c8c8c8 !important; margin-bottom: 4px; }
+.jd-verdict { font-size: 24px; font-weight: 700; }
+.jd-verdict.yes { color: #4a8c3f !important; }
+.jd-verdict.partial { color: #d4a843 !important; }
+.jd-verdict.no { color: #c0392b !important; }
+
+/* Page 3 - Path Forward */
+.rd-p3-title { padding: 24px 24px 8px; }
+.rd-p3-title h2 { font-size: 28px; font-weight: 900; color: #fff !important; margin-bottom: 4px; }
+.rd-p3-title .subtitle { font-size: 13px; color: #666 !important; }
+
+.rd-p3-body { display: flex; gap: 0; padding: 0 24px 16px; }
+.rd-p3-needs { flex: 0 0 45%; border: 1px solid #333; border-top: 3px solid #c0392b; padding: 20px; }
+.rd-p3-opps { flex: 0 0 30%; border: 1px solid #333; border-top: 3px solid #d4a843; border-left: none; padding: 20px; }
+.rd-p3-aca { flex: 1; border: 1px solid #333; border-top: 3px solid #d4a843; border-left: none; padding: 20px; }
+
+.needs-item { display: flex; gap: 12px; margin-bottom: 16px; }
+.opp-item { border: 1px solid #333; padding: 16px; margin-bottom: 12px; position: relative; }
+.opp-item .opp-arrow { font-size: 24px; color: #4a8c3f !important; margin-bottom: 4px; }
+.opp-item .opp-text { font-size: 12px; font-style: italic; color: #aaa !important; line-height: 1.5; }
+
+.aca-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+.aca-letter { width: 44px; height: 44px; border: 2px solid #d4a843; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #d4a843 !important; flex-shrink: 0; }
+.aca-content .aca-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 2px; }
+.aca-content .aca-desc { font-size: 11px; color: #888 !important; }
+
+/* Data says */
+.rd-datasays { margin: 0 24px 24px; border: 1px solid #333; border-top: 3px solid #d4a843; padding: 24px; }
+.rd-datasays .rd-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #d4a843 !important; text-transform: uppercase; margin-bottom: 12px; }
+.rd-datasays .ds-text { font-size: 15px; font-style: italic; color: #bbb !important; line-height: 1.7; }
+
+/* Shared footer */
+.rd-footer { display: flex; justify-content: space-between; padding: 16px 24px; }
+.rd-footer .values { font-size: 11px; color: #555 !important; letter-spacing: 1px; }
+.rd-footer .brand { font-size: 11px; color: #555 !important; letter-spacing: 2px; text-transform: uppercase; }
+
+/* PRINT */
+@media print {
+  body { background: #1e1e1e; }
+  nav, .view:not(#view-preview), .preview-controls, .no-print { display: none !important; }
+  #view-preview { display: block !important; padding: 0; }
+  .pm-output, .rd-page { page-break-after: always; margin-bottom: 0; box-shadow: none; }
+  .pm-output:last-child, .rd-page:last-child { page-break-after: avoid; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { margin: 5mm; size: A4 landscape; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">PLAYER REVIEW GENERATOR</span>
+  <button class="active" onclick="switchView('squad')">Squad</button>
+  <button onclick="switchView('postmatch')">Post-Match</button>
+  <button onclick="switchView('reviewdeck')">Review Deck</button>
+  <button onclick="switchView('preview')">Preview / Print</button>
+</nav>
+
+<div id="view-squad" class="view active"></div>
+<div id="view-postmatch" class="view"></div>
+<div id="view-reviewdeck" class="view"></div>
+<div id="view-preview" class="view"></div>
+
+<script>
+// =============================================
+// STATE
+// =============================================
+const STORAGE_KEY = 'hockeyPlayerReviews';
+let state = {
+  squad: [],
+  postMatchSets: [],
+  reviewDeckSets: [],
+  ui: { currentView: 'squad', currentPMId: null, currentRDId: null, currentPlayerIdx: 0 }
+};
+
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) { try { const d = JSON.parse(raw); Object.assign(state, d); } catch(e) { console.error(e); } }
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+// =============================================
+// VIEW SWITCHING
+// =============================================
+function switchView(v) {
+  state.ui.currentView = v;
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => {
+    const t = b.textContent.toLowerCase();
+    if ((v==='squad' && t.includes('squad')) || (v==='postmatch' && t.includes('post')) || (v==='reviewdeck' && t.includes('review deck')) || (v==='preview' && t.includes('preview'))) b.classList.add('active');
+  });
+  if (v==='squad') renderSquad();
+  else if (v==='postmatch') renderPMList();
+  else if (v==='reviewdeck') renderRDList();
+  else if (v==='preview') renderPreview();
+  saveState();
+}
+
+// =============================================
+// SQUAD MANAGEMENT
+// =============================================
+function renderSquad() {
+  const el = document.getElementById('view-squad');
+  let html = `<h2>Squad Management</h2>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="addPlayer()">+ Add Player</button>
+      <button class="btn btn-secondary" onclick="exportSquad()">Export Squad</button>
+      <button class="btn btn-secondary" onclick="importSquad()">Import Squad</button>
+    </div>
+    <div class="squad-grid">`;
+  state.squad.forEach((p, i) => {
+    const initials = (p.name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    html += `<div class="squad-card">
+      <div class="card-actions">
+        <button onclick="uploadPlayerPhoto(${i})" title="Upload photo">📷</button>
+        <button onclick="editPlayer(${i})" title="Edit">✎</button>
+        <button onclick="removePlayer(${i})" title="Remove">×</button>
+      </div>
+      ${p.photo ? `<img src="${p.photo}">` : `<div class="no-photo">${initials}</div>`}
+      <h4>${esc(p.name)}</h4>
+      <small>${esc(p.position)}</small>
+    </div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function addPlayer() {
+  const name = prompt('Player name:');
+  if (!name) return;
+  const pos = prompt('Position (e.g. Midfielder):') || '';
+  state.squad.push({ id: uid(), name, position: pos, photo: '' });
+  saveState(); renderSquad();
+}
+
+function editPlayer(i) {
+  const p = state.squad[i];
+  const name = prompt('Name:', p.name);
+  if (name === null) return;
+  const pos = prompt('Position:', p.position);
+  if (pos === null) return;
+  p.name = name; p.position = pos;
+  saveState(); renderSquad();
+}
+
+function removePlayer(i) {
+  if (!confirm('Remove ' + state.squad[i].name + '?')) return;
+  state.squad.splice(i, 1);
+  saveState(); renderSquad();
+}
+
+function uploadPlayerPhoto(i) {
+  const input = document.createElement('input'); input.type='file'; input.accept='image/*';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => { state.squad[i].photo = ev.target.result; saveState(); renderSquad(); };
+    reader.readAsDataURL(e.target.files[0]);
+  };
+  input.click();
+}
+
+function exportSquad() {
+  const blob = new Blob([JSON.stringify(state.squad, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'squad.json'; a.click();
+}
+
+function importSquad() {
+  const input = document.createElement('input'); input.type='file'; input.accept='.json';
+  input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { const imported = JSON.parse(ev.target.result); state.squad = [...state.squad, ...imported]; saveState(); renderSquad(); }
+      catch(e) { alert('Invalid JSON'); }
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+  input.click();
+}
+
+// =============================================
+// POST-MATCH FEEDBACK
+// =============================================
+function renderPMList() {
+  const el = document.getElementById('view-postmatch');
+  if (state.ui.currentPMId) { renderPMBuilder(); return; }
+  let html = `<h2>Post-Match Feedback</h2>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="createPMSet()">+ New Match Review</button>
+    </div>`;
+  state.postMatchSets.forEach(s => {
+    const count = s.players.filter(p => p.goingWell1 || p.needsWork1).length;
+    html += `<div class="review-card" onclick="openPMSet('${s.id}')">
+      <div class="info"><h4>${esc(s.matchTitle)}</h4><small>${esc(s.date)} · ${count}/${s.players.length} completed</small></div>
+      <div class="review-actions">
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();dupPMSet('${s.id}')">Dup</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();delPMSet('${s.id}')">×</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function createPMSet() {
+  if (state.squad.length === 0) { alert('Add players to your squad first.'); return; }
+  const title = prompt('Match (e.g. NZ vs Australia, 3-2):') || 'Match Review';
+  const set = {
+    id: uid(), matchTitle: title, date: new Date().toLocaleDateString('en-GB'),
+    nextGame: '', teamName: 'BLACK STICKS MEN',
+    players: state.squad.map(p => ({
+      playerId: p.id, name: p.name, position: p.position, photo: p.photo,
+      score: '', goingWell1: '', goingWell2: '', goingWell3: '',
+      needsWork1: '', needsWork2: '',
+      nextGameFocus: '', dataLine: '', overToYou: ''
+    }))
+  };
+  state.postMatchSets.push(set);
+  state.ui.currentPMId = set.id;
+  state.ui.currentPlayerIdx = 0;
+  saveState(); renderPMBuilder();
+}
+
+function openPMSet(id) { state.ui.currentPMId = id; state.ui.currentPlayerIdx = 0; saveState(); renderPMBuilder(); }
+
+function dupPMSet(id) {
+  const orig = state.postMatchSets.find(s=>s.id===id); if (!orig) return;
+  const copy = JSON.parse(JSON.stringify(orig)); copy.id = uid(); copy.matchTitle += ' (copy)';
+  state.postMatchSets.push(copy); saveState(); renderPMList();
+}
+
+function delPMSet(id) {
+  if (!confirm('Delete this match review?')) return;
+  state.postMatchSets = state.postMatchSets.filter(s=>s.id!==id);
+  if (state.ui.currentPMId===id) state.ui.currentPMId=null;
+  saveState(); renderPMList();
+}
+
+function getPMSet() { return state.postMatchSets.find(s=>s.id===state.ui.currentPMId); }
+
+function renderPMBuilder() {
+  const el = document.getElementById('view-postmatch');
+  const set = getPMSet();
+  if (!set) { renderPMList(); return; }
+  const pi = state.ui.currentPlayerIdx;
+  const player = set.players[pi];
+  if (!player) { state.ui.currentPlayerIdx = 0; renderPMBuilder(); return; }
+
+  let html = `<div class="toolbar">
+    <button class="btn btn-secondary btn-sm" onclick="state.ui.currentPMId=null;saveState();renderPMList()">← Back</button>
+    <button class="btn btn-success btn-sm" onclick="switchView('preview')">Preview / Print →</button>
+  </div>
+  <div class="section">
+    <h3>Match Details</h3>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Match</label><input value="${esc(set.matchTitle)}" onchange="getPMSet().matchTitle=this.value;saveState();"></div>
+      <div class="form-group"><label>Date</label><input value="${esc(set.date)}" onchange="getPMSet().date=this.value;saveState();"></div>
+      <div class="form-group"><label>Next Game</label><input value="${esc(set.nextGame)}" onchange="getPMSet().nextGame=this.value;saveState();" placeholder="vs India, Thursday"></div>
+      <div class="form-group" style="flex:1.5;"><label>Team Name</label><input value="${esc(set.teamName)}" onchange="getPMSet().teamName=this.value;saveState();"></div>
+    </div>
+  </div>`;
+
+  // Player tabs
+  html += `<div class="player-tabs">`;
+  set.players.forEach((p, i) => {
+    const filled = p.goingWell1 || p.needsWork1;
+    html += `<div class="player-tab ${i===pi?'active':''} ${filled?'filled':''}" onclick="state.ui.currentPlayerIdx=${i};saveState();renderPMBuilder();">${esc(p.name.split(' ').pop())}</div>`;
+  });
+  html += `</div>`;
+
+  // Player form
+  html += `<div class="section">
+    <h3>${esc(player.name)} — ${esc(player.position)}</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Overall Score (1-10)</label><input type="number" min="1" max="10" value="${player.score}" onchange="getPMSet().players[${pi}].score=this.value;saveState();" style="width:70px;"></div>
+      <div class="form-group"><label>Position Override</label><input value="${esc(player.position)}" onchange="getPMSet().players[${pi}].position=this.value;saveState();" style="width:140px;"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Going Well 1</label><textarea rows="2" onchange="getPMSet().players[${pi}].goingWell1=this.value;saveState();">${esc(player.goingWell1)}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Going Well 2</label><textarea rows="2" onchange="getPMSet().players[${pi}].goingWell2=this.value;saveState();">${esc(player.goingWell2)}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Going Well 3</label><textarea rows="2" onchange="getPMSet().players[${pi}].goingWell3=this.value;saveState();">${esc(player.goingWell3)}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Needs Work 1</label><textarea rows="2" onchange="getPMSet().players[${pi}].needsWork1=this.value;saveState();">${esc(player.needsWork1)}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Needs Work 2</label><textarea rows="2" onchange="getPMSet().players[${pi}].needsWork2=this.value;saveState();">${esc(player.needsWork2)}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Next Game Focus</label><textarea rows="2" onchange="getPMSet().players[${pi}].nextGameFocus=this.value;saveState();">${esc(player.nextGameFocus)}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Data</label><input value="${esc(player.dataLine)}" onchange="getPMSet().players[${pi}].dataLine=this.value;saveState();" placeholder="Total distance: 7.2km | Sprints: 23 | Circle entries: 12"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;"><label>Over To You</label><textarea rows="3" onchange="getPMSet().players[${pi}].overToYou=this.value;saveState();">${esc(player.overToYou)}</textarea></div>
+    </div>
+    <div class="toolbar" style="margin-top:12px;">
+      ${pi > 0 ? `<button class="btn btn-secondary btn-sm" onclick="state.ui.currentPlayerIdx--;saveState();renderPMBuilder();">← Prev</button>` : ''}
+      ${pi < set.players.length-1 ? `<button class="btn btn-primary btn-sm" onclick="state.ui.currentPlayerIdx++;saveState();renderPMBuilder();">Next →</button>` : ''}
+    </div>
+  </div>`;
+  el.innerHTML = html;
+}
+
+// =============================================
+// REVIEW DECK
+// =============================================
+function renderRDList() {
+  const el = document.getElementById('view-reviewdeck');
+  if (state.ui.currentRDId) { renderRDBuilder(); return; }
+  let html = `<h2>Player Review Decks</h2>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="createRDSet()">+ New Review</button>
+    </div>`;
+  state.reviewDeckSets.forEach(s => {
+    const count = s.players.filter(p => p.foundationStatement).length;
+    html += `<div class="review-card" onclick="openRDSet('${s.id}')">
+      <div class="info"><h4>${esc(s.reviewTitle)}</h4><small>${esc(s.reviewPeriod)} · ${count}/${s.players.length} completed</small></div>
+      <div class="review-actions">
+        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();dupRDSet('${s.id}')">Dup</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();delRDSet('${s.id}')">×</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function createRDSet() {
+  if (state.squad.length === 0) { alert('Add players to your squad first.'); return; }
+  const title = prompt('Review Title:') || 'Player Review';
+  const period = prompt('Review Period (e.g. Pro League Block 1):') || '';
+  const set = {
+    id: uid(), reviewTitle: title, reviewPeriod: period, teamName: 'BLACK STICKS MEN',
+    players: state.squad.map(p => ({
+      playerId: p.id, name: p.name, position: p.position, photo: p.photo,
+      overallRating: '', trajectory: '', trajectoryNote: '', foundationStatement: '',
+      topStrength1: '', topStrength2: '', topFocus1: '', topFocus2: '',
+      strength1Title: '', strength1Detail: '',
+      strength2Title: '', strength2Detail: '',
+      strength3Title: '', strength3Detail: '',
+      workOn1Title: '', workOn1Detail: '', workOn1Coaching: '',
+      workOn2Title: '', workOn2Detail: '', workOn2Coaching: '',
+      workOn3Title: '', workOn3Detail: '', workOn3Coaching: '',
+      jdClaim1: '', jdVerdict1: 'yes',
+      jdClaim2: '', jdVerdict2: 'partial',
+      jdClaim3: '', jdVerdict3: 'no',
+      needsWork1: '', needsWork2: '', needsWork3: '',
+      opportunity1: '', opportunity2: '',
+      acaAccountability: 'Closed loops? Feedback documented?',
+      acaConsistency: 'Performing to standard across the block?',
+      acaAction: 'Time protected for key skills? Work-ons actioned?',
+      dataSays: ''
+    }))
+  };
+  state.reviewDeckSets.push(set);
+  state.ui.currentRDId = set.id;
+  state.ui.currentPlayerIdx = 0;
+  saveState(); renderRDBuilder();
+}
+
+function openRDSet(id) { state.ui.currentRDId = id; state.ui.currentPlayerIdx = 0; saveState(); renderRDBuilder(); }
+function dupRDSet(id) {
+  const orig = state.reviewDeckSets.find(s=>s.id===id); if (!orig) return;
+  const copy = JSON.parse(JSON.stringify(orig)); copy.id = uid(); copy.reviewTitle += ' (copy)';
+  state.reviewDeckSets.push(copy); saveState(); renderRDList();
+}
+function delRDSet(id) {
+  if (!confirm('Delete?')) return;
+  state.reviewDeckSets = state.reviewDeckSets.filter(s=>s.id!==id);
+  if (state.ui.currentRDId===id) state.ui.currentRDId=null;
+  saveState(); renderRDList();
+}
+function getRDSet() { return state.reviewDeckSets.find(s=>s.id===state.ui.currentRDId); }
+
+function renderRDBuilder() {
+  const el = document.getElementById('view-reviewdeck');
+  const set = getRDSet();
+  if (!set) { renderRDList(); return; }
+  const pi = state.ui.currentPlayerIdx;
+  const p = set.players[pi];
+  if (!p) { state.ui.currentPlayerIdx = 0; renderRDBuilder(); return; }
+
+  const f = (field) => `getRDSet().players[${pi}].${field}`;
+  const inp = (label, field, val, extra='') => `<div class="form-group" ${extra}><label>${label}</label><input value="${esc(val)}" onchange="${f(field)}=this.value;saveState();"></div>`;
+  const ta = (label, field, val, rows=2, extra='') => `<div class="form-group" ${extra}><label>${label}</label><textarea rows="${rows}" onchange="${f(field)}=this.value;saveState();">${esc(val)}</textarea></div>`;
+
+  let html = `<div class="toolbar">
+    <button class="btn btn-secondary btn-sm" onclick="state.ui.currentRDId=null;saveState();renderRDList();">← Back</button>
+    <button class="btn btn-success btn-sm" onclick="switchView('preview')">Preview / Print →</button>
+  </div>
+  <div class="section">
+    <h3>Review Details</h3>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Title</label><input value="${esc(set.reviewTitle)}" onchange="getRDSet().reviewTitle=this.value;saveState();"></div>
+      <div class="form-group" style="flex:1;"><label>Review Period</label><input value="${esc(set.reviewPeriod)}" onchange="getRDSet().reviewPeriod=this.value;saveState();"></div>
+      <div class="form-group" style="flex:1;"><label>Team Name</label><input value="${esc(set.teamName)}" onchange="getRDSet().teamName=this.value;saveState();"></div>
+    </div>
+  </div>`;
+
+  // Player tabs
+  html += `<div class="player-tabs">`;
+  set.players.forEach((pl, i) => {
+    const filled = pl.foundationStatement;
+    html += `<div class="player-tab ${i===pi?'active':''} ${filled?'filled':''}" onclick="state.ui.currentPlayerIdx=${i};saveState();renderRDBuilder();">${esc(pl.name.split(' ').pop())}</div>`;
+  });
+  html += `</div>`;
+
+  // Page 1 fields
+  html += `<div class="section"><h3>Page 1 — Overview: ${esc(p.name)}</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Overall Rating</label>
+        <select onchange="${f('overallRating')}=this.value;saveState();">
+          <option value="" ${!p.overallRating?'selected':''}>Select...</option>
+          <option value="high" ${p.overallRating==='high'?'selected':''}>High Confidence</option>
+          <option value="building" ${p.overallRating==='building'?'selected':''}>Building</option>
+          <option value="attention" ${p.overallRating==='attention'?'selected':''}>Needs Attention</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Trajectory</label>
+        <select onchange="${f('trajectory')}=this.value;saveState();">
+          <option value="" ${!p.trajectory?'selected':''}>Select...</option>
+          <option value="improving" ${p.trajectory==='improving'?'selected':''}>Improving ↑</option>
+          <option value="plateauing" ${p.trajectory==='plateauing'?'selected':''}>Plateauing →</option>
+          <option value="declining" ${p.trajectory==='declining'?'selected':''}>Declining ↓</option>
+        </select>
+      </div>
+      ${inp('Trajectory Note','trajectoryNote',p.trajectoryNote,'style="flex:1;"')}
+    </div>
+    ${ta('Foundation Statement','foundationStatement',p.foundationStatement,3,'style="flex:1;"')}
+    <div class="form-row">
+      ${ta('Top Strength 1','topStrength1',p.topStrength1,2,'style="flex:1;"')}
+      ${ta('Top Strength 2','topStrength2',p.topStrength2,2,'style="flex:1;"')}
+    </div>
+    <div class="form-row">
+      ${ta('Top Focus Area 1','topFocus1',p.topFocus1,2,'style="flex:1;"')}
+      ${ta('Top Focus Area 2','topFocus2',p.topFocus2,2,'style="flex:1;"')}
+    </div>
+  </div>`;
+
+  // Page 2 fields
+  html += `<div class="section"><h3>Page 2 — Where You Stand</h3>
+    <div class="form-row">${inp('Strength 1 Title','strength1Title',p.strength1Title,'style="flex:1;"')}${ta('Detail','strength1Detail',p.strength1Detail,2,'style="flex:2;"')}</div>
+    <div class="form-row">${inp('Strength 2 Title','strength2Title',p.strength2Title,'style="flex:1;"')}${ta('Detail','strength2Detail',p.strength2Detail,2,'style="flex:2;"')}</div>
+    <div class="form-row">${inp('Strength 3 Title','strength3Title',p.strength3Title,'style="flex:1;"')}${ta('Detail','strength3Detail',p.strength3Detail,2,'style="flex:2;"')}</div>
+    <div class="form-row">${inp('Work-On 1 Title','workOn1Title',p.workOn1Title,'style="flex:1;"')}${ta('Detail','workOn1Detail',p.workOn1Detail,2,'style="flex:2;"')}${ta('Coaching Direction','workOn1Coaching',p.workOn1Coaching,1,'style="flex:1;"')}</div>
+    <div class="form-row">${inp('Work-On 2 Title','workOn2Title',p.workOn2Title,'style="flex:1;"')}${ta('Detail','workOn2Detail',p.workOn2Detail,2,'style="flex:2;"')}${ta('Coaching Direction','workOn2Coaching',p.workOn2Coaching,1,'style="flex:1;"')}</div>
+    <div class="form-row">${inp('Work-On 3 Title','workOn3Title',p.workOn3Title,'style="flex:1;"')}${ta('Detail','workOn3Detail',p.workOn3Detail,2,'style="flex:2;"')}${ta('Coaching Direction','workOn3Coaching',p.workOn3Coaching,1,'style="flex:1;"')}</div>
+    <h3 style="margin-top:12px;">JD Alignment</h3>
+    <div class="form-row">
+      ${inp('Claim 1','jdClaim1',p.jdClaim1,'style="flex:2;"')}
+      <div class="form-group"><label>Verdict</label><select onchange="${f('jdVerdict1')}=this.value;saveState();"><option value="yes" ${p.jdVerdict1==='yes'?'selected':''}>✓ Yes</option><option value="partial" ${p.jdVerdict1==='partial'?'selected':''}>~ Partial</option><option value="no" ${p.jdVerdict1==='no'?'selected':''}>✗ No</option></select></div>
+    </div>
+    <div class="form-row">
+      ${inp('Claim 2','jdClaim2',p.jdClaim2,'style="flex:2;"')}
+      <div class="form-group"><label>Verdict</label><select onchange="${f('jdVerdict2')}=this.value;saveState();"><option value="yes" ${p.jdVerdict2==='yes'?'selected':''}>✓ Yes</option><option value="partial" ${p.jdVerdict2==='partial'?'selected':''}>~ Partial</option><option value="no" ${p.jdVerdict2==='no'?'selected':''}>✗ No</option></select></div>
+    </div>
+    <div class="form-row">
+      ${inp('Claim 3','jdClaim3',p.jdClaim3,'style="flex:2;"')}
+      <div class="form-group"><label>Verdict</label><select onchange="${f('jdVerdict3')}=this.value;saveState();"><option value="yes" ${p.jdVerdict3==='yes'?'selected':''}>✓ Yes</option><option value="partial" ${p.jdVerdict3==='partial'?'selected':''}>~ Partial</option><option value="no" ${p.jdVerdict3==='no'?'selected':''}>✗ No</option></select></div>
+    </div>
+  </div>`;
+
+  // Page 3 fields
+  html += `<div class="section"><h3>Page 3 — Path Forward</h3>
+    ${ta('Needs Work 1','needsWork1',p.needsWork1,2,'style="flex:1;"')}
+    ${ta('Needs Work 2','needsWork2',p.needsWork2,2,'style="flex:1;"')}
+    ${ta('Needs Work 3','needsWork3',p.needsWork3,2,'style="flex:1;"')}
+    <div class="form-row">${ta('Improvement Opportunity 1','opportunity1',p.opportunity1,2,'style="flex:1;"')}${ta('Improvement Opportunity 2','opportunity2',p.opportunity2,2,'style="flex:1;"')}</div>
+    <h3 style="margin-top:12px;">ACA Tracker</h3>
+    <div class="form-row">
+      ${inp('Accountability','acaAccountability',p.acaAccountability,'style="flex:1;"')}
+      ${inp('Consistency','acaConsistency',p.acaConsistency,'style="flex:1;"')}
+      ${inp('Action','acaAction',p.acaAction,'style="flex:1;"')}
+    </div>
+    ${ta('The Data Says (Closing)','dataSays',p.dataSays,3,'style="flex:1;"')}
+    <div class="toolbar" style="margin-top:12px;">
+      ${pi > 0 ? `<button class="btn btn-secondary btn-sm" onclick="state.ui.currentPlayerIdx--;saveState();renderRDBuilder();">← Prev</button>` : ''}
+      ${pi < set.players.length-1 ? `<button class="btn btn-primary btn-sm" onclick="state.ui.currentPlayerIdx++;saveState();renderRDBuilder();">Next →</button>` : ''}
+    </div>
+  </div>`;
+  el.innerHTML = html;
+}
+
+// =============================================
+// PREVIEW / PRINT
+// =============================================
+function renderPreview() {
+  const el = document.getElementById('view-preview');
+  let html = `<div class="preview-controls no-print" style="margin-bottom:16px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <select id="preview-type" onchange="renderPreview()" style="padding:6px 10px; background:#0d1b2a; color:#fff; border:1px solid #334; border-radius:4px;">
+      <option value="postmatch">Post-Match Feedback</option>
+      <option value="reviewdeck">Review Deck</option>
+    </select>
+    <select id="preview-set" onchange="renderPreview()" style="padding:6px 10px; background:#0d1b2a; color:#fff; border:1px solid #334; border-radius:4px;">
+      <option value="">Select...</option>
+    </select>
+    <select id="preview-player" onchange="renderPreview()" style="padding:6px 10px; background:#0d1b2a; color:#fff; border:1px solid #334; border-radius:4px;">
+      <option value="all">All Players</option>
+    </select>
+    <button class="btn btn-primary" onclick="window.print()">Print All</button>
+  </div>
+  <div id="preview-content"></div>`;
+  el.innerHTML = html;
+
+  // Restore type selection
+  const typeEl = document.getElementById('preview-type');
+  if (state.ui.currentRDId && !state.ui.currentPMId) typeEl.value = 'reviewdeck';
+
+  // Populate set dropdown
+  const setEl = document.getElementById('preview-set');
+  const type = typeEl.value;
+  const sets = type === 'postmatch' ? state.postMatchSets : state.reviewDeckSets;
+  const currentId = type === 'postmatch' ? state.ui.currentPMId : state.ui.currentRDId;
+  setEl.innerHTML = '<option value="">Select...</option>' + sets.map(s => {
+    const label = type === 'postmatch' ? s.matchTitle : s.reviewTitle;
+    return `<option value="${s.id}" ${s.id===currentId?'selected':''}>${esc(label)}</option>`;
+  }).join('');
+
+  const selectedSet = sets.find(s => s.id === setEl.value);
+  if (!selectedSet) { document.getElementById('preview-content').innerHTML = '<p style="color:#889;">Select a review set.</p>'; return; }
+
+  // Populate player dropdown
+  const playerEl = document.getElementById('preview-player');
+  playerEl.innerHTML = '<option value="all">All Players</option>' + selectedSet.players.map((p,i) => `<option value="${i}">${esc(p.name)}</option>`).join('');
+
+  // Render
+  const content = document.getElementById('preview-content');
+  const playerFilter = playerEl.value;
+  const players = playerFilter === 'all' ? selectedSet.players : [selectedSet.players[parseInt(playerFilter)]];
+
+  if (type === 'postmatch') {
+    content.innerHTML = players.map(p => renderPMOutput(selectedSet, p)).join('');
+  } else {
+    content.innerHTML = players.map(p => renderRDOutput(selectedSet, p)).join('');
+  }
+}
+
+// =============================================
+// RENDER POST-MATCH OUTPUT
+// =============================================
+function renderPMOutput(set, p) {
+  const initials = (p.name||'').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const scoreColor = (parseInt(p.score)||0) >= 7 ? '#4a8c3f' : (parseInt(p.score)||0) >= 5 ? '#d4a843' : '#c0392b';
+
+  return `<div class="pm-output">
+    <div class="pm-header">
+      <span class="team-name">${esc(set.teamName)}</span>
+      <span class="doc-type">POST-MATCH FEEDBACK · CONFIDENTIAL</span>
+    </div>
+
+    <div class="pm-profile">
+      <div class="photo-box">
+        ${p.photo ? `<img src="${p.photo}">` : `<div class="no-img">${initials}</div>`}
+      </div>
+      <div class="profile-info">
+        <div class="player-name">${esc(p.name)}</div>
+        <div class="meta-grid">
+          <div><div class="meta-label">Position</div><div class="meta-value">${esc(p.position)}</div></div>
+          <div><div class="meta-label">Match</div><div class="meta-value">${esc(set.matchTitle)}</div></div>
+          <div><div class="meta-label">Next Game</div><div class="meta-value">${esc(set.nextGame)}</div></div>
+          <div><div class="meta-label">Date</div><div class="meta-value">${esc(set.date)}</div></div>
+        </div>
+      </div>
+      ${p.score ? `<div class="score-circle" style="border-color:${scoreColor}; color:${scoreColor} !important;">${esc(p.score)}</div>` : ''}
+    </div>
+
+    <div class="pm-two-col">
+      <div class="pm-section">
+        <div class="pm-section-header green">GOING WELL</div>
+        ${p.goingWell1 ? `<div class="pm-item">${escHtml(p.goingWell1)}</div>` : ''}
+        ${p.goingWell2 ? `<div class="pm-item">${escHtml(p.goingWell2)}</div>` : ''}
+        ${p.goingWell3 ? `<div class="pm-item">${escHtml(p.goingWell3)}</div>` : ''}
+      </div>
+      <div class="pm-section">
+        <div class="pm-section-header red">NEEDS WORK</div>
+        ${p.needsWork1 ? `<div class="pm-item red-border">${escHtml(p.needsWork1)}</div>` : ''}
+        ${p.needsWork2 ? `<div class="pm-item red-border">${escHtml(p.needsWork2)}</div>` : ''}
+      </div>
+    </div>
+
+    <div class="pm-focus-section">
+      <div class="pm-section-header gold">NEXT GAME FOCUS</div>
+      <div class="focus-text">${escHtml(p.nextGameFocus)}</div>
+    </div>
+
+    ${p.dataLine ? `<div class="pm-data-section">
+      <span class="data-label">DATA</span>
+      <span class="data-content">${escHtml(p.dataLine)}</span>
+    </div>` : ''}
+
+    <div class="pm-oty-section">
+      <div class="pm-section-header gold">OVER TO YOU</div>
+      <div class="oty-text">${escHtml(p.overToYou)}</div>
+    </div>
+
+    <div class="pm-footer">
+      <span class="values">Accountability · Consistency · Action</span>
+      <span class="brand">CONFIDENTIAL</span>
+    </div>
+  </div>`;
+}
+
+// =============================================
+// RENDER REVIEW DECK OUTPUT (3 pages)
+// =============================================
+function renderRDOutput(set, p) {
+  const verdictSymbol = v => v==='yes' ? '✓' : v==='partial' ? '~' : '✗';
+  const verdictClass = v => v==='yes' ? 'yes' : v==='partial' ? 'partial' : 'no';
+
+  // Page 1
+  let html = `<div class="rd-page">
+    <div class="rd-header">
+      <span class="team-name">${esc(set.teamName)}</span>
+      <div class="doc-info"><span>PLAYER REVIEW · CONFIDENTIAL</span><span>1 / 3</span></div>
+    </div>
+    <div class="rd-p1-body">
+      <div class="rd-p1-left">
+        <div class="player-section">
+          <div class="rd-label">PLAYER</div>
+          <div class="player-name-big">${esc(p.name)}</div>
+          <div class="rd-label">POSITION</div>
+          <div class="rd-value">${esc(p.position)}</div>
+          <div class="rd-label">REVIEW PERIOD</div>
+          <div class="rd-value">${esc(set.reviewPeriod)}</div>
+          <hr>
+          <div class="rd-label">OVERALL RATING</div>
+          <div class="rating-pills">
+            <div class="rating-pill ${p.overallRating==='high'?'active-green':''}">HIGH CONFIDENCE</div>
+            <div class="rating-pill ${p.overallRating==='building'?'active-amber':''}">BUILDING</div>
+            <div class="rating-pill ${p.overallRating==='attention'?'active-red':''}">NEEDS ATTENTION</div>
+          </div>
+          <hr>
+          <div class="rd-label">TRAJECTORY</div>
+          <div class="trajectory-boxes">
+            <div class="trajectory-box ${p.trajectory==='improving'?'active':''}"><div class="arrow up">↑</div><div class="traj-label">IMPROVING</div></div>
+            <div class="trajectory-box ${p.trajectory==='plateauing'?'active':''}"><div class="arrow right">→</div><div class="traj-label">PLATEAUING</div></div>
+            <div class="trajectory-box ${p.trajectory==='declining'?'active':''}"><div class="arrow down">↓</div><div class="traj-label">DECLINING</div></div>
+          </div>
+          ${p.trajectoryNote ? `<div class="trajectory-note">${escHtml(p.trajectoryNote)}</div>` : ''}
+        </div>
+      </div>
+      <div class="rd-p1-right">
+        <div class="rd-foundation">
+          <div class="rd-label">FOUNDATION STATEMENT</div>
+          <div class="foundation-text">${escHtml(p.foundationStatement)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="rd-p1-bottom">
+      <div class="bottom-box">
+        <div class="rd-label green">TOP STRENGTHS</div>
+        ${p.topStrength1 ? `<div class="pm-item">${escHtml(p.topStrength1)}</div>` : ''}
+        ${p.topStrength2 ? `<div class="pm-item">${escHtml(p.topStrength2)}</div>` : ''}
+      </div>
+      <div class="bottom-box">
+        <div class="rd-label red">TOP FOCUS AREAS</div>
+        ${p.topFocus1 ? `<div class="pm-item red-border">${escHtml(p.topFocus1)}</div>` : ''}
+        ${p.topFocus2 ? `<div class="pm-item red-border">${escHtml(p.topFocus2)}</div>` : ''}
+      </div>
+    </div>
+    <div class="rd-footer">
+      <span class="values">Accountability · Consistency · Action</span>
+      <span class="brand">CONFIDENTIAL</span>
+    </div>
+  </div>`;
+
+  // Page 2 - Where You Stand
+  html += `<div class="rd-page">
+    <div class="rd-header">
+      <span class="team-name">${esc(set.teamName)}</span>
+      <div class="doc-info"><span>PLAYER REVIEW · CONFIDENTIAL</span><span>2 / 3</span></div>
+    </div>
+    <div class="rd-p2-title">
+      <h2 style="color:#fff !important; margin-bottom:4px;">WHERE YOU STAND</h2>
+      <div class="subtitle">Strengths · Work-Ons · JD Alignment</div>
+    </div>
+    <div class="rd-p2-body">
+      <div class="rd-p2-strengths">
+        <div class="rd-label" style="color:#d4a843 !important; margin-bottom:14px;">STRENGTHS — GOING WELL</div>
+        ${['1','2','3'].map(n => p['strength'+n+'Title'] ? `<div class="strength-item"><div class="s-title"><span class="check">✓</span> ${esc(p['strength'+n+'Title'])}</div><div class="s-detail">${escHtml(p['strength'+n+'Detail'])}</div></div>` : '').join('')}
+      </div>
+      <div class="rd-p2-workons">
+        <div class="rd-label" style="color:#c0392b !important; margin-bottom:14px;">WORK-ONS — DEVELOPMENT AREAS</div>
+        ${['1','2','3'].map((n,i) => p['workOn'+n+'Title'] ? `<div class="workon-item"><div class="workon-num">0${i+1}</div><div class="workon-content"><div class="wo-title">${esc(p['workOn'+n+'Title'])}</div><div class="wo-detail">${escHtml(p['workOn'+n+'Detail'])}</div>${p['workOn'+n+'Coaching'] ? `<div class="wo-coaching">${escHtml(p['workOn'+n+'Coaching'])}</div>` : ''}</div></div>` : '').join('')}
+      </div>
+    </div>
+    <div class="rd-jd">
+      <div class="rd-label">JD ALIGNMENT — PERFORMING AGAINST THE ROLE</div>
+      <div class="jd-grid">
+        ${['1','2','3'].map(n => `<div class="jd-item">
+          <div class="jd-claimed">CLAIMED</div>
+          <div class="jd-claim-text">${esc(p['jdClaim'+n])}</div>
+          <div class="jd-verdict ${verdictClass(p['jdVerdict'+n])}">${verdictSymbol(p['jdVerdict'+n])}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="rd-footer">
+      <span class="values">Accountability · Consistency · Action</span>
+      <span class="brand">CONFIDENTIAL</span>
+    </div>
+  </div>`;
+
+  // Page 3 - Path Forward
+  html += `<div class="rd-page">
+    <div class="rd-header">
+      <span class="team-name">${esc(set.teamName)}</span>
+      <div class="doc-info"><span>PLAYER REVIEW · CONFIDENTIAL</span><span>3 / 3</span></div>
+    </div>
+    <div class="rd-p3-title">
+      <h2 style="color:#fff !important; margin-bottom:4px;">YOUR PATH FORWARD</h2>
+      <div class="subtitle">Needs Work · Improvement Opportunities · The Closing Message</div>
+    </div>
+    <div class="rd-p3-body">
+      <div class="rd-p3-needs">
+        <div class="rd-label" style="color:#c0392b !important; margin-bottom:14px;">NEEDS WORK</div>
+        ${['1','2','3'].map((n,i) => p['needsWork'+n] ? `<div class="needs-item"><div class="workon-num">0${i+1}</div><div style="flex:1;font-size:13px;font-style:italic;color:#aaa !important;line-height:1.5;">${escHtml(p['needsWork'+n])}</div></div>` : '').join('')}
+      </div>
+      <div class="rd-p3-opps">
+        <div class="rd-label" style="color:#d4a843 !important; margin-bottom:14px;">IMPROVEMENT OPPORTUNITIES</div>
+        ${p.opportunity1 ? `<div class="opp-item"><div class="opp-arrow">↑</div><div class="opp-text">${escHtml(p.opportunity1)}</div></div>` : ''}
+        ${p.opportunity2 ? `<div class="opp-item"><div class="opp-arrow">↑</div><div class="opp-text">${escHtml(p.opportunity2)}</div></div>` : ''}
+      </div>
+      <div class="rd-p3-aca">
+        <div class="rd-label" style="color:#d4a843 !important; margin-bottom:14px;">ACA TRACKER</div>
+        <div class="aca-item"><div class="aca-letter">A</div><div class="aca-content"><div class="aca-title">ACCOUNTABILITY</div><div class="aca-desc">${esc(p.acaAccountability)}</div></div></div>
+        <div class="aca-item"><div class="aca-letter">C</div><div class="aca-content"><div class="aca-title">CONSISTENCY</div><div class="aca-desc">${esc(p.acaConsistency)}</div></div></div>
+        <div class="aca-item"><div class="aca-letter">A</div><div class="aca-content"><div class="aca-title">ACTION</div><div class="aca-desc">${esc(p.acaAction)}</div></div></div>
+      </div>
+    </div>
+    <div class="rd-datasays">
+      <div class="rd-label">THE DATA SAYS</div>
+      <div class="ds-text">${escHtml(p.dataSays)}</div>
+    </div>
+    <div class="rd-footer">
+      <span class="values">Accountability · Consistency · Action</span>
+      <span class="brand">CONFIDENTIAL</span>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+// =============================================
+// INIT
+// =============================================
+loadState();
+if (state.ui.currentView) switchView(state.ui.currentView);
+else renderSquad();
+</script>
+</body>
+</html>

@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<!-- ELV8 Session Timer (C) — wall-clock anchored match-day timing -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ELV8 Session Timer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Montserrat', -apple-system, 'Segoe UI', Arial, sans-serif; background: #1c1c1c; color: #fff; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
+
+/* NAV */
+.top-bar { display: flex; align-items: center; padding: 10px 16px; background: #262626; border-bottom: 2px solid #D4AF37; gap: 8px; position: sticky; top: 0; z-index: 100; }
+.top-bar .logo { font-weight: 900; font-size: 15px; color: #D4AF37; letter-spacing: 1px; margin-right: auto; }
+.top-bar button { background: #2f2f2f; border: 1px solid #3c3c3c; color: #c4c4c4; font-size: 12px; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+.top-bar button.active { background: #D4AF37; color: #1c1c1c; border-color: #D4AF37; }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* TEMPLATES */
+.templates-view { padding: 16px; max-width: 600px; margin: 0 auto; }
+.templates-view h2 { font-size: 20px; color: #D4AF37; margin-bottom: 16px; }
+.tmpl-card { background: #262626; border: 1px solid #3c3c3c; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
+.tmpl-card:hover { border-color: #D4AF37; }
+.tmpl-card .info h3 { font-size: 15px; color: #fff; margin-bottom: 2px; }
+.tmpl-card .info small { font-size: 12px; color: #8c8c8c; }
+.tmpl-card .actions { display: flex; gap: 6px; }
+.tmpl-card .actions button { background: #2f2f2f; border: 1px solid #4a4a4a; color: #c4c4c4; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+.tmpl-card .actions button:hover { color: #fff; border-color: #8c8c8c; }
+.tmpl-card .actions button.del:hover { color: #e23b2e; border-color: #e23b2e; }
+.new-tmpl-btns { display: flex; gap: 8px; margin-bottom: 20px; }
+.btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all .15s; }
+.btn-gold { background: #D4AF37; color: #1c1c1c; }
+.btn-gold:hover { background: #b8952e; }
+.btn-dark { background: #2f2f2f; color: #c4c4c4; border: 1px solid #4a4a4a; }
+.btn-danger { background: #161616; color: #e23b2e; border: 1px solid #e23b2e; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-block { display: block; width: 100%; }
+
+/* EDITOR */
+.editor-view { padding: 16px; max-width: 700px; margin: 0 auto; }
+.editor-view h2 { font-size: 20px; color: #D4AF37; margin-bottom: 16px; }
+.ed-field { margin-bottom: 14px; }
+.ed-field label { display: block; font-size: 12px; color: #8c8c8c; margin-bottom: 4px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+.ed-field input, .ed-field select { width: 100%; padding: 8px 12px; background: #161616; border: 1px solid #3c3c3c; border-radius: 6px; color: #fff; font-size: 14px; }
+.ed-field input:focus, .ed-field select:focus { outline: none; border-color: #D4AF37; }
+.ed-row { display: flex; gap: 10px; }
+.ed-row .ed-field { flex: 1; }
+
+.drill-list { margin-top: 16px; }
+.drill-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; margin-bottom: 6px; }
+.drill-item .di-cat { width: 6px; height: 32px; border-radius: 3px; flex-shrink: 0; }
+.drill-item .di-info { flex: 1; min-width: 0; }
+.drill-item .di-name { font-size: 13px; font-weight: 600; }
+.drill-item .di-meta { font-size: 11px; color: #8c8c8c; }
+.drill-item .di-actions { display: flex; gap: 4px; }
+.drill-item .di-actions button { background: none; border: 1px solid #4a4a4a; color: #8c8c8c; font-size: 11px; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
+.drill-item .di-actions button:hover { color: #fff; border-color: #8c8c8c; }
+.add-drill-form { background: #262626; border: 1px solid #3c3c3c; border-radius: 8px; padding: 14px; margin-top: 12px; }
+.add-drill-form h4 { font-size: 13px; color: #D4AF37; margin-bottom: 10px; }
+
+/* Backup alarms panel */
+.backup-panel { background: #161616; border: 1px solid #3c3c3c; border-radius: 8px; padding: 14px; margin-top: 20px; }
+.backup-panel h4 { font-size: 13px; color: #D4AF37; margin-bottom: 4px; }
+.backup-panel .bp-sub { font-size: 11px; color: #8c8c8c; margin-bottom: 12px; line-height: 1.4; }
+.bp-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #262626; }
+.bp-row:last-child { border-bottom: none; }
+.bp-time { font-size: 16px; font-weight: 800; color: #D4AF37; width: 78px; font-variant-numeric: tabular-nums; }
+.bp-name { font-size: 13px; color: #e8e8e8; }
+.bp-row.final .bp-name { color: #fff; font-weight: 700; }
+
+/* TIMER VIEW */
+.timer-view { display: flex; flex-direction: column; min-height: calc(100vh - 50px); min-height: calc(100dvh - 50px); }
+.timer-header { padding: 10px 16px; background: #262626; border-bottom: 1px solid #3c3c3c; display: flex; align-items: center; justify-content: space-between; }
+.timer-header h2 { font-size: 14px; color: #D4AF37; font-weight: 800; letter-spacing: .5px; }
+.timer-header .th-clock { font-size: 13px; color: #8c8c8c; font-variant-numeric: tabular-nums; }
+.live-tag { font-size: 10px; font-weight: 800; letter-spacing: 1px; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; }
+.live-tag.live { background: #2a9d3a; color: #fff; }
+.live-tag.paused { background: #e2a52e; color: #1c1c1c; }
+.live-tag.armed { background: #3aa7e0; color: #1c1c1c; }
+
+/* Overall strip */
+.overall-strip { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: #232323; border-bottom: 1px solid #3c3c3c; }
+.overall-strip .os-block { text-align: center; flex: 1; }
+.overall-strip .os-label { font-size: 9px; color: #8c8c8c; text-transform: uppercase; letter-spacing: 1px; }
+.overall-strip .os-val { font-size: 18px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.overall-strip .os-val.gold { color: #D4AF37; }
+.overall-strip .os-divider { width: 1px; align-self: stretch; background: #3c3c3c; }
+
+/* Current drill */
+.current-drill { flex: 0 0 auto; padding: 18px 16px 14px; text-align: center; background: #1c1c1c; }
+.cd-category { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.cd-name { font-size: 30px; font-weight: 900; color: #fff; margin-bottom: 4px; line-height: 1.15; }
+.cd-time-range { font-size: 13px; color: #8c8c8c; margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+.countdown { font-size: 92px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -2px; margin-bottom: 10px; font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; }
+.countdown.warning { color: #e23b2e; animation: pulse .5s ease-in-out infinite alternate; }
+.countdown.normal { color: #fff; }
+@keyframes pulse { from { opacity: 1; } to { opacity: .55; } }
+.progress-wrap { width: 100%; max-width: 360px; margin: 0 auto 14px; height: 6px; background: #2f2f2f; border-radius: 3px; overflow: hidden; }
+.progress-bar { height: 100%; background: #D4AF37; border-radius: 3px; transition: width .25s linear; }
+.next-up { font-size: 13px; color: #8c8c8c; margin-bottom: 14px; }
+.next-up span { color: #c4c4c4; font-weight: 700; }
+
+/* Controls */
+.timer-controls { display: flex; gap: 12px; justify-content: center; padding: 0 16px 10px; }
+.tc-btn { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #3c3c3c; background: #262626; color: #fff; font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.tc-btn:hover { border-color: #8c8c8c; background: #2f2f2f; }
+.tc-btn.primary { border-color: #D4AF37; background: #D4AF37; color: #1c1c1c; width: 76px; height: 76px; font-size: 24px; }
+.tc-btn.primary:hover { background: #b8952e; }
+.tc-btn.danger { border-color: #e23b2e; color: #e23b2e; }
+
+/* Nudge row */
+.nudge-row { display: flex; gap: 8px; justify-content: center; padding: 0 16px 14px; }
+.nudge-btn { background: #232323; border: 1px solid #4a4a4a; color: #c4c4c4; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 16px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.nudge-btn:hover { border-color: #D4AF37; color: #fff; }
+
+/* Timeline */
+.drill-timeline { flex: 1; overflow-y: auto; padding: 6px 16px 100px; background: #1c1c1c; border-top: 1px solid #262626; }
+.dt-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; margin-bottom: 4px; transition: all .15s; cursor: pointer; }
+.dt-item:hover { background: #262626; }
+.dt-item.active { background: #262626; border: 1px solid #2a9d3a; }
+.dt-item.done { opacity: .4; }
+.dt-item .dt-time { font-size: 13px; font-weight: 700; color: #D4AF37; width: 72px; text-align: left; font-variant-numeric: tabular-nums; }
+.dt-item .dt-cat { width: 5px; height: 28px; border-radius: 3px; flex-shrink: 0; }
+.dt-item .dt-name { flex: 1; font-size: 14px; font-weight: 600; }
+.dt-item .dt-dur { font-size: 12px; color: #8c8c8c; }
+
+/* Ready screen */
+.ready-screen { padding: 20px 16px 100px; max-width: 600px; margin: 0 auto; }
+.ready-screen h2 { font-size: 20px; color: #D4AF37; margin-bottom: 4px; }
+.ready-screen .rs-sub { font-size: 13px; color: #8c8c8c; margin-bottom: 18px; }
+.rs-clocks { display: flex; gap: 10px; margin-bottom: 18px; }
+.rs-clock { flex: 1; background: #262626; border: 1px solid #3c3c3c; border-radius: 8px; padding: 12px; text-align: center; }
+.rs-clock .rsc-label { font-size: 10px; color: #8c8c8c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.rs-clock .rsc-val { font-size: 22px; font-weight: 800; color: #D4AF37; font-variant-numeric: tabular-nums; }
+.rs-start-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+.rs-start-btns .btn { padding: 14px; font-size: 15px; }
+
+/* Armed screen */
+.armed-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 16px; text-align: center; }
+.armed-screen .as-label { font-size: 13px; color: #3aa7e0; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.armed-cd { font-size: 84px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 8px; font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; }
+.armed-screen .as-target { font-size: 15px; color: #8c8c8c; margin-bottom: 4px; }
+.armed-screen .as-first { font-size: 18px; color: #D4AF37; font-weight: 800; margin-bottom: 30px; }
+.armed-screen .as-actions { display: flex; gap: 10px; }
+
+/* Overlays */
+.alarm-flash { position: fixed; inset: 0; background: rgba(212,175,55,.35); pointer-events: none; z-index: 200; animation: flashAnim .35s ease-out; }
+@keyframes flashAnim { from { opacity: 1; } to { opacity: 0; } }
+.finished-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 150; }
+.finished-overlay h1 { font-size: 46px; color: #D4AF37; font-weight: 900; margin-bottom: 8px; text-align: center; }
+.finished-overlay p { font-size: 16px; color: #8c8c8c; margin-bottom: 30px; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #2f2f2f; color: #fff; padding: 10px 22px; border-radius: 20px; font-size: 14px; font-weight: 700; z-index: 300; animation: toastIn .3s ease-out; box-shadow: 0 4px 20px rgba(0,0,0,.5); text-align: center; max-width: 90%; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+.note { font-size: 12px; color: #8c8c8c; line-height: 1.5; background: #161616; border-left: 3px solid #D4AF37; padding: 10px 12px; border-radius: 4px; margin-top: 16px; }
+
+@media (max-width: 480px) {
+  .countdown { font-size: 74px; }
+  .cd-name { font-size: 24px; }
+  .armed-cd { font-size: 68px; }
+  .tc-btn { width: 54px; height: 54px; font-size: 17px; }
+  .tc-btn.primary { width: 68px; height: 68px; font-size: 22px; }
+}
+.no-select { user-select: none; -webkit-user-select: none; }
+</style>
+</head>
+<body class="no-select">
+
+<div class="top-bar">
+  <span class="logo">ELV8 SESSION TIMER</span>
+  <button id="nav-templates" class="active" onclick="showView('templates')">Sessions</button>
+  <button id="nav-timer" onclick="showView('timer')">Timer</button>
+</div>
+
+<div id="view-templates" class="view active templates-view"></div>
+<div id="view-editor" class="view editor-view"></div>
+<div id="view-timer" class="view timer-view"></div>
+
+<script>
+// =============================================
+// STATE
+// =============================================
+const STORE_KEY = 'hockeySessionTimer';
+const RUN_KEY = 'hockeySessionTimerRun';
+const CATEGORIES = [
+  { id: 'connection', label: 'Connection', color: '#d4a0d4' },
+  { id: 'running', label: 'Running', color: '#2a9d3a' },
+  { id: 'kitup', label: 'Kit Up', color: '#3aa7e0' },
+  { id: 'hockey', label: 'Hockey', color: '#f4a259' },
+  { id: 'off-pitch', label: 'Off Pitch', color: '#d4a0d4' },
+  { id: 'other', label: 'Other', color: '#8c8c8c' }
+];
+
+let state = { sessions: [], ui: { view: 'templates', editingId: null } };
+
+// Timer runtime
+let timer = {
+  sessionId: null,
+  mode: 'idle',          // idle | armed | running | paused | finished
+  anchorStartMs: null,   // absolute ms when drill 0 begins
+  pausedAtMs: null,
+  boundaries: [],        // [{startMs,endMs}] per drill
+  sessionEndMs: null,
+  alarms: [],            // [{atMs,type,idx,fired}]
+  lastCheckMs: 0,
+  renderedIndex: -1,
+  intervalId: null,
+  wakeLock: null
+};
+
+function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+function load() { try { const r = localStorage.getItem(STORE_KEY); if (r) Object.assign(state, JSON.parse(r)); } catch(e) {} }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function saveRun() {
+  if (timer.mode === 'idle' || timer.mode === 'finished') { localStorage.removeItem(RUN_KEY); return; }
+  localStorage.setItem(RUN_KEY, JSON.stringify({
+    sessionId: timer.sessionId, mode: timer.mode,
+    anchorStartMs: timer.anchorStartMs, pausedAtMs: timer.pausedAtMs
+  }));
+}
+function clearRun() { localStorage.removeItem(RUN_KEY); }
+function loadRun() { try { const r = localStorage.getItem(RUN_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+
+// =============================================
+// TIME HELPERS
+// =============================================
+function clockToTodayMs(hhmm) {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(':').map(Number);
+  const d = new Date(); d.setHours(h, m, 0, 0); return d.getTime();
+}
+function fmtClock(ms) {
+  const d = new Date(ms);
+  let h = d.getHours(); const m = d.getMinutes();
+  const ap = h >= 12 ? 'pm' : 'am'; h = h % 12; if (h === 0) h = 12;
+  return `${h}:${m.toString().padStart(2,'0')}${ap}`;
+}
+function fmtCD(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+  if (h > 0) return `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+function totalMins(s) { return (s.drills||[]).reduce((a,d)=>a+(d.duration||0),0); }
+
+// Start clock (24h "HH:MM") this session anchors to, or '' if none set
+function getStartClock(s) {
+  if (s.type === 'prematch') return warmupStartClock(s);
+  return s.startTime || '';
+}
+function warmupStartClock(s) {
+  if (!s.gameTime) return '';
+  const [h, m] = s.gameTime.split(':').map(Number);
+  let mins = h*60 + m - totalMins(s);
+  mins = ((mins % 1440) + 1440) % 1440;
+  return `${Math.floor(mins/60).toString().padStart(2,'0')}:${(mins%60).toString().padStart(2,'0')}`;
+}
+
+// =============================================
+// AUDIO
+// =============================================
+let audioCtx = null;
+function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function resumeAudio() { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
+function vibrate(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch(e) {} }
+
+function tone(freq, dur, startOffset, gainVal) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.frequency.value = freq; osc.type = 'sine';
+  const t = ctx.currentTime + startOffset;
+  gain.gain.setValueAtTime(gainVal, t);
+  gain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+  osc.start(t); osc.stop(t + dur);
+}
+function playSeq(freq, dur, count, gap, gainVal) {
+  for (let i = 0; i < count; i++) tone(freq, dur, i*(dur+gap), gainVal);
+}
+function playGo() { [660,880,1175].forEach((f,i)=>tone(f,0.16,i*0.14,0.5)); }
+function playTransitionAlarm() { playSeq(1175, 0.18, 4, 0.09, 0.6); }
+function playWarn(count) { playSeq(880, 0.13, count, 0.08, 0.45); }
+function playFinishAlarm() { playSeq(1568, 0.28, 5, 0.1, 0.55); }
+
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination); gain.gain.value = 0;
+  osc.start(); osc.stop(ctx.currentTime + 0.01); audioUnlocked = true;
+}
+document.addEventListener('touchstart', unlockAudio, { once: true });
+document.addEventListener('click', unlockAudio, { once: true });
+
+function fireAlarm(type) {
+  if (type === 'start') { playGo(); vibrate([200,100,200]); showFlash(); showToast('▶ Started'); }
+  else if (type === 'transition') {
+    playTransitionAlarm(); vibrate([400,150,400,150,400]); showFlash();
+    const s = getTimerSession(); const i = currentIdx(Date.now());
+    const d = s && s.drills[i];
+    showToast(d ? '➜ ' + d.name : 'Next drill');
+  }
+  else if (type === 'warn30') { playWarn(2); vibrate([150]); showToast('30 seconds'); }
+  else if (type === 'warn10') { playWarn(3); vibrate([100,80,100]); }
+  else if (type === 'end') { playFinishAlarm(); vibrate([600,200,600,200,600]); showFlash(); }
+}
+
+// =============================================
+// WAKE LOCK
+// =============================================
+async function requestWakeLock() {
+  try { if ('wakeLock' in navigator) timer.wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+}
+function releaseWakeLock() { try { if (timer.wakeLock) { timer.wakeLock.release(); timer.wakeLock = null; } } catch(e) {} }
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && (timer.mode === 'running' || timer.mode === 'armed')) {
+    requestWakeLock(); resumeAudio();
+    checkAlarms(Date.now());
+    timer.renderedIndex = -1; renderTimer();
+  }
+});
+
+// =============================================
+// VIEWS
+// =============================================
+function showView(v) {
+  state.ui.view = v;
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.top-bar button').forEach(b => b.classList.remove('active'));
+  if (v === 'templates') {
+    document.getElementById('view-templates').classList.add('active');
+    document.getElementById('nav-templates').classList.add('active');
+    renderTemplates();
+  } else if (v === 'editor') {
+    document.getElementById('view-editor').classList.add('active');
+    document.getElementById('nav-templates').classList.add('active');
+    renderEditor();
+  } else if (v === 'timer') {
+    document.getElementById('view-timer').classList.add('active');
+    document.getElementById('nav-timer').classList.add('active');
+    timer.renderedIndex = -1; renderTimer();
+  }
+  save();
+}
+
+// =============================================
+// TEMPLATES
+// =============================================
+function renderTemplates() {
+  const el = document.getElementById('view-templates');
+  let html = `<h2>Sessions</h2>
+    <div class="new-tmpl-btns">
+      <button class="btn btn-gold" onclick="createSession('prematch')">+ Pre-Match Warmup</button>
+      <button class="btn btn-dark" onclick="createSession('training')">+ Training Session</button>
+    </div>`;
+  if (state.sessions.length === 0)
+    html += `<p style="color:#8c8c8c; font-size:14px; text-align:center; padding:40px 0;">No sessions yet. Create one above.</p>`;
+  state.sessions.forEach(s => {
+    const dc = (s.drills||[]).length;
+    const startClock = getStartClock(s);
+    const typeLabel = s.type === 'prematch' ? 'Pre-Match' : 'Training';
+    const startStr = startClock ? ' · starts ' + fmtClock(clockToTodayMs(startClock)) : '';
+    html += `<div class="tmpl-card" onclick="editSession('${s.id}')">
+      <div class="info">
+        <h3>${esc(s.name)}</h3>
+        <small>${typeLabel} · ${dc} drills · ${totalMins(s)} min${startStr}</small>
+      </div>
+      <div class="actions" onclick="event.stopPropagation()">
+        <button onclick="startSession('${s.id}')">▶ Start</button>
+        <button onclick="dupSession('${s.id}')">Dup</button>
+        <button class="del" onclick="delSession('${s.id}')">×</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function createSession(type) {
+  const s = {
+    id: uid(),
+    name: type === 'prematch' ? 'Pre-Match Warmup' : 'Training Session',
+    type: type,
+    gameTime: type === 'prematch' ? '' : '',
+    startTime: '',
+    drills: type === 'prematch' ? getDefaultPrematch() : getDefaultTraining()
+  };
+  state.sessions.push(s);
+  state.ui.editingId = s.id;
+  save();
+  showView('editor');
+}
+function getDefaultPrematch() {
+  return [
+    { id: uid(), name: 'On Pitch Connection', category: 'connection', duration: 1 },
+    { id: uid(), name: 'Running General', category: 'running', duration: 3 },
+    { id: uid(), name: 'Stretching & Agility', category: 'running', duration: 3 },
+    { id: uid(), name: 'Speed & Mobility', category: 'running', duration: 3 },
+    { id: uid(), name: 'Kit Up', category: 'kitup', duration: 2 },
+    { id: uid(), name: 'Stick & Ball', category: 'hockey', duration: 2 },
+    { id: uid(), name: 'Ball @ Back / Goal Scoring', category: 'hockey', duration: 4 },
+    { id: uid(), name: 'PCA / Mini Games x2', category: 'hockey', duration: 5 },
+    { id: uid(), name: 'Combative', category: 'hockey', duration: 4 },
+    { id: uid(), name: 'Off Pitch', category: 'off-pitch', duration: 8 }
+  ];
+}
+function getDefaultTraining() {
+  return [
+    { id: uid(), name: 'Individual Eliminations', category: 'hockey', duration: 15 },
+    { id: uid(), name: 'On Pitch Connection', category: 'connection', duration: 5 },
+    { id: uid(), name: 'Shooting & Basics', category: 'hockey', duration: 20 },
+    { id: uid(), name: 'Shooting Advanced', category: 'hockey', duration: 20 },
+    { id: uid(), name: 'Match Play', category: 'hockey', duration: 25 },
+    { id: uid(), name: 'Combative', category: 'hockey', duration: 15 }
+  ];
+}
+function editSession(id) { state.ui.editingId = id; save(); showView('editor'); }
+function dupSession(id) {
+  const orig = state.sessions.find(s => s.id === id); if (!orig) return;
+  const copy = JSON.parse(JSON.stringify(orig));
+  copy.id = uid(); copy.name += ' (copy)'; copy.drills.forEach(d => d.id = uid());
+  state.sessions.push(copy); save(); renderTemplates();
+}
+function delSession(id) {
+  if (!confirm('Delete this session?')) return;
+  state.sessions = state.sessions.filter(s => s.id !== id); save(); renderTemplates();
+}
+
+// =============================================
+// EDITOR
+// =============================================
+function getEditing() { return state.sessions.find(s => s.id === state.ui.editingId); }
+
+function renderEditor() {
+  const el = document.getElementById('view-editor');
+  const s = getEditing();
+  if (!s) { showView('templates'); return; }
+  const isPrematch = s.type === 'prematch';
+
+  let html = `<div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+    <button class="btn btn-dark btn-sm" onclick="showView('templates')">← Back</button>
+    <h2 style="margin:0; flex:1;">${isPrematch ? 'Pre-Match Warmup' : 'Training Session'}</h2>
+    <button class="btn btn-gold" onclick="startSession('${s.id}')">▶ Start</button>
+  </div>`;
+
+  html += `<div class="ed-field">
+    <label>Session Name</label>
+    <input value="${esc(s.name)}" onchange="getEditing().name=this.value;save();">
+  </div>`;
+
+  if (isPrematch) {
+    html += `<div class="ed-row">
+      <div class="ed-field">
+        <label>Game Start Time</label>
+        <input type="time" value="${esc(s.gameTime)}" onchange="getEditing().gameTime=this.value;save();renderEditor();">
+      </div>
+      <div class="ed-field">
+        <label>Warmup Starts (auto)</label>
+        <input value="${getStartClock(s) ? fmtClock(clockToTodayMs(getStartClock(s))) : '--:--'}" readonly style="color:#D4AF37; font-weight:700;">
+      </div>
+    </div>`;
+  } else {
+    html += `<div class="ed-field">
+      <label>Start Time (optional — for auto-start)</label>
+      <input type="time" value="${esc(s.startTime||'')}" onchange="getEditing().startTime=this.value;save();renderEditor();">
+    </div>`;
+  }
+
+  html += `<div style="display:flex; align-items:center; justify-content:space-between; margin-top:20px; margin-bottom:8px;">
+    <h3 style="margin:0; color:#D4AF37; font-size:15px;">Drills</h3>
+    <span style="font-size:12px; color:#8c8c8c;">${s.drills.length} drills · ${totalMins(s)} min total</span>
+  </div>`;
+
+  const times = clockSchedule(s); // array of clock strings or ''
+
+  html += `<div class="drill-list" id="drill-list">`;
+  s.drills.forEach((d, i) => {
+    const cat = CATEGORIES.find(c => c.id === d.category) || CATEGORIES[5];
+    const timeStr = times[i];
+    html += `<div class="drill-item" data-index="${i}">
+      <div class="di-cat" style="background:${cat.color};"></div>
+      <div class="di-info">
+        <div class="di-name">${esc(d.name)}</div>
+        <div class="di-meta">${timeStr ? timeStr + ' · ' : ''}${d.duration} min · ${cat.label}</div>
+      </div>
+      <div class="di-actions">
+        <button onclick="editDrill(${i})">✎</button>
+        <button onclick="moveDrill(${i},-1)">↑</button>
+        <button onclick="moveDrill(${i},1)">↓</button>
+        <button onclick="removeDrill(${i})" style="color:#e23b2e;">×</button>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="add-drill-form">
+    <h4>Add Drill</h4>
+    <div class="ed-row">
+      <div class="ed-field" style="flex:2;"><label>Name</label><input id="new-drill-name" placeholder="Drill name"></div>
+      <div class="ed-field" style="flex:0 0 80px;"><label>Min</label><input id="new-drill-dur" type="number" value="5" min="1" max="120"></div>
+    </div>
+    <div class="ed-row" style="margin-top:8px;">
+      <div class="ed-field" style="flex:1;">
+        <label>Category</label>
+        <select id="new-drill-cat">${CATEGORIES.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}</select>
+      </div>
+      <div class="ed-field" style="flex:0 0 auto; display:flex; align-items:flex-end;">
+        <button class="btn btn-gold" onclick="addDrill()">+ Add</button>
+      </div>
+    </div>
+  </div>`;
+
+  // Backup alarms
+  const backup = backupAlarms(s);
+  if (backup.length) {
+    html += `<div class="backup-panel">
+      <h4>⏰ Backup Alarms</h4>
+      <p class="bp-sub">Set these in your phone's Clock app as a safety net. They are the exact clock times for every change. Tap Copy to grab the full list.</p>`;
+    backup.forEach((b, i) => {
+      html += `<div class="bp-row ${i === backup.length-1 ? 'final' : ''}">
+        <span class="bp-time">${b.time}</span><span class="bp-name">${esc(b.name)}</span></div>`;
+    });
+    html += `<button class="btn btn-dark btn-sm btn-block" style="margin-top:12px;" onclick="copyBackup('${s.id}')">Copy times</button>
+    </div>`;
+  } else {
+    html += `<div class="note">Set a ${isPrematch ? 'Game Start Time' : 'Start Time'} above to generate backup alarm times you can punch into your phone's Clock app.</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// Returns array of clock strings (one per drill) anchored to start clock, or '' each if no start
+function clockSchedule(s) {
+  const start = getStartClock(s);
+  if (!start) return s.drills.map(() => '');
+  let ms = clockToTodayMs(start);
+  return s.drills.map(d => { const str = fmtClock(ms); ms += (d.duration||0)*60000; return str; });
+}
+function backupAlarms(s) {
+  const start = getStartClock(s);
+  if (!start) return [];
+  let ms = clockToTodayMs(start); const out = [];
+  s.drills.forEach(d => { out.push({ time: fmtClock(ms), name: d.name }); ms += (d.duration||0)*60000; });
+  out.push({ time: fmtClock(ms), name: s.type === 'prematch' ? 'GAME START' : 'Session Complete' });
+  return out;
+}
+function copyBackup(id) {
+  const s = state.sessions.find(x => x.id === id); if (!s) return;
+  const txt = backupAlarms(s).map(b => `${b.time}  ${b.name}`).join('\n');
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => showToast('Times copied'), () => fallbackCopy(txt));
+  else fallbackCopy(txt);
+}
+function fallbackCopy(txt) {
+  const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+  ta.select(); try { document.execCommand('copy'); showToast('Times copied'); } catch(e) {} ta.remove();
+}
+
+function addDrill() {
+  const s = getEditing(); if (!s) return;
+  const name = document.getElementById('new-drill-name').value.trim();
+  const dur = parseInt(document.getElementById('new-drill-dur').value) || 5;
+  const cat = document.getElementById('new-drill-cat').value;
+  if (!name) { document.getElementById('new-drill-name').focus(); return; }
+  s.drills.push({ id: uid(), name, category: cat, duration: dur });
+  save(); document.getElementById('new-drill-name').value = ''; renderEditor();
+}
+function removeDrill(i) { const s = getEditing(); if (!s) return; s.drills.splice(i, 1); save(); renderEditor(); }
+function moveDrill(i, dir) {
+  const s = getEditing(); if (!s) return;
+  const ni = i + dir; if (ni < 0 || ni >= s.drills.length) return;
+  [s.drills[i], s.drills[ni]] = [s.drills[ni], s.drills[i]]; save(); renderEditor();
+}
+function editDrill(i) {
+  const s = getEditing(); if (!s) return;
+  const d = s.drills[i];
+  const name = prompt('Drill name:', d.name); if (name === null) return; d.name = name;
+  const dur = prompt('Duration (minutes):', d.duration); if (dur !== null) d.duration = parseInt(dur) || d.duration;
+  save(); renderEditor();
+}
+
+// =============================================
+// TIMER ENGINE (wall-clock anchored)
+// =============================================
+function getTimerSession() { return state.sessions.find(s => s.id === timer.sessionId); }
+
+function startSession(id) {
+  const s = state.sessions.find(s => s.id === id);
+  if (!s || s.drills.length === 0) { alert('Add drills first.'); return; }
+  unlockAudio();
+  timer.sessionId = id;
+  timer.mode = 'idle';
+  timer.anchorStartMs = null;
+  timer.pausedAtMs = null;
+  showView('timer');
+}
+
+function buildSchedule() {
+  const s = getTimerSession(); if (!s) return;
+  let off = 0; timer.boundaries = [];
+  s.drills.forEach(d => {
+    const startMs = timer.anchorStartMs + off*1000;
+    off += (d.duration||1)*60;
+    timer.boundaries.push({ startMs, endMs: timer.anchorStartMs + off*1000 });
+  });
+  timer.sessionEndMs = timer.anchorStartMs + off*1000;
+  buildAlarms(s);
+}
+function buildAlarms(s) {
+  const now = Date.now(); const al = [];
+  timer.boundaries.forEach((b, i) => {
+    al.push({ atMs: b.startMs, type: i === 0 ? 'start' : 'transition', idx: i });
+    al.push({ atMs: b.endMs - 30000, type: 'warn30', idx: i });
+    al.push({ atMs: b.endMs - 10000, type: 'warn10', idx: i });
+  });
+  al.push({ atMs: timer.sessionEndMs, type: 'end', idx: s.drills.length });
+  al.forEach(a => a.fired = a.atMs <= now); // anything already in the past is silent
+  al.sort((a, b) => a.atMs - b.atMs);
+  timer.alarms = al;
+  timer.lastCheckMs = now;
+}
+function currentIdx(now) {
+  const b = timer.boundaries;
+  for (let i = 0; i < b.length; i++) { if (now < b[i].endMs) return i; }
+  return b.length;
+}
+
+function armSession() {
+  const s = getTimerSession(); const clock = getStartClock(s);
+  if (!clock) { startNow(); return; }
+  let target = clockToTodayMs(clock);
+  const now = Date.now();
+  if (target < now - 60000) {
+    if (!confirm('That start time has already passed today. Start now instead?')) return;
+    target = now;
+  }
+  unlockAudio();
+  timer.anchorStartMs = target;
+  buildSchedule();
+  timer.mode = now >= target ? 'running' : 'armed';
+  if (timer.mode === 'running') fireAlarm('start');
+  ensureRunning();
+}
+function startNow() {
+  unlockAudio();
+  timer.anchorStartMs = Date.now();
+  buildSchedule();
+  timer.mode = 'running';
+  fireAlarm('start');
+  ensureRunning();
+}
+function beginRun() { timer.mode = 'running'; fireAlarm('start'); timer.renderedIndex = -1; }
+
+function ensureRunning() {
+  requestWakeLock();
+  if (!timer.intervalId) timer.intervalId = setInterval(tick, 250);
+  timer.renderedIndex = -1;
+  saveRun();
+  renderTimer();
+}
+function stopInterval() { if (timer.intervalId) { clearInterval(timer.intervalId); timer.intervalId = null; } }
+
+function tick() {
+  const s = getTimerSession(); if (!s) { stopInterval(); return; }
+  resumeAudio();
+  const now = Date.now();
+  if (timer.mode === 'armed') {
+    if (now >= timer.anchorStartMs) { beginRun(); }
+    else { updateArmed(now); return; }
+  }
+  if (timer.mode === 'paused') return;
+  if (timer.mode === 'running') {
+    checkAlarms(now);
+    if (now >= timer.sessionEndMs) { finishSession(); return; }
+    const idx = currentIdx(now);
+    if (idx !== timer.renderedIndex) renderTimer();
+    else updateRunning(now);
+    saveRun();
+  }
+}
+
+function checkAlarms(now) {
+  const due = timer.alarms.filter(a => !a.fired && a.atMs > timer.lastCheckMs && a.atMs <= now);
+  timer.lastCheckMs = now;
+  if (!due.length) return;
+  due.forEach(a => a.fired = true);
+  // If several are overdue (e.g. screen was off), alert once for the most important.
+  const sig = due.filter(a => a.type === 'transition' || a.type === 'end' || a.type === 'start');
+  const pick = sig.length ? sig[sig.length-1] : due[due.length-1];
+  fireAlarm(pick.type);
+}
+
+function finishSession() {
+  timer.mode = 'finished'; stopInterval(); releaseWakeLock(); clearRun();
+  timer.renderedIndex = -1; renderTimer();
+}
+
+// Live controls
+function pauseTimer() { if (timer.mode !== 'running') return; timer.mode = 'paused'; timer.pausedAtMs = Date.now(); saveRun(); timer.renderedIndex = -1; renderTimer(); }
+function resumeTimer() {
+  if (timer.mode !== 'paused') return;
+  const shift = Date.now() - timer.pausedAtMs;
+  timer.anchorStartMs += shift; buildSchedule();
+  timer.mode = 'running'; timer.pausedAtMs = null;
+  ensureRunning();
+}
+function toggleTimer() {
+  if (timer.mode === 'running') pauseTimer();
+  else if (timer.mode === 'paused') resumeTimer();
+  else if (timer.mode === 'idle') startNow();
+  else if (timer.mode === 'armed') { /* armed: tapping play starts immediately */ timer.anchorStartMs = Date.now(); buildSchedule(); beginRun(); ensureRunning(); }
+}
+function skipDrill() {
+  const now = Date.now(); const i = currentIdx(now); const s = getTimerSession();
+  if (!s || i >= s.drills.length) return;
+  const delta = timer.boundaries[i].endMs - now; // slide everything earlier
+  timer.anchorStartMs -= delta; buildSchedule();
+  timer.renderedIndex = -1; saveRun(); renderTimer();
+}
+function prevDrill() {
+  const now = Date.now(); const i = Math.min(currentIdx(now), timer.boundaries.length-1);
+  const segStart = timer.boundaries[i] ? timer.boundaries[i].startMs : now;
+  let delta;
+  if (now - segStart > 3000 || i === 0) delta = now - segStart;        // restart current drill
+  else delta = now - timer.boundaries[i-1].startMs;                    // jump to previous drill
+  timer.anchorStartMs += delta; buildSchedule();
+  timer.renderedIndex = -1; saveRun(); renderTimer();
+}
+function nudge(sec) {
+  if (timer.mode === 'idle' || timer.mode === 'finished') return;
+  timer.anchorStartMs += sec*1000; buildSchedule();
+  timer.renderedIndex = -1; saveRun(); renderTimer();
+  showToast((sec > 0 ? '+' : '') + (sec/60 % 1 === 0 ? (sec/60)+' min' : Math.abs(sec)+'s'));
+}
+function jumpToDrill(i) {
+  const s = getTimerSession(); if (!s || i < 0 || i >= s.drills.length) return;
+  const now = Date.now();
+  const delta = now - timer.boundaries[i].startMs; // make drill i start now
+  timer.anchorStartMs += delta; buildSchedule();
+  timer.renderedIndex = -1; saveRun(); renderTimer();
+}
+function stopTimer() {
+  if (!confirm('Stop this session?')) return;
+  stopInterval(); timer.mode = 'idle'; timer.anchorStartMs = null; timer.pausedAtMs = null;
+  releaseWakeLock(); clearRun(); showView('templates');
+}
+
+// =============================================
+// TIMER RENDER
+// =============================================
+function renderTimer() {
+  const el = document.getElementById('view-timer');
+  const s = getTimerSession();
+  if (!s) {
+    el.innerHTML = `<div style="padding:40px; text-align:center; color:#8c8c8c;">
+      <p>No session loaded.</p>
+      <button class="btn btn-gold" onclick="showView('templates')" style="margin-top:16px;">Choose Session</button>
+    </div>`;
+    return;
+  }
+  if (timer.mode === 'idle') return renderReady(el, s);
+  if (timer.mode === 'finished') return renderFinished(el, s);
+  if (timer.mode === 'armed') return renderArmed(el, s);
+  return renderRunning(el, s);
+}
+
+function renderReady(el, s) {
+  const startClock = getStartClock(s);
+  const startMs = startClock ? clockToTodayMs(startClock) : null;
+  const endMs = startMs ? startMs + totalMins(s)*60000 : null;
+  let html = `<div class="ready-screen">
+    <h2>${esc(s.name)}</h2>
+    <p class="rs-sub">${s.drills.length} drills · ${totalMins(s)} min total</p>
+    <div class="rs-clocks">
+      <div class="rs-clock"><div class="rsc-label">Starts</div><div class="rsc-val">${startMs ? fmtClock(startMs) : 'Now'}</div></div>
+      <div class="rs-clock"><div class="rsc-label">${s.type === 'prematch' ? 'Game' : 'Ends'}</div><div class="rsc-val">${endMs ? fmtClock(endMs) : '--'}</div></div>
+    </div>
+    <div class="rs-start-btns">`;
+  if (startClock) html += `<button class="btn btn-gold btn-block" onclick="armSession()">⏰ Auto-start at ${fmtClock(startMs)}</button>`;
+  html += `<button class="btn ${startClock ? 'btn-dark' : 'btn-gold'} btn-block" onclick="startNow()">▶ Start Now</button>
+    </div>`;
+
+  const backup = backupAlarms(s);
+  if (backup.length) {
+    html += `<div class="backup-panel">
+      <h4>⏰ Backup Alarms</h4>
+      <p class="bp-sub">Safety net for match day. Set these exact times in your phone's Clock app — they fire even with the screen off.</p>`;
+    backup.forEach((b, i) => {
+      html += `<div class="bp-row ${i === backup.length-1 ? 'final' : ''}">
+        <span class="bp-time">${b.time}</span><span class="bp-name">${esc(b.name)}</span></div>`;
+    });
+    html += `<button class="btn btn-dark btn-sm btn-block" style="margin-top:12px;" onclick="copyBackup('${s.id}')">Copy times</button></div>`;
+  }
+  html += `<div class="note"><strong>Keep this screen on and the app open</strong> through the warm-up. It holds the screen awake automatically and fires loud alarms + vibration at every change. The backup alarms above are your insurance if the phone locks.</div>`;
+  html += `<button class="btn btn-dark btn-sm" style="margin-top:16px;" onclick="editSession('${s.id}')">Edit session</button>`;
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function renderArmed(el, s) {
+  const first = s.drills[0];
+  el.innerHTML = `<div class="timer-header">
+      <h2>${esc(s.name)}</h2><span class="th-clock" id="now-clock">${fmtClock(Date.now())}</span>
+    </div>
+    <div class="armed-screen">
+      <div class="as-label">Auto-starts in</div>
+      <div class="armed-cd" id="armed-cd">${fmtCD((timer.anchorStartMs - Date.now())/1000)}</div>
+      <div class="as-target">at ${fmtClock(timer.anchorStartMs)}</div>
+      <div class="as-first">First: ${esc(first.name)}</div>
+      <div class="as-actions">
+        <button class="btn btn-gold" onclick="toggleTimer()">▶ Start now instead</button>
+        <button class="btn btn-danger" onclick="stopTimer()">Cancel</button>
+      </div>
+    </div>`;
+}
+function updateArmed(now) {
+  const cd = document.getElementById('armed-cd'); if (cd) cd.textContent = fmtCD((timer.anchorStartMs - now)/1000);
+  const nc = document.getElementById('now-clock'); if (nc) nc.textContent = fmtClock(now);
+}
+
+function renderRunning(el, s) {
+  const now = Date.now();
+  const idx = Math.min(currentIdx(now), s.drills.length - 1);
+  timer.renderedIndex = idx;
+  const drill = s.drills[idx];
+  const b = timer.boundaries[idx];
+  const cat = CATEGORIES.find(c => c.id === drill.category) || CATEGORIES[5];
+  const segRemain = (b.endMs - now)/1000;
+  const segTotal = (b.endMs - b.startMs)/1000;
+  const pct = Math.min(100, Math.max(0, ((now - b.startMs)/(b.endMs - b.startMs))*100));
+  const warn = segRemain <= 30;
+  const next = s.drills[idx+1];
+  const paused = timer.mode === 'paused';
+
+  el.innerHTML = `<div class="timer-header">
+      <h2>${esc(s.name)}</h2>
+      <span class="live-tag ${paused ? 'paused' : 'live'}">${paused ? 'Paused' : 'Live'}</span>
+      <span class="th-clock" id="now-clock">${fmtClock(now)}</span>
+    </div>
+
+    <div class="overall-strip">
+      <div class="os-block"><div class="os-label">Drill</div><div class="os-val">${idx+1}/${s.drills.length}</div></div>
+      <div class="os-divider"></div>
+      <div class="os-block"><div class="os-label">Session left</div><div class="os-val gold" id="overall-cd">${fmtCD((timer.sessionEndMs - now)/1000)}</div></div>
+      <div class="os-divider"></div>
+      <div class="os-block"><div class="os-label">Ends</div><div class="os-val">${fmtClock(timer.sessionEndMs)}</div></div>
+    </div>
+
+    <div class="current-drill">
+      <div class="cd-category" style="background:${cat.color}; color:#1c1c1c;">${cat.label}</div>
+      <div class="cd-name">${esc(drill.name)}</div>
+      <div class="cd-time-range">${fmtClock(b.startMs)} – ${fmtClock(b.endMs)} · ${drill.duration} min</div>
+      <div class="countdown ${warn ? 'warning' : 'normal'}" id="seg-cd">${fmtCD(segRemain)}</div>
+      <div class="progress-wrap"><div class="progress-bar" id="seg-progress" style="width:${pct}%; background:${warn ? '#e23b2e' : '#D4AF37'};"></div></div>
+      ${next ? `<div class="next-up">Next: <span>${esc(next.name)}</span> at ${fmtClock(b.endMs)}</div>` : `<div class="next-up">Final drill</div>`}
+    </div>
+
+    <div class="timer-controls">
+      <button class="tc-btn" onclick="prevDrill()" title="Previous">⏮</button>
+      <button class="tc-btn primary" onclick="toggleTimer()" id="play-btn">${paused ? '▶' : '⏸'}</button>
+      <button class="tc-btn" onclick="skipDrill()" title="Next">⏭</button>
+      <button class="tc-btn danger" onclick="stopTimer()" title="Stop">⏹</button>
+    </div>
+    <div class="nudge-row">
+      <button class="nudge-btn" onclick="nudge(-60)">−1 min</button>
+      <button class="nudge-btn" onclick="nudge(-10)">−10s</button>
+      <button class="nudge-btn" onclick="nudge(10)">+10s</button>
+      <button class="nudge-btn" onclick="nudge(60)">+1 min</button>
+    </div>
+
+    <div class="drill-timeline">${renderTimeline(s, idx)}</div>`;
+}
+function renderTimeline(s, idx) {
+  let html = '';
+  s.drills.forEach((d, i) => {
+    const dc = CATEGORIES.find(c => c.id === d.category) || CATEGORIES[5];
+    const b = timer.boundaries[i];
+    const cls = i === idx ? 'active' : (i < idx ? 'done' : '');
+    html += `<div class="dt-item ${cls}" onclick="jumpToDrill(${i})">
+      <span class="dt-time">${fmtClock(b.startMs)}</span>
+      <div class="dt-cat" style="background:${dc.color};"></div>
+      <span class="dt-name">${esc(d.name)}</span>
+      <span class="dt-dur">${d.duration}m</span>
+    </div>`;
+  });
+  return html;
+}
+function updateRunning(now) {
+  const s = getTimerSession(); if (!s) return;
+  const idx = Math.min(currentIdx(now), s.drills.length - 1);
+  const b = timer.boundaries[idx]; if (!b) return;
+  const segRemain = (b.endMs - now)/1000;
+  const warn = segRemain <= 30;
+  const cd = document.getElementById('seg-cd');
+  if (cd) { cd.textContent = fmtCD(segRemain); cd.className = 'countdown ' + (warn ? 'warning' : 'normal'); }
+  const ov = document.getElementById('overall-cd'); if (ov) ov.textContent = fmtCD((timer.sessionEndMs - now)/1000);
+  const pr = document.getElementById('seg-progress');
+  if (pr) { const pct = Math.min(100, Math.max(0, ((now - b.startMs)/(b.endMs - b.startMs))*100)); pr.style.width = pct + '%'; pr.style.background = warn ? '#e23b2e' : '#D4AF37'; }
+  const nc = document.getElementById('now-clock'); if (nc) nc.textContent = fmtClock(now);
+}
+
+function renderFinished(el, s) {
+  el.innerHTML = `<div class="finished-overlay">
+    <h1>SESSION COMPLETE</h1>
+    <p>${esc(s.name)}</p>
+    <button class="btn btn-gold" onclick="resetTimer()">Done</button>
+  </div>`;
+}
+function resetTimer() { timer.mode = 'idle'; timer.sessionId = null; showView('templates'); }
+
+// =============================================
+// OVERLAYS
+// =============================================
+function showFlash() {
+  const f = document.createElement('div'); f.className = 'alarm-flash';
+  document.body.appendChild(f); setTimeout(() => f.remove(), 350);
+}
+function showToast(msg) {
+  const existing = document.querySelector('.toast'); if (existing) existing.remove();
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+}
+
+// =============================================
+// INIT
+// =============================================
+load();
+(function restore() {
+  const r = loadRun();
+  if (r && state.sessions.find(s => s.id === r.sessionId)) {
+    timer.sessionId = r.sessionId;
+    timer.anchorStartMs = r.anchorStartMs;
+    timer.pausedAtMs = r.pausedAtMs;
+    timer.mode = r.mode;
+    buildSchedule();
+    const live = r.mode === 'paused' || r.mode === 'armed' || Date.now() < timer.sessionEndMs + 1000;
+    if (live) {
+      document.getElementById('view-templates').classList.remove('active');
+      document.getElementById('nav-templates').classList.remove('active');
+      document.getElementById('view-timer').classList.add('active');
+      document.getElementById('nav-timer').classList.add('active');
+      state.ui.view = 'timer';
+      if (timer.mode === 'paused') { timer.renderedIndex = -1; renderTimer(); }
+      else ensureRunning();
+      return;
+    }
+    clearRun(); timer.mode = 'idle'; timer.sessionId = null;
+  }
+  if (state.ui.view === 'editor' && state.ui.editingId) showView('editor');
+  else showView('templates');
+})();
+</script>
+</body>
+</html>

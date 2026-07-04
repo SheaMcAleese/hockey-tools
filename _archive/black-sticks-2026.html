@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D0D0D">
+<title>Black Sticks 2026</title>
+<link rel="manifest" href="bs2026-manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230D0D0D' width='100' height='100'/><text y='70' x='15' font-size='60'>🏑</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0D0D0D;
+  --gold: #D4AF37;
+  --text: #F0EDE6;
+  --panel: #1A1A1A;
+  --panel-hover: #242424;
+  --gold-dim: rgba(212, 175, 55, 0.15);
+  --gold-glow: rgba(212, 175, 55, 0.3);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  padding-bottom: calc(72px + var(--safe-bottom));
+}
+
+h1, h2, h3, h4 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
+
+/* ── Screens ── */
+.screen { display: none; min-height: calc(100vh - 72px); min-height: calc(100dvh - 72px); padding: 20px 16px 32px; animation: fadeIn 0.25s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Bottom Nav ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--panel);
+  border-top: 1px solid rgba(212,175,55,0.12);
+  display: flex; justify-content: space-around; align-items: center;
+  height: calc(72px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 12px; border: none; background: none;
+  color: rgba(240,237,230,0.4); font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.05em;
+  cursor: pointer; transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item.active { color: var(--gold); }
+.nav-item svg { width: 22px; height: 22px; }
+.nav-item.active svg { filter: drop-shadow(0 0 6px var(--gold-glow)); }
+
+/* ── Home Screen ── */
+.home-header { text-align: center; padding: 20px 0 8px; }
+.home-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 32px; }
+.home-logo .fern { font-size: 22px; vertical-align: middle; margin-right: 6px; }
+
+.countdown-block { text-align: center; margin: 20px 0 32px; }
+.countdown-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 96px; line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 0 40px var(--gold-glow);
+}
+.countdown-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; color: var(--gold);
+  letter-spacing: 0.15em; margin-top: 4px;
+}
+
+.daily-question {
+  font-size: 20px; font-weight: 300; line-height: 1.5;
+  text-align: center; padding: 24px 8px;
+  color: var(--text); opacity: 0.9;
+  min-height: 100px;
+}
+
+.home-tiles {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-top: 24px;
+}
+.home-tile {
+  background: var(--panel);
+  border: 1px solid rgba(212,175,55,0.08);
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-tile:active { transform: scale(0.97); background: var(--panel-hover); }
+.home-tile .tile-icon { font-size: 28px; margin-bottom: 8px; }
+.home-tile .tile-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px; letter-spacing: 0.1em; color: var(--gold);
+}
+
+/* ── Habits Screen ── */
+.habits-header { margin-bottom: 20px; }
+.habits-header h1 { font-size: 32px; color: var(--gold); }
+.habits-header p { font-size: 13px; color: rgba(240,237,230,0.5); margin-top: 4px; }
+
+.habit-card {
+  background: var(--panel);
+  border: 1px solid rgba(212,175,55,0.08);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.habit-card.completed { border-color: rgba(212,175,55,0.25); }
+.habit-top {
+  display: flex; align-items: center; padding: 14px 16px;
+  cursor: pointer; gap: 12px;
+  -webkit-tap-highlight-color: transparent;
+}
+.habit-check {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid rgba(212,175,55,0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s; cursor: pointer;
+}
+.habit-check.checked {
+  background: var(--gold); border-color: var(--gold);
+}
+.habit-check svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.2s; }
+.habit-check.checked svg { opacity: 1; }
+.habit-info { flex: 1; }
+.habit-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.05em; color: var(--text); }
+.habit-streak { font-size: 11px; color: var(--gold); margin-top: 2px; }
+.habit-expand-icon {
+  width: 20px; height: 20px; color: rgba(240,237,230,0.3);
+  transition: transform 0.2s;
+}
+.habit-card.expanded .habit-expand-icon { transform: rotate(180deg); }
+.habit-detail {
+  display: none; padding: 0 16px 16px;
+  font-size: 14px; line-height: 1.6;
+  color: rgba(240,237,230,0.7);
+}
+.habit-card.expanded .habit-detail { display: block; }
+
+/* ── Journal Screen ── */
+.journal-header { margin-bottom: 20px; }
+.journal-header h1 { font-size: 32px; color: var(--gold); }
+.journal-date { font-size: 13px; color: rgba(240,237,230,0.5); margin-top: 4px; }
+
+.rating-section {
+  background: var(--panel); border-radius: 12px;
+  padding: 20px; margin-bottom: 16px;
+  border: 1px solid rgba(212,175,55,0.08);
+}
+.rating-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px; color: var(--gold);
+  margin-bottom: 12px; letter-spacing: 0.05em;
+}
+.rating-dots {
+  display: flex; gap: 8px; justify-content: space-between;
+}
+.rating-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid rgba(212,175,55,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  color: rgba(240,237,230,0.4);
+  -webkit-tap-highlight-color: transparent;
+}
+.rating-dot.selected {
+  background: var(--gold); border-color: var(--gold);
+  color: var(--bg); font-weight: 700;
+}
+
+.journal-prompts {
+  display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.prompt-btn {
+  background: var(--panel); border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 20px; padding: 8px 14px;
+  font-size: 12px; color: var(--gold);
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.prompt-btn:active { background: var(--gold-dim); }
+
+.journal-textarea {
+  width: 100%; min-height: 200px;
+  background: var(--panel); border: 1px solid rgba(212,175,55,0.08);
+  border-radius: 12px; padding: 16px;
+  color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 15px; line-height: 1.6;
+  resize: vertical; outline: none;
+  transition: border-color 0.2s;
+}
+.journal-textarea:focus { border-color: rgba(212,175,55,0.3); }
+.journal-textarea::placeholder { color: rgba(240,237,230,0.25); }
+
+.journal-actions {
+  display: flex; gap: 10px; margin-top: 14px;
+}
+.btn {
+  flex: 1; padding: 14px;
+  border: none; border-radius: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px; letter-spacing: 0.1em;
+  cursor: pointer; transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-gold { background: var(--gold); color: var(--bg); }
+.btn-gold:active { opacity: 0.85; transform: scale(0.98); }
+.btn-outline { background: transparent; border: 1px solid rgba(212,175,55,0.3); color: var(--gold); }
+.btn-outline:active { background: var(--gold-dim); }
+
+.journal-history { margin-top: 32px; }
+.journal-history h3 {
+  font-size: 18px; color: var(--gold);
+  margin-bottom: 12px; letter-spacing: 0.05em;
+}
+.history-entry {
+  background: var(--panel); border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 8px;
+  border: 1px solid rgba(212,175,55,0.06);
+  cursor: pointer;
+}
+.history-date { font-size: 12px; color: var(--gold); font-weight: 500; }
+.history-preview { font-size: 13px; color: rgba(240,237,230,0.5); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-rating { font-size: 11px; color: rgba(212,175,55,0.6); margin-top: 2px; }
+
+/* ── Scouting Screen ── */
+.scouting-header { margin-bottom: 20px; }
+.scouting-header h1 { font-size: 32px; color: var(--gold); }
+
+.opponent-card {
+  background: var(--panel); border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.08);
+  margin-bottom: 12px; overflow: hidden;
+  transition: all 0.2s;
+}
+.opponent-top {
+  display: flex; align-items: center; padding: 18px 16px;
+  cursor: pointer; gap: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+.opponent-flag { font-size: 36px; }
+.opponent-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 0.05em;
+  color: var(--text);
+}
+.opponent-arrow {
+  margin-left: auto; width: 20px; height: 20px;
+  color: rgba(240,237,230,0.3); transition: transform 0.2s;
+}
+.opponent-card.expanded .opponent-arrow { transform: rotate(180deg); }
+.opponent-detail { display: none; padding: 0 16px 20px; }
+.opponent-card.expanded .opponent-detail { display: block; }
+
+.intel-section { margin-bottom: 16px; }
+.intel-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px; color: var(--gold);
+  letter-spacing: 0.1em; margin-bottom: 6px;
+}
+.intel-text { font-size: 14px; line-height: 1.6; color: rgba(240,237,230,0.75); }
+
+.scouting-note-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px; color: var(--gold);
+  letter-spacing: 0.1em; margin-bottom: 6px; margin-top: 8px;
+}
+.scouting-note {
+  width: 100%; min-height: 80px;
+  background: rgba(212,175,55,0.05);
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 8px; padding: 12px;
+  color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 14px; line-height: 1.5;
+  resize: vertical; outline: none;
+}
+.scouting-note:focus { border-color: rgba(212,175,55,0.4); }
+.scouting-note::placeholder { color: rgba(240,237,230,0.2); }
+
+/* ── Legacy Screen ── */
+.legacy-header { margin-bottom: 8px; }
+.legacy-header h1 { font-size: 32px; color: var(--gold); }
+.legacy-sub { font-size: 14px; color: rgba(240,237,230,0.5); font-style: italic; margin-top: 4px; margin-bottom: 20px; }
+
+.legacy-featured {
+  background: var(--panel);
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 14px;
+  padding: 24px 20px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.legacy-featured::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.legacy-era {
+  font-size: 11px; font-weight: 600; color: var(--gold);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.legacy-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; color: var(--text);
+  margin-bottom: 12px; line-height: 1.2;
+}
+.legacy-body {
+  font-size: 15px; line-height: 1.7;
+  color: rgba(240,237,230,0.75);
+}
+.legacy-nav-hint {
+  text-align: center; font-size: 12px;
+  color: rgba(240,237,230,0.3); margin-bottom: 16px;
+}
+
+.legacy-swipe-container {
+  position: relative; overflow: hidden;
+  touch-action: pan-y;
+}
+
+.legacy-grid { margin-top: 8px; }
+.legacy-grid h3 {
+  font-size: 18px; color: var(--gold);
+  margin-bottom: 12px;
+}
+.legacy-mini {
+  background: var(--panel); border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 8px;
+  border: 1px solid rgba(212,175,55,0.06);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.legacy-mini:active { background: var(--panel-hover); }
+.legacy-mini .lm-era { font-size: 10px; color: var(--gold); letter-spacing: 0.1em; font-weight: 600; }
+.legacy-mini .lm-title { font-size: 14px; margin-top: 2px; color: var(--text); }
+
+/* ── Legacy Modal ── */
+.legacy-modal {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  padding: 20px;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+}
+.legacy-modal.active { display: flex; align-items: center; justify-content: center; }
+.legacy-modal-content {
+  background: var(--panel);
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 14px;
+  padding: 24px 20px;
+  max-width: 400px; width: 100%;
+  position: relative;
+}
+.legacy-modal-close {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; color: rgba(240,237,230,0.4);
+  font-size: 24px; cursor: pointer; padding: 4px 8px;
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: var(--bg);
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  z-index: 300; opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ── Settings toggle ── */
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0;
+}
+.settings-label { font-size: 14px; color: rgba(240,237,230,0.7); }
+.toggle {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: rgba(240,237,230,0.15);
+  position: relative; cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle.on { background: var(--gold); }
+.toggle::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; top: 2px; left: 2px;
+  transition: transform 0.2s;
+}
+.toggle.on::after { transform: translateX(20px); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HOME SCREEN ══════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <div class="home-logo"><span class="fern">🏑</span> BLACK STICKS</div>
+  </div>
+  <div class="countdown-block">
+    <div class="countdown-number" id="countdown-days">---</div>
+    <div class="countdown-label">DAYS TO THE WORLD CUP</div>
+  </div>
+  <div class="daily-question" id="daily-question"></div>
+  <div class="home-tiles">
+    <div class="home-tile" onclick="navigate('habits')">
+      <div class="tile-icon">⚡</div>
+      <div class="tile-label">HABITS</div>
+    </div>
+    <div class="home-tile" onclick="navigate('journal')">
+      <div class="tile-icon">📝</div>
+      <div class="tile-label">JOURNAL</div>
+    </div>
+    <div class="home-tile" onclick="navigate('scouting')">
+      <div class="tile-icon">🎯</div>
+      <div class="tile-label">SCOUTING</div>
+    </div>
+    <div class="home-tile" onclick="navigate('legacy')">
+      <div class="tile-icon">🏆</div>
+      <div class="tile-label">LEGACY</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ HABITS SCREEN ══════════ -->
+<div id="screen-habits" class="screen">
+  <div class="habits-header">
+    <h1>DAILY HABITS</h1>
+    <p id="habits-date"></p>
+  </div>
+  <div id="habits-list"></div>
+</div>
+
+<!-- ══════════ JOURNAL SCREEN ══════════ -->
+<div id="screen-journal" class="screen">
+  <div class="journal-header">
+    <h1>JOURNAL</h1>
+    <div class="journal-date" id="journal-date"></div>
+  </div>
+  <div class="rating-section">
+    <div class="rating-label">RATE YOUR WEEK: <span id="rating-value">—</span>/10</div>
+    <div class="rating-dots" id="rating-dots"></div>
+  </div>
+  <div class="journal-prompts">
+    <button class="prompt-btn" onclick="insertPrompt('Today in training...')">Today in training...</button>
+    <button class="prompt-btn" onclick="insertPrompt('Something I\'m working through...')">Something I'm working through...</button>
+    <button class="prompt-btn" onclick="insertPrompt('My focus heading into the week...')">My focus heading into the week...</button>
+  </div>
+  <textarea class="journal-textarea" id="journal-text" placeholder="Write freely..."></textarea>
+  <div class="journal-actions">
+    <button class="btn btn-gold" onclick="saveJournal()">SAVE ENTRY</button>
+    <button class="btn btn-outline" onclick="copyForTMA()">COPY FOR TMA</button>
+  </div>
+  <div class="journal-history" id="journal-history"></div>
+</div>
+
+<!-- ══════════ SCOUTING SCREEN ══════════ -->
+<div id="screen-scouting" class="screen">
+  <div class="scouting-header">
+    <h1>OPPOSITION INTEL</h1>
+  </div>
+  <div id="scouting-cards"></div>
+</div>
+
+<!-- ══════════ LEGACY SCREEN ══════════ -->
+<div id="screen-legacy" class="screen">
+  <div class="legacy-header">
+    <h1>BLACK STICKS LEGACY</h1>
+  </div>
+  <div class="legacy-sub">"You stand on the shoulders of what came before."</div>
+  <div class="legacy-swipe-container" id="legacy-featured-container">
+    <div class="legacy-featured" id="legacy-featured"></div>
+  </div>
+  <div class="legacy-nav-hint">← Swipe to browse all cards →</div>
+  <div class="legacy-grid">
+    <h3>ALL LEGACY CARDS</h3>
+    <div id="legacy-list"></div>
+  </div>
+</div>
+
+<!-- ══════════ LEGACY MODAL ══════════ -->
+<div class="legacy-modal" id="legacy-modal">
+  <div class="legacy-modal-content">
+    <button class="legacy-modal-close" onclick="closeLegacyModal()">×</button>
+    <div id="legacy-modal-body"></div>
+  </div>
+</div>
+
+<!-- ══════════ TOAST ══════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════ BOTTOM NAV ══════════ -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-screen="home" onclick="navigate('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10"/></svg>
+    HOME
+  </button>
+  <button class="nav-item" data-screen="habits" onclick="navigate('habits')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    HABITS
+  </button>
+  <button class="nav-item" data-screen="journal" onclick="navigate('journal')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    JOURNAL
+  </button>
+  <button class="nav-item" data-screen="scouting" onclick="navigate('scouting')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    SCOUTING
+  </button>
+  <button class="nav-item" data-screen="legacy" onclick="navigate('legacy')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    LEGACY
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+
+const WORLD_CUP_DATE = new Date('2026-08-16T00:00:00');
+
+const QUESTIONS = [
+"What's the one thing you'll do today that your competitor won't?",
+"The Dutch trained this morning. Did you match them?",
+"Argentina prepared for YOU today. How did you prepare for them?",
+"Champions do the unsexy work. What's yours today?",
+"What would the 1976 team think of your effort today?",
+"One technical detail. One mental rep. What are they?",
+"How many times will you choose discomfort today?",
+"Japan is watching film right now. Are you?",
+"What are you building today that matters on August 16?",
+"What conversation will you have today that makes you better?",
+"The World Cup doesn't care how you feel. What will you do anyway?",
+"Name one thing you'll do today that future you will thank you for.",
+"What does a world-class Black Stick look like today — and are you that?",
+"Pressure is a privilege. How will you embrace it today?",
+"This is the work. Not the tournament. What's your work today?",
+"The 1976 team were farmers and tradesmen. What's your excuse?",
+"What would you do today if you knew you were being watched by a selector?",
+"Small margins win World Cups. What's your margin today?",
+"Is your preparation today better than Japan's? How do you know?",
+"What habit are you building that will show up on the pitch in August?",
+"One percent better today. What does that look like?",
+"What's the hardest thing you could do today — and will you do it?",
+"A Black Stick earned their jersey. Are you earning yours today?",
+"Argentina's set pieces are elite. Are you ready for them?",
+"What would Blair Tarrant do in this training session?",
+"Mental toughness is built in moments like this one. What will you choose?",
+"The Netherlands will find your weakness. Are you working on it today?",
+"Clarity beats intensity. What's your one focus today?",
+"The last preparation phase before the World Cup. Treat it like it.",
+"What does sacrifice look like for you today?",
+"Champions recover as hard as they train. What's your recovery today?",
+"Are you the hardest worker in your training group today?",
+"Japan presses relentlessly. Is your decision-making under pressure sharp?",
+"What's one thing your future World Cup self wishes you'd done today?",
+"Not next week. Not tomorrow. What can you control in the next hour?",
+"The best teams win in the margins. Where are your margins today?",
+"Who is your direct opponent at the World Cup — and what are they doing right now?",
+"Hayden Shaw studied keeper footage for months. What are you studying?",
+"Dean Couzins captained this team for nearly two decades. What leadership will you show today?",
+"What does it mean to wear the fern? Show it today.",
+"Ryan Archibald played 327 games for this country. What would he do today?",
+"You are a professional. What does a professional's Tuesday look like?",
+"Gold Coast. Manchester. Montreal. Your name could be next. What are you doing about it?",
+"The fern has been worn since the 1880s. You're borrowing it. Worth it today?",
+"Training is where you earn the right to perform. Did you earn it today?",
+"Argentina will test your composure. Build it now.",
+"The Dutch are tactically brilliant. Is your game understanding growing daily?",
+"What's one thing you're avoiding that you know you need to do?",
+"Tony Ineson scored one goal in an Olympic final. Were you ready for your moment today?",
+"Be where your feet are. What does full presence look like today?",
+"How would you describe your preparation to your teammates in the debrief?",
+"The World Cup starts in the habits you're building right now.",
+"Are you working on your weakness or enjoying your strength today?",
+"What's one thing you can do today that compounds over the next 60 days?",
+"Phil Burrows scored 150 goals through relentless movement. What's your relentless thing?",
+"How sharp is your mind today — and what will you do to sharpen it?",
+"Every rep counts. Every session counts. Does your effort match that belief?",
+"The tournament is close enough to taste. Is your preparation close enough to match?",
+"What would it feel like to walk out in the World Cup knowing you left nothing behind?",
+"This squad has a chance to write the next line of Black Sticks history. Start today."
+];
+
+const HABITS = [
+{name:"Morning Activation",desc:"10 minutes of movement before you look at your phone. A walk, bodyweight work, stretching — anything that primes your nervous system before the noise starts. High performers protect their mornings."},
+{name:"Visualise Your Game",desc:"5 minutes eyes closed, seeing yourself executing your role perfectly in the next match or session. Specific, vivid, felt. See the ball. See your movement. See the outcome. What you rehearse mentally, you repeat physically."},
+{name:"Cold Exposure",desc:"Cold shower or ice bath — minimum 2 minutes. Builds stress tolerance and mental toughness, two things the World Cup demands in full. The discomfort is the point."},
+{name:"Film Study (10 mins)",desc:"Watch one clip of your next opponent or one clip of your own play. One pattern. One insight. Ten minutes a day compounds into a significant edge over 60 days."},
+{name:"Nutrition Window",desc:"Eat a quality meal within 30 minutes of waking. Performance starts with fuel. No excuses in a World Cup prep block. Your body rebuilds overnight — feed it."},
+{name:"Evening Review",desc:"Three questions before bed: What went well today? What would I do differently? What's my one focus for tomorrow? Five minutes. Builds self-awareness faster than almost anything else."},
+{name:"Sleep Non-Negotiable",desc:"In bed by 10pm. Eight hours minimum. Sleep is not rest — it's your primary recovery tool. Everything else you do in prep is undermined if you're under-sleeping. Protect it."},
+{name:"One Technical Rep",desc:"Pick one technical weakness. Work on it deliberately for 15 minutes today — not in a full session, just that one thing. Mastery is repetition. Repetition requires intention."},
+{name:"Connection",desc:"Have one real conversation with a teammate today. Not about hockey. Ask how they are. Culture is built in the margins, not in the team talks."},
+{name:"Gratitude Anchor",desc:"Write one thing you're grateful for about being a Black Stick. Not generic — specific. It could be the jersey, a teammate, an opportunity. Perspective resets performance."}
+];
+
+const OPPONENTS = [
+{
+  id:"japan", flag:"🇯🇵", name:"JAPAN",
+  style:"High-tempo, structured pressing game. Disciplined defensive shape with fast, organised transitions. They work as a unit — compact, connected, and relentless in their press. They will not give you time on the ball.",
+  threat:"Their press wins the ball high up the pitch and they convert quickly. Turnovers in your defensive third are immediately dangerous. Slow decision-making is their weapon — don't give it to them.",
+  edge:"They struggle against physical, direct play through the centre of the pitch. Make them work laterally. Move the ball quickly before the press arrives. Win the physical battle early and their structure cracks."
+},
+{
+  id:"argentina", flag:"🇦🇷", name:"ARGENTINA",
+  style:"Flair-driven, technically gifted, strong individual ability across the pitch. They play with emotional intensity and back themselves in one-on-one situations. Dangerous in open play and devastating from set pieces.",
+  threat:"Their penalty corner execution is elite — drag flick specialists who are accurate and powerful. Defensive structure at set pieces is critical. They also have the individual quality to punish any lapse in concentration.",
+  edge:"Argentina can lose composure under sustained pressure and high work rate. They don't always enjoy a physical battle. If NZ can maintain tempo and deny them space to express themselves, cracks appear. Win the first ten minutes and set the tone."
+},
+{
+  id:"netherlands", flag:"🇳🇱", name:"NETHERLANDS",
+  style:"Total hockey. Fluid positional play, relentless attacking structure, world-class individuals across every line. They are comfortable in all phases — pressing, possession, transition, and set pieces. The best team in the world for a reason.",
+  threat:"They will find your weakness and exploit it systematically. They are patient, precise, and clinical. If you give them space, they will use it. If you give them time, they will hurt you.",
+  edge:"They can be disrupted by aggressive man-marking and physicality in the transition phase. Deny them rhythm — no free space, no free passes, no comfort. They have been beaten before by teams that refuse to let them play. Be that team."
+}
+];
+
+const LEGACY_CARDS = [
+{era:"1976",title:"The 1976 Gold — Montreal Olympics",body:"NZ were 100-1 outsiders. Nobody gave them a chance. They beat the Netherlands in a pulsating semi-final, then defeated Australia 1-0 in the final. It remains the only Olympic gold medal in NZ hockey history. Nobody expected it. They didn't care."},
+{era:"1976",title:"Tony Ineson — The Goal That Changed Everything",body:"He scored the goal that won New Zealand its only Olympic gold. A penalty corner conversion in the final against Australia in Montreal, 1976. He was a dairy farmer from Canterbury. Nobody outside New Zealand knew his name. Now it's in the history books forever."},
+{era:"1976",title:"Arthur Borren — Captain of Gold",body:"Dutch-born, Black Sticks to his core. Arthur Borren captained New Zealand to the 1976 Olympic gold as a right winger with over 100 international caps. He led a squad of everyman characters — farmers, teachers, tradesmen — to the greatest result in NZ hockey history. Leadership is not about where you're from. It's about what you stand for."},
+{era:"1976",title:"Trevor Manning — Playing Through Pain",body:"Trevor Manning was the goalkeeper in the 1976 Olympic final. He played through a shattered kneecap. He was a railway worker. He didn't have sponsorships, performance staff, or a high-performance centre. He had grit. NZ won 1-0."},
+{era:"1976",title:"Ross Gillespie — The Coach Behind the Gold",body:"Ross Gillespie coached the 1976 Olympic gold team. He built a system around belief, structure, and unity in a squad with no superstars and no professional support. He later rebuilt his home after the 2011 Christchurch earthquake the same way he built his team — methodically, without fuss. Great coaches build great people first."},
+{era:"1997–2012",title:"Ryan Archibald — 321 Caps",body:"The 2nd most capped Black Stick of all time. 321 international appearances. Ryan Archibald debuted in 1997 and played at three Olympic Games. His consistency, longevity, and professionalism set a standard that every Black Stick since has measured themselves against. Longevity is a choice made every single day."},
+{era:"1999–2016",title:"Dean Couzins — Captain, 318 Caps",body:"Captained the Black Sticks across multiple Olympic cycles and accumulated 318 international caps. A defender who led with quiet authority. He didn't chase headlines — he chased excellence, and he chased it for nearly two decades. That's what legacy looks like."},
+{era:"2001–2016",title:"Blair Hopping — 264 Caps, Three Olympics",body:"Three Olympic Games, two Commonwealth Games, and a reputation as one of the most reliable defenders to ever wear black. Blair Hopping's longevity came from one thing: he took care of the fundamentals every single day without exception. The basics done brilliantly, consistently. That was his career."},
+{era:"2003–2016",title:"Phil Burrows — 150 Goals, Top Scorer",body:"The most prolific goal scorer in Black Sticks men's history with 150 international goals. Phil Burrows combined technical excellence with relentless movement. He was a forward who made the simple look easy — and only his teammates knew how hard he worked to make it look that way."},
+{era:"2006–2020",title:"Simon Child — 302 Caps",body:"Over 300 international appearances across a career defined by constant adaptation. Simon Child evolved his game as the sport evolved around him, staying relevant and competitive across multiple eras. That kind of longevity doesn't happen by accident — it happens through choice, every day."},
+{era:"2010–2024",title:"Hugo Inglis — 256 Caps, A Striker's Dedication",body:"Hugo Inglis brought world-class striker craft to the Black Sticks across multiple Olympic cycles. He stepped away from international hockey to pursue a career in London, then returned when his country needed him to help the team qualify for Paris. Loyalty to the jersey never left him."},
+{era:"2002",title:"The 2002 Commonwealth Games Silver — Manchester",body:"In just their second Commonwealth Games appearance, New Zealand won silver in Manchester. It signalled a new era of ambition — the Black Sticks weren't just participants anymore. They were genuine contenders. That silver medal changed the belief of an entire programme."},
+{era:"2002",title:"Manchester 2002 — The Silver That Changed Everything",body:"New Zealand defeated some of the world's best teams on their way to the 2002 Commonwealth Games final in Manchester. Hayden Shaw was the tournament's top scorer with 13 goals — almost all from drag flicks. They finished silver. It wasn't just a medal — it was proof of concept. The Black Sticks belonged at the top table, and everyone in the programme knew it from that moment forward."},
+{era:"2010",title:"The 2010 Commonwealth Games Bronze — Delhi",body:"A performance that showed character under adversity. Playing in intense heat in Delhi, the Black Sticks fought through a gruelling tournament to claim bronze. Sometimes the medals that test you hardest mean the most. Resilience over conditions. It's always a choice."},
+{era:"2014",title:"The 2014 World Cup 7th Place — The Hague",body:"Joint-best World Cup result in NZ history at the time. The team showed they belonged on the world stage — competing against the best nations and finishing with pride. Every player on that team left a marker in the record books. Seventh best in the world. A benchmark worth chasing."},
+{era:"2007–2022",title:"Blair Tarrant — Captain, 272 Caps, Three Olympics",body:"Fifteen years. Three Olympic Games. Three World Cups. Three Commonwealth Games. Blair Tarrant captained the Black Sticks from 2017 to 2022 and was known for his composure and leadership in the heart of New Zealand's defence. He played professionally in the Netherlands and Germany, then came home and immediately gave back to the next generation as a coach. He wore the black shirt with immense pride, and he improved every single day he wore it."},
+{era:"2018",title:"The 2018 Commonwealth Games Silver — Gold Coast",body:"Back on the podium. Silver at the Gold Coast Commonwealth Games was a statement — the Black Sticks were building something real and doing it in front of a home crowd. The programme was rising. The results were following."},
+{era:"2002–2012",title:"Hayden Shaw — The Drag Flick Assassin",body:"Hayden Shaw made his Black Sticks debut in 2002 and immediately became the team's most dangerous weapon from penalty corners. At the 2008 Beijing Olympics he belted a hat-trick past the Korean goalkeeper — after spending months watching footage of their keeper, studying their movements, their hands, their footwork. He finished his career with 178 caps and 127 goals, almost all from drag flicks. Preparation disguised as genius."},
+{era:"2025",title:"The Nations Cup 2025 Back-to-Back",body:"Back-to-back Nations Cup titles. The Black Sticks dominated in Kuala Lumpur, beating Pakistan 6-2 in the final. Five goals in the first half. Nic Woods — player of the match — said: \"Things just come together when it all clicks.\" Promotion back to the Pro League. The programme on the rise, and the World Cup on the horizon."},
+{era:"2010–2024",title:"Kane Russell — The Set Piece Weapon",body:"Kane Russell combined defensive solidity with dangerous set-piece execution, becoming a specialist drag flick weapon in the Black Sticks arsenal. A champion javelin thrower at school level — a reminder that high performers are often more well-rounded than people assume. The skills transfer. The discipline is the same."},
+{era:"1902",title:"The First NZ Hockey Game — 1902",body:"New Zealand played its first recorded inter-provincial hockey match in 1902. Over 120 years later, the game the pioneers played is now contested by world-class athletes on artificial turf in front of global audiences. Every time you step on the field, you carry 120 years of history with you. Don't take it lightly."},
+{era:"1956",title:"The First Olympic Appearance — Melbourne 1956",body:"New Zealand debuted at the Melbourne Olympics in 1956, finishing sixth. They were new to the world stage, finding their feet against the hockey powerhouses of Asia and Europe. But they showed up. That act of showing up, of competing, of not being intimidated — that spirit has been in the DNA of this programme for 70 years."},
+{era:"2013",title:"Stephen Jenness — Standards in Every Match",body:"In the 2013 Oceania Cup, New Zealand beat Papua New Guinea 18-0. Stephen Jenness scored six of those goals. What the scoreboard doesn't show is what professional athletes do in every contest regardless of opposition — they maintain standards, build habits, and use every moment to sharpen their edge. There are no throwaway games."},
+{era:"1980",title:"The Boycott of 1980 — A Missed Olympics",body:"New Zealand boycotted the 1980 Moscow Olympics. Players who had dedicated years to making that squad never got their chance. The lesson hasn't changed: nothing in sport is guaranteed. Every opportunity is finite. You have to earn it, and you have to take it when it comes — because sometimes it doesn't come again."},
+{era:"1976",title:"From Farmers to Champions — The 1976 Squad",body:"The 1976 gold medal team were teachers, farmers, tradesmen, and railway workers. There was no professional programme. No high-performance centre. No full-time support staff. They trained when they could, sacrificed what they had, and beat the world. If they could do it then, with what they had, the question for you is simple: what's your excuse?"},
+{era:"ALWAYS",title:"The Fern — What It Means",body:"The silver fern has been on the chest of New Zealand athletes since the 1880s. Every All Black, Black Cap, and Black Stick who has ever represented this country has worn it. It is not a logo. It is not a brand asset. It is a covenant — with the country, with the players who came before you, and with those who will come after."},
+{era:"2014",title:"Blair Hilton — One Moment, Maximum Pressure",body:"In a 2014 World Hockey League match in Delhi, Blair Hilton scored the winning shootout goal against Argentina to put New Zealand into the semifinals. One player. One moment. One decision made under maximum pressure. You can't rehearse for that moment — but you can build the kind of person who delivers in it. That work starts now."},
+{era:"2007–2022",title:"Arun Panchia — 287 Caps, The Quiet Workhorse",body:"287 international caps without ever being the loudest voice in the room. Arun Panchia was a midfielder who made the complex look simple and the hard look routine. His longevity was a product of discipline, adaptability, and a professionalism that never wavered regardless of the result or the occasion."},
+{era:"1973",title:"The 1973 World Cup — First Time on the World Stage",body:"New Zealand's first World Cup appearance in 1973 in the Netherlands. They finished 7th — a result that, 50 years later, still stands as one of their best. The first time they stood on the biggest stage in world hockey, they competed properly. That competitive spirit is not inherited. It is chosen. It has been chosen by every generation since."},
+{era:"2026",title:"You — The Next Chapter",body:"Every generation of Black Sticks has had its defining moment. The 1976 team had Montreal. The 2002 team had Manchester. The 2014 team had The Hague. The 2023 team had Bhubaneswar. This squad has the 2026 World Cup. The legacy is not finished. It is waiting for you to write the next line. What will yours say?"}
+];
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function dayOfYear() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  return Math.floor((now - start) / 86400000);
+}
+
+function formatDate(d) {
+  return new Date(d || Date.now()).toLocaleDateString('en-NZ', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function store(key, val) { localStorage.setItem('bs2026_' + key, JSON.stringify(val)); }
+function load(key, def) { try { const v = localStorage.getItem('bs2026_' + key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.screen === screen);
+  });
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════
+
+function updateCountdown() {
+  const now = new Date();
+  const diff = WORLD_CUP_DATE - now;
+  const days = Math.max(0, Math.ceil(diff / 86400000));
+  document.getElementById('countdown-days').textContent = days;
+}
+
+function updateDailyQuestion() {
+  const idx = dayOfYear() % QUESTIONS.length;
+  document.getElementById('daily-question').textContent = QUESTIONS[idx];
+}
+
+// ═══════════════════════════════════════
+// HABITS
+// ═══════════════════════════════════════
+
+function getHabitData() {
+  return load('habits_' + todayKey(), Array(HABITS.length).fill(false));
+}
+
+function getStreaks() {
+  return load('streaks', Array(HABITS.length).fill(0));
+}
+
+function renderHabits() {
+  const container = document.getElementById('habits-list');
+  const checked = getHabitData();
+  const streaks = getStreaks();
+  document.getElementById('habits-date').textContent = formatDate();
+
+  container.innerHTML = HABITS.map((h, i) => {
+    const isChecked = checked[i];
+    const streak = streaks[i];
+    const streakText = streak > 0 ? `${streak}-day streak 🔥` : '';
+    return `
+    <div class="habit-card ${isChecked ? 'completed' : ''}" id="habit-${i}">
+      <div class="habit-top">
+        <div class="habit-check ${isChecked ? 'checked' : ''}" onclick="event.stopPropagation();toggleHabit(${i})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div class="habit-info" onclick="toggleHabitExpand(${i})">
+          <div class="habit-name">${h.name}</div>
+          ${streakText ? `<div class="habit-streak">${streakText}</div>` : ''}
+        </div>
+        <svg class="habit-expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="toggleHabitExpand(${i})"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="habit-detail">${h.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHabit(i) {
+  const checked = getHabitData();
+  checked[i] = !checked[i];
+  store('habits_' + todayKey(), checked);
+  updateStreaks(i, checked[i]);
+  renderHabits();
+}
+
+function updateStreaks(i, completed) {
+  const streaks = getStreaks();
+  if (completed) {
+    streaks[i] = (streaks[i] || 0) + 1;
+  } else {
+    streaks[i] = Math.max(0, (streaks[i] || 0) - 1);
+  }
+  store('streaks', streaks);
+}
+
+function toggleHabitExpand(i) {
+  document.getElementById('habit-' + i).classList.toggle('expanded');
+}
+
+// ═══════════════════════════════════════
+// JOURNAL
+// ═══════════════════════════════════════
+
+function initJournal() {
+  document.getElementById('journal-date').textContent = formatDate();
+
+  // Rating dots
+  const dotsContainer = document.getElementById('rating-dots');
+  dotsContainer.innerHTML = '';
+  for (let r = 1; r <= 10; r++) {
+    const dot = document.createElement('div');
+    dot.className = 'rating-dot';
+    dot.textContent = r;
+    dot.onclick = () => setRating(r);
+    dotsContainer.appendChild(dot);
+  }
+
+  // Load today's entry
+  const entry = load('journal_' + todayKey(), null);
+  if (entry) {
+    document.getElementById('journal-text').value = entry.text || '';
+    if (entry.rating) setRating(entry.rating, false);
+  }
+
+  renderJournalHistory();
+}
+
+let currentRating = 0;
+function setRating(r, save = true) {
+  currentRating = r;
+  document.getElementById('rating-value').textContent = r;
+  document.querySelectorAll('.rating-dot').forEach((d, i) => {
+    d.classList.toggle('selected', i + 1 === r);
+  });
+  if (save) saveJournalSilent();
+}
+
+function insertPrompt(text) {
+  const ta = document.getElementById('journal-text');
+  if (ta.value && !ta.value.endsWith('\n')) ta.value += '\n\n';
+  ta.value += text + ' ';
+  ta.focus();
+}
+
+function saveJournalSilent() {
+  const text = document.getElementById('journal-text').value;
+  const entry = { text, rating: currentRating, date: todayKey() };
+  store('journal_' + todayKey(), entry);
+}
+
+function saveJournal() {
+  saveJournalSilent();
+  showToast('Entry saved');
+  renderJournalHistory();
+}
+
+function copyForTMA() {
+  const text = document.getElementById('journal-text').value;
+  const formatted = `DATE: ${formatDate()}\nWEEKLY SELF-RATING: ${currentRating || '—'}/10\nJOURNAL ENTRY:\n${text}`;
+  navigator.clipboard.writeText(formatted).then(() => {
+    showToast('Copied for TMA');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = formatted;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Copied for TMA');
+  });
+}
+
+function renderJournalHistory() {
+  const container = document.getElementById('journal-history');
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('bs2026_journal_') && k !== 'bs2026_journal_' + todayKey()) {
+      keys.push(k.replace('bs2026_journal_', ''));
+    }
+  }
+  keys.sort().reverse();
+
+  if (keys.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `<h3>PREVIOUS ENTRIES</h3>` + keys.slice(0, 20).map(k => {
+    const entry = load('journal_' + k, {});
+    const preview = (entry.text || '').substring(0, 80);
+    return `<div class="history-entry" onclick="loadJournalEntry('${k}')">
+      <div class="history-date">${formatDate(k)}</div>
+      ${entry.rating ? `<div class="history-rating">Rating: ${entry.rating}/10</div>` : ''}
+      <div class="history-preview">${preview || 'No entry text'}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadJournalEntry(key) {
+  const entry = load('journal_' + key, {});
+  document.getElementById('journal-text').value = entry.text || '';
+  if (entry.rating) setRating(entry.rating, false);
+  document.getElementById('journal-date').textContent = formatDate(key);
+  window.scrollTo(0, 0);
+}
+
+// Auto-save journal on typing
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('journal-text');
+  let saveTimer;
+  ta.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveJournalSilent, 1000);
+  });
+});
+
+// ═══════════════════════════════════════
+// SCOUTING
+// ═══════════════════════════════════════
+
+function renderScouting() {
+  const container = document.getElementById('scouting-cards');
+  container.innerHTML = OPPONENTS.map(o => {
+    const note = load('scout_' + o.id, '');
+    return `
+    <div class="opponent-card" id="opp-${o.id}">
+      <div class="opponent-top" onclick="toggleOpponent('${o.id}')">
+        <span class="opponent-flag">${o.flag}</span>
+        <span class="opponent-name">${o.name}</span>
+        <svg class="opponent-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="opponent-detail">
+        <div class="intel-section">
+          <div class="intel-label">STYLE OF PLAY</div>
+          <div class="intel-text">${o.style}</div>
+        </div>
+        <div class="intel-section">
+          <div class="intel-label">KEY THREAT</div>
+          <div class="intel-text">${o.threat}</div>
+        </div>
+        <div class="intel-section">
+          <div class="intel-label">NZ EDGE</div>
+          <div class="intel-text">${o.edge}</div>
+        </div>
+        <div class="scouting-note-label">YOUR PERSONAL SCOUTING NOTE</div>
+        <textarea class="scouting-note" placeholder="Add your own notes..." oninput="saveScoutNote('${o.id}', this.value)">${note}</textarea>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleOpponent(id) {
+  document.getElementById('opp-' + id).classList.toggle('expanded');
+}
+
+function saveScoutNote(id, val) {
+  store('scout_' + id, val);
+}
+
+// ═══════════════════════════════════════
+// LEGACY
+// ═══════════════════════════════════════
+
+let currentLegacyIndex = dayOfYear() % LEGACY_CARDS.length;
+
+function renderLegacy() {
+  renderLegacyFeatured(currentLegacyIndex);
+  const list = document.getElementById('legacy-list');
+  list.innerHTML = LEGACY_CARDS.map((c, i) => `
+    <div class="legacy-mini" onclick="openLegacyModal(${i})">
+      <div class="lm-era">${c.era}</div>
+      <div class="lm-title">${c.title}</div>
+    </div>
+  `).join('');
+}
+
+function renderLegacyFeatured(idx) {
+  const c = LEGACY_CARDS[idx];
+  document.getElementById('legacy-featured').innerHTML = `
+    <div class="legacy-era">${c.era}</div>
+    <div class="legacy-title">${c.title}</div>
+    <div class="legacy-body">${c.body}</div>
+  `;
+}
+
+function openLegacyModal(idx) {
+  const c = LEGACY_CARDS[idx];
+  document.getElementById('legacy-modal-body').innerHTML = `
+    <div class="legacy-era">${c.era}</div>
+    <div class="legacy-title">${c.title}</div>
+    <div class="legacy-body">${c.body}</div>
+  `;
+  document.getElementById('legacy-modal').classList.add('active');
+}
+
+function closeLegacyModal() {
+  document.getElementById('legacy-modal').classList.remove('active');
+}
+
+// Swipe on featured card
+(function() {
+  let startX = 0, startY = 0;
+  const el = document.getElementById('legacy-featured-container');
+  el.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) {
+        currentLegacyIndex = (currentLegacyIndex + 1) % LEGACY_CARDS.length;
+      } else {
+        currentLegacyIndex = (currentLegacyIndex - 1 + LEGACY_CARDS.length) % LEGACY_CARDS.length;
+      }
+      renderLegacyFeatured(currentLegacyIndex);
+    }
+  }, { passive: true });
+})();
+
+// Close modal on backdrop click
+document.getElementById('legacy-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeLegacyModal();
+});
+
+// ═══════════════════════════════════════
+// STREAK RESET AT MIDNIGHT
+// ═══════════════════════════════════════
+
+function checkStreakReset() {
+  const lastDate = load('lastActiveDate', null);
+  const today = todayKey();
+  if (lastDate && lastDate !== today) {
+    // Check if yesterday's habits were completed — reset streaks for uncompleted ones
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+    const yData = load('habits_' + yKey, Array(HABITS.length).fill(false));
+    const streaks = getStreaks();
+    yData.forEach((completed, i) => {
+      if (!completed) streaks[i] = 0;
+    });
+    store('streaks', streaks);
+  }
+  store('lastActiveDate', today);
+}
+
+// ═══════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════
+
+async function requestNotifications() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+
+function init() {
+  updateCountdown();
+  updateDailyQuestion();
+  renderHabits();
+  initJournal();
+  renderScouting();
+  renderLegacy();
+  checkStreakReset();
+  requestNotifications();
+
+  // Update countdown every minute
+  setInterval(updateCountdown, 60000);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('bs2026-sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

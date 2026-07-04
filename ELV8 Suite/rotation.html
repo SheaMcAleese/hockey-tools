@@ -4,41 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hockey Rotation Generator</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#e94560">
-<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; }
+body { font-family: 'Montserrat', -apple-system, 'Segoe UI', Arial, sans-serif; background: #1c1c1c; color: #fff; min-height: 100vh; }
 
 /* NAV */
-nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; }
-nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #e94560; }
-nav button { background: none; border: none; color: #8899aa; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+nav { background: #262626; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #3c3c3c; }
+nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #D4AF37; }
+nav button { background: none; border: none; color: #8c8c8c; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
 nav button:hover { color: #fff; }
-nav button.active { color: #fff; border-bottom-color: #e94560; }
+nav button.active { color: #fff; border-bottom-color: #D4AF37; }
 
 /* VIEWS */
 .view { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
 .view.active { display: block; }
 
 /* COMMON */
-h2 { font-size: 22px; margin-bottom: 16px; color: #e94560; }
-h3 { font-size: 16px; margin-bottom: 10px; color: #ccc; }
+h2 { font-size: 22px; margin-bottom: 16px; color: #D4AF37; }
+h3 { font-size: 16px; margin-bottom: 10px; color: #c4c4c4; }
 .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
-.btn-primary { background: #e94560; color: #fff; }
-.btn-primary:hover { background: #c73650; }
-.btn-secondary { background: #0f3460; color: #fff; }
-.btn-secondary:hover { background: #1a4a8a; }
-.btn-danger { background: #722; color: #fff; }
-.btn-danger:hover { background: #933; }
-.btn-success { background: #2a7a3a; color: #fff; }
-.btn-success:hover { background: #3a9a4a; }
+.btn-primary { background: #D4AF37; color: #1c1c1c; }
+.btn-primary:hover { background: #b8952e; }
+.btn-secondary { background: #2f2f2f; color: #fff; }
+.btn-secondary:hover { background: #3c3c3c; }
+.btn-danger { background: #e23b2e; color: #fff; }
+.btn-danger:hover { background: #b92e23; }
+.btn-success { background: #2a9d3a; color: #fff; }
+.btn-success:hover { background: #34b847; }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
-input, select, textarea { padding: 6px 10px; border: 1px solid #334; border-radius: 4px; background: #0d1b2a; color: #fff; font-size: 13px; }
-input:focus, select:focus { outline: none; border-color: #e94560; }
+input, select, textarea { padding: 6px 10px; border: 1px solid #3c3c3c; border-radius: 4px; background: #161616; color: #fff; font-size: 13px; }
+input:focus, select:focus { outline: none; border-color: #D4AF37; }
 select { cursor: pointer; }
-label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
+label { font-size: 13px; color: #c4c4c4; display: block; margin-bottom: 4px; }
 .row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
 .mb-8 { margin-bottom: 8px; }
 .mb-16 { margin-bottom: 16px; }
@@ -47,35 +47,35 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 
 /* ROSTER TABLE */
 .roster-table { width: 100%; border-collapse: collapse; }
-.roster-table th { background: #0f3460; padding: 8px 12px; text-align: left; font-size: 13px; color: #8cf; }
-.roster-table td { padding: 4px 6px; border-bottom: 1px solid #222; }
+.roster-table th { background: #D4AF37; padding: 8px 12px; text-align: left; font-size: 13px; color: #1c1c1c; }
+.roster-table td { padding: 4px 6px; border-bottom: 1px solid #3c3c3c; }
 .roster-table td input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; padding: 4px 6px; }
-.roster-table td input:hover { border-color: #334; }
-.roster-table td input:focus { border-color: #e94560; background: #0d1b2a; }
-.roster-table tr:hover { background: #1a2a4a; }
-.roster-table td select { background: #0d1b2a; width: 80px; }
+.roster-table td input:hover { border-color: #3c3c3c; }
+.roster-table td input:focus { border-color: #D4AF37; background: #161616; }
+.roster-table tr:hover { background: #2f2f2f; }
+.roster-table td select { background: #161616; width: 80px; }
 
 /* GAME LIST */
-.game-card { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: all .2s; }
-.game-card:hover { border-color: #e94560; }
-.game-card.active { border-color: #e94560; background: #1a2a4a; }
+.game-card { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: all .2s; }
+.game-card:hover { border-color: #D4AF37; }
+.game-card.active { border-color: #D4AF37; background: #2f2f2f; }
 .game-card h4 { color: #fff; margin-bottom: 4px; }
-.game-card small { color: #889; }
+.game-card small { color: #8c8c8c; }
 
 /* SHEET LIST */
-.sheet-card { background: #0d1b2a; border: 1px solid #223; border-radius: 4px; padding: 10px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all .2s; }
-.sheet-card:hover { border-color: #e94560; }
-.sheet-card.active { border-color: #e94560; background: #1a2a4a; }
+.sheet-card { background: #161616; border: 1px solid #3c3c3c; border-radius: 4px; padding: 10px 14px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all .2s; }
+.sheet-card:hover { border-color: #D4AF37; }
+.sheet-card.active { border-color: #D4AF37; background: #2f2f2f; }
 .sheet-card .info { display: flex; flex-direction: column; }
 .sheet-card .info span:first-child { font-weight: 600; font-size: 14px; }
-.sheet-card .info span:last-child { font-size: 12px; color: #889; }
+.sheet-card .info span:last-child { font-size: 12px; color: #8c8c8c; }
 .sheet-actions { display: flex; gap: 4px; }
 
 /* BUILDER */
 .builder-layout { display: flex; gap: 20px; }
 .builder-sidebar { width: 280px; flex-shrink: 0; }
 .builder-main { flex: 1; min-width: 0; }
-.group-panel { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 12px; margin-bottom: 10px; }
+.group-panel { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 12px; margin-bottom: 10px; }
 .group-panel .group-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
 .group-panel .group-header input[type="text"] { width: 100px; font-weight: 700; }
 .group-panel .players-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
@@ -84,71 +84,135 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .group-panel .config-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .group-panel .config-row input[type="number"] { width: 55px; }
 .group-panel .config-row input[type="text"] { width: 130px; }
-.rotation-desc { font-size: 12px; color: #8cf; margin-top: 6px; padding: 4px 8px; background: #0a1628; border-radius: 3px; }
-.usage-panel { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 12px; }
+.rotation-desc { font-size: 12px; color: #3aa7e0; margin-top: 6px; padding: 4px 8px; background: #161616; border-radius: 3px; }
+.usage-panel { background: #262626; border: 1px solid #3c3c3c; border-radius: 6px; padding: 12px; }
 .usage-panel .player-chip { display: inline-block; padding: 3px 8px; margin: 2px; border-radius: 3px; font-size: 12px; font-weight: 600; }
-.usage-panel .player-chip.assigned { background: #2a7a3a; color: #fff; }
-.usage-panel .player-chip.unassigned { background: #722; color: #fff; }
+.usage-panel .player-chip.assigned { background: #2a9d3a; color: #fff; }
+.usage-panel .player-chip.unassigned { background: #e23b2e; color: #fff; }
 
 /* SECTION LABEL */
-.section-divider { text-align: center; font-size: 11px; font-weight: 700; color: #e94560; letter-spacing: 2px; margin: 14px 0 6px; text-transform: uppercase; }
+.section-divider { text-align: center; font-size: 11px; font-weight: 700; color: #D4AF37; letter-spacing: 2px; margin: 14px 0 6px; text-transform: uppercase; }
 
-/* ===================== */
-/* OUTPUT / PREVIEW TABLE */
-/* ===================== */
-.sub-sheet-output { background: #1f3864; color: #000; padding: 0; margin-bottom: 30px; font-family: 'Segoe UI', Arial, sans-serif; }
-.sub-sheet-output * { color: #000; }
+/* ===================================================== */
+/* OUTPUT / PREVIEW — ELV8 PREMIUM DOCUMENT SYSTEM        */
+/* ===================================================== */
+.sub-sheet-output {
+  background: #fff; color: #15171a; margin: 0 auto 30px; max-width: 1180px;
+  font-family: 'Montserrat', -apple-system, 'Segoe UI', Arial, sans-serif;
+  border: 1px solid #e7e7e7; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.32);
+}
 
-.sheet-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px 4px; background: #1f3864; }
-.sheet-header .formation-name { font-size: 20px; font-weight: 900; color: #ff3333 !important; }
-.sheet-header .take-off-note { font-size: 13px; font-weight: 800; color: #fff !important; letter-spacing: 0.5px; }
+/* MASTHEAD */
+.doc-masthead { display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 30px; background: #1c1c1c; border-bottom: 3px solid #D4AF37; }
+.doc-masthead .mh-left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.doc-masthead .mh-kicker { font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  font-weight: 700; color: #8c8c8c; }
+.doc-masthead .mh-title { font-size: 21px; font-weight: 800; color: #fff; line-height: 1.1;
+  text-transform: uppercase; letter-spacing: 0.5px; }
+.doc-masthead .mh-right { display: flex; gap: 26px; flex-shrink: 0; }
+.doc-masthead .mh-item { display: flex; flex-direction: column; gap: 2px; text-align: right; }
+.doc-masthead .mh-eyebrow { font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  font-weight: 600; color: #7a7a7a; }
+.doc-masthead .mh-value { font-size: 13px; font-weight: 700; color: #D4AF37;
+  text-transform: uppercase; letter-spacing: 0.3px; }
 
-.rotation-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.rotation-table th, .rotation-table td { border: 1.5px solid #000; padding: 5px 6px; font-size: 13px; text-align: center; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* META STRIP */
+.doc-meta { display: flex; align-items: stretch; background: #fff; padding: 0 30px;
+  border-bottom: 1px solid #e7e7e7; }
+.doc-meta .meta-cell { display: flex; flex-direction: column; gap: 3px; padding: 13px 26px 13px 0;
+  margin-right: 26px; border-right: 1px solid #ededed; }
+.doc-meta .meta-cell:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+.doc-meta .meta-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  font-weight: 600; color: #9a9a9a; }
+.doc-meta .meta-value { font-size: 15px; font-weight: 700; color: #15171a; }
 
-/* Header row */
-.rotation-table thead th { background: #1f3864; font-weight: 700; font-size: 12px; padding: 6px 4px; }
-.rotation-table thead th.col-pos { color: #ff4444; width: 80px; }
-.rotation-table thead th.col-start { color: #44cc44; }
-.rotation-table thead th.col-interchange { color: #ff6666; width: 110px; }
-.rotation-table thead th.col-1st-rot { color: #6699ff; width: 80px; }
-.rotation-table thead th.col-rotation { color: #fff; }
-.rotation-table thead th.col-timing { color: #ffd700; width: 110px; }
+/* TABLE WRAP */
+.doc-tablewrap { padding: 20px 30px 8px; }
 
-/* Spacer rows */
-.rotation-table tr.spacer td { border: none; height: 12px; background: #fff; }
-.rotation-table tr.section-spacer td { border: none; height: 20px; background: #fff; }
+/* SECTION HEADER (within tbody as a banded row) */
+.rotation-table tr.section-head td { border: none; padding: 18px 4px 6px; text-align: left; }
+.rotation-table tr.section-head:first-child td { padding-top: 4px; }
+.rotation-table tr.section-head .sec-label { display: inline-block; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 2px; font-weight: 800; color: #1c1c1c;
+  padding-bottom: 3px; border-bottom: 2px solid #D4AF37; }
 
-/* POS cell */
-.rotation-table td.cell-pos { font-weight: 700; font-size: 13px; text-align: center; background: #1f3864; color: #fff !important; }
+/* TABLE BASE — no heavy gridlines */
+.rotation-table { width: 100%; border-collapse: collapse; table-layout: fixed;
+  font-variant-numeric: tabular-nums; }
+.rotation-table th, .rotation-table td { border: none; padding: 9px 8px; font-size: 13px;
+  text-align: center; vertical-align: middle; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
 
-/* Starter cells - brighter green, white text */
-.rotation-table td.cell-starter { background: #3cc43c; font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff !important; }
-.rotation-table td.cell-starter .pos-tag { color: #fff !important; font-weight: 700; }
-.rotation-table td.cell-starter-empty { background: #fff; }
+/* Header row — charcoal band */
+.rotation-table thead th { background: #1c1c1c; color: #cfcfcf; font-weight: 700; font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 11px 6px; }
+.rotation-table thead th.col-pos { text-align: left; padding-left: 14px; }
+.rotation-table thead th.col-start { color: #6fce7d; }
+.rotation-table thead th.col-interchange { color: #f08a82; }
+.rotation-table thead th.col-1st-rot { color: #8fcdf0; }
+.rotation-table thead th.col-rotation { color: #cfcfcf; }
+.rotation-table thead th.col-timing { color: #f0d36a; }
+.rotation-table thead th:first-child { border-top-left-radius: 6px; }
+.rotation-table thead th:last-child { border-top-right-radius: 6px; }
 
-/* Interchange cells - ALL bright red with white text */
-.rotation-table td.cell-interchange { font-weight: 700; font-size: 13px; background: #e60000; color: #fff !important; }
-.rotation-table td.cell-interchange * { color: #fff !important; }
+/* Data rows — hairline separators + zebra */
+.rotation-table tr.data-row td { border-bottom: 1px solid #eef0f1; }
+.rotation-table tr.data-row.zebra td { background: #fafbfc; }
 
-/* 1st rotation cell */
-.rotation-table td.cell-1st-rot { background: #1f3864; color: #fff !important; font-weight: 700; font-size: 15px; }
+/* POS cell — gold left accent bar + dark label */
+.rotation-table td.cell-pos { text-align: left; font-weight: 800; font-size: 13px; color: #15171a;
+  padding-left: 14px; border-left: 3px solid #D4AF37; letter-spacing: 0.3px; }
 
-/* Rotation description - allow wrapping for long rotation text */
-.rotation-table td.cell-rotation { font-size: 12px; text-align: center; background: #fff; white-space: normal; word-wrap: break-word; }
+/* Starter cells — refined: white cell, green dot + bold dark name, gold tag */
+.rotation-table td.cell-starter { font-weight: 700; font-size: 13px; color: #15171a; }
+.rotation-table td.cell-starter .starter-name { display: inline-flex; align-items: center; gap: 6px; }
+.rotation-table td.cell-starter .starter-name::before { content: ''; width: 6px; height: 6px;
+  border-radius: 50%; background: #2a9d3a; flex-shrink: 0; }
+.rotation-table td.cell-starter .pos-tag { display: inline-block; margin-left: 5px;
+  font-size: 10px; font-weight: 800; color: #b8952e; letter-spacing: 0.5px; }
+.rotation-table td.cell-starter-empty { color: #d4d4d4; }
 
-/* Timing */
-.rotation-table td.cell-timing { font-weight: 700; font-size: 12px; background: #fff; }
+/* Interchange — refined red pill */
+.rotation-table td.cell-interchange { font-size: 13px; }
+.rotation-table td.cell-interchange .inter-pill { display: inline-block; padding: 4px 12px;
+  background: #fdeceb; color: #c5271c; border: 1px solid #f3b6b1; border-radius: 100px;
+  font-weight: 700; font-size: 12px; letter-spacing: 0.3px; }
+
+/* 1st rotation — charcoal minute chip */
+.rotation-table td.cell-1st-rot { font-weight: 800; font-size: 14px; color: #1c1c1c; }
+.rotation-table td.cell-1st-rot .min-chip { display: inline-block; min-width: 26px; padding: 3px 8px;
+  background: #f1f2f3; border-radius: 5px; font-variant-numeric: tabular-nums; }
+
+/* Rotation description */
+.rotation-table td.cell-rotation { font-size: 11.5px; font-weight: 600; color: #45494e;
+  text-align: center; white-space: normal; word-wrap: break-word; line-height: 1.4; }
+
+/* Timing — blue accent */
+.rotation-table td.cell-timing { font-weight: 700; font-size: 12px; color: #1f6f9c; }
 
 /* GK row */
-.rotation-table td.cell-gk-start { background: #9bc2e6; font-weight: 700; font-size: 14px; text-align: center; }
+.rotation-table tr.gk-row td { border-bottom: none; }
+.rotation-table td.cell-gk-start { font-weight: 700; font-size: 13px; text-align: left;
+  padding-left: 14px; color: #15171a; }
+.rotation-table td.cell-gk-start .starter-name::before { content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%; background: #2a9d3a; margin-right: 6px; }
 
 /* Position notes row */
-.rotation-table tr.pos-notes-row td { border: none; background: #1f3864; }
-.rotation-table tr.pos-notes-row .notes-text { font-size: 11px; font-weight: 600; color: #ff66ff !important; text-align: center; }
+.rotation-table tr.pos-notes-row td { border-bottom: 1px solid #eef0f1; padding: 0 0 9px; }
+.rotation-table tr.pos-notes-row .notes-text { display: inline-block; font-size: 10.5px;
+  font-weight: 600; color: #8a6d1a; text-align: left; letter-spacing: 0.2px; }
+.rotation-table tr.pos-notes-row .notes-text::before { content: 'NOTE'; display: inline-block;
+  margin-right: 8px; font-size: 8.5px; letter-spacing: 1.5px; font-weight: 800; color: #c2a23e; }
 
-/* Quarter label */
-.quarter-label { text-align: center; font-size: 24px; font-weight: 900; padding: 12px 0; color: #ffd700 !important; background: #1f3864; }
+/* FOOTER */
+.doc-footer { display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 30px; background: #1c1c1c; margin-top: 14px; }
+.doc-footer .ft-left { font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  font-weight: 700; color: #d8d8d8; }
+.doc-footer .ft-left .ft-accent { color: #D4AF37; }
+.doc-footer .ft-right { font-size: 9.5px; letter-spacing: 0.8px; color: #8c8c8c; font-weight: 500; }
 
 /* PREVIEW CONTROLS */
 .preview-controls { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
@@ -156,7 +220,7 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 /* MODAL */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 100; justify-content: center; align-items: center; }
 .modal-overlay.active { display: flex; }
-.modal { background: #16213e; border: 1px solid #334; border-radius: 8px; padding: 24px; min-width: 400px; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+.modal { background: #262626; border: 1px solid #3c3c3c; border-radius: 8px; padding: 24px; min-width: 400px; max-width: 600px; max-height: 80vh; overflow-y: auto; }
 .modal h3 { margin-bottom: 16px; }
 .modal .form-group { margin-bottom: 12px; }
 .modal .form-group input, .modal .form-group select { width: 100%; }
@@ -164,10 +228,10 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 
 /* CHECKBOX GRID */
 .player-checkbox-grid { display: flex; flex-direction: column; gap: 0; margin: 12px 0; }
-.player-checkbox-grid label { display: flex; align-items: center; gap: 0; font-size: 15px; font-weight: 600; padding: 8px 12px; background: #0d1b2a; cursor: pointer; border-bottom: 1px solid #1a2a4a; }
-.player-checkbox-grid label:hover { background: #1a2a4a; }
-.player-checkbox-grid label .player-num { width: 36px; font-size: 14px; color: #889; font-weight: 400; flex-shrink: 0; }
-.player-checkbox-grid label input[type="checkbox"] { cursor: pointer; width: 20px; height: 20px; margin-right: 14px; flex-shrink: 0; accent-color: #e94560; }
+.player-checkbox-grid label { display: flex; align-items: center; gap: 0; font-size: 15px; font-weight: 600; padding: 8px 12px; background: #161616; cursor: pointer; border-bottom: 1px solid #2f2f2f; }
+.player-checkbox-grid label:hover { background: #2f2f2f; }
+.player-checkbox-grid label .player-num { width: 36px; font-size: 14px; color: #8c8c8c; font-weight: 400; flex-shrink: 0; }
+.player-checkbox-grid label input[type="checkbox"] { cursor: pointer; width: 20px; height: 20px; margin-right: 14px; flex-shrink: 0; accent-color: #D4AF37; }
 .player-checkbox-grid label .player-label { flex: 1; }
 
 /* PRINT */
@@ -175,10 +239,12 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
   body { background: #fff; }
   nav, .view:not(#view-preview), .preview-controls, .no-print { display: none !important; }
   #view-preview { display: block !important; padding: 0; }
-  .sub-sheet-output { page-break-after: always; margin-bottom: 0; }
+  .sub-sheet-output { page-break-after: always; margin: 0; max-width: none; width: 100%;
+    border: none; border-radius: 0; box-shadow: none; }
   .sub-sheet-output:last-child { page-break-after: avoid; }
+  .rotation-table thead th:first-child, .rotation-table thead th:last-child { border-radius: 0; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  @page { size: landscape; margin: 10mm; }
+  @page { size: A4 landscape; margin: 8mm; }
 }
 
 /* SCROLLABLE */
@@ -237,7 +303,8 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
     <select id="preview-sheet-select" onchange="renderPreview()">
       <option value="">All sheets</option>
     </select>
-    <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-primary" onclick="shareImage()">📷 Share Image</button>
+    <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
   </div>
   <div id="preview-output"></div>
 </div>
@@ -339,6 +406,27 @@ const DEFAULT_PRESETS = [
     ]
   },
   {
+    id: 'p8', name: '3 DEF - 2 DEEP MF - 2 HIGH MF - 3 STR',
+    groups: [
+      { posLabel: 'RS / CS', section: 'STR', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'LS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'AM1', section: 'MF', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'AM2', section: 'MF', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'DM1 / DM2', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'CB / LH / RH', section: 'DEF', starterCount: 3, rotationType: '4-player-cycle' },
+    ]
+  },
+  {
+    id: 'p9', name: '3 DEF - 2 DEEP MF - 2 HIGH MF - 3 STR (LOSE A PLAYER)',
+    groups: [
+      { posLabel: 'RS / CS', section: 'STR', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'LS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
+      { posLabel: 'AM1 / AM2', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'DM1 / DM2', section: 'MF', starterCount: 2, rotationType: '3-player-cycle' },
+      { posLabel: 'CB / LH / RH', section: 'DEF', starterCount: 3, rotationType: '4-player-cycle' },
+    ]
+  },
+  {
     id: 'p6', name: '5 DEF - 5 MF - 5 STR (LOSE A PLAYER)',
     groups: [
       { posLabel: 'RS', section: 'STR', starterCount: 1, rotationType: '1-for-1' },
@@ -382,9 +470,9 @@ function loadState() {
       const data = JSON.parse(raw);
       state.squad = data.squad || [];
       const savedPresets = data.formationPresets || [];
-      const savedIds = new Set(savedPresets.map(p => p.id));
-      const newPresets = DEFAULT_PRESETS.filter(p => !savedIds.has(p.id));
-      state.formationPresets = [...savedPresets, ...newPresets];
+      const defaultIds = new Set(DEFAULT_PRESETS.map(p => p.id));
+      const customPresets = savedPresets.filter(p => !defaultIds.has(p.id));
+      state.formationPresets = [...DEFAULT_PRESETS, ...customPresets];
       state.games = data.games || [];
       if (data.ui) state.ui = { ...state.ui, ...data.ui };
     } catch(e) { console.error('Failed to load state', e); }
@@ -431,7 +519,7 @@ function renderRoster() {
   const tbody = document.getElementById('roster-body');
   tbody.innerHTML = state.squad.map((p, i) => `
     <tr>
-      <td style="width:40px; color:#889;">${i+1}</td>
+      <td style="width:40px; color:#8c8c8c;">${i+1}</td>
       <td><input type="text" value="${p.name}" onchange="updatePlayer(${p.id},'name',this.value.toUpperCase())" style="font-weight:700;"></td>
       <td><select onchange="updatePlayer(${p.id},'primaryPos',this.value)">${POSITIONS.map(pos => `<option value="${pos}" ${p.primaryPos===pos?'selected':''}>${pos}</option>`).join('')}</select></td>
       <td><select onchange="updatePlayer(${p.id},'altPos',this.value)"><option value="">-</option>${POSITIONS.map(pos => `<option value="${pos}" ${p.altPos===pos?'selected':''}>${pos}</option>`).join('')}</select></td>
@@ -485,7 +573,7 @@ function renderGames() {
       <h4>${g.name}</h4>
       <small>${g.date || ''} · ${g.subSheets.length} sub sheet${g.subSheets.length !== 1 ? 's' : ''}</small>
     </div>
-  `).join('') || '<p style="color:#889;font-size:13px;">No games yet. Create one to get started.</p>';
+  `).join('') || '<p style="color:#8c8c8c;font-size:13px;">No games yet. Create one to get started.</p>';
   renderGameDetail();
 }
 
@@ -498,10 +586,10 @@ function selectGame(id) {
 function renderGameDetail() {
   const detail = document.getElementById('game-detail');
   const game = state.games.find(g => g.id === state.ui.currentGameId);
-  if (!game) { detail.innerHTML = '<p style="color:#889;">Select a game to manage sub sheets.</p>'; return; }
+  if (!game) { detail.innerHTML = '<p style="color:#8c8c8c;">Select a game to manage sub sheets.</p>'; return; }
 
   let html = `<h3>${game.name}</h3>
-    <p style="color:#889;font-size:13px;margin-bottom:12px;">${game.date || 'No date'} · GK: ${game.gk1} / ${game.gk2}</p>
+    <p style="color:#8c8c8c;font-size:13px;margin-bottom:12px;">${game.date || 'No date'} · GK: ${game.gk1} / ${game.gk2}</p>
     <div class="toolbar">
       <button class="btn btn-primary btn-sm" onclick="addSubSheet('${game.id}')">+ Add Sub Sheet</button>
       <button class="btn btn-danger btn-sm" onclick="deleteGame('${game.id}')">Delete Game</button>
@@ -613,9 +701,9 @@ function editSheet(gameId, sheetId) {
 function renderBuilder() {
   const container = document.getElementById('builder-content');
   const game = state.games.find(g => g.id === state.ui.currentGameId);
-  if (!game) { container.innerHTML = '<p style="color:#889;">Select a game and sub sheet from Game Manager first.</p>'; return; }
+  if (!game) { container.innerHTML = '<p style="color:#8c8c8c;">Select a game and sub sheet from Game Manager first.</p>'; return; }
   const sheet = game.subSheets.find(s => s.id === state.ui.currentSheetId);
-  if (!sheet) { container.innerHTML = '<p style="color:#889;">Select a sub sheet to edit.</p>'; return; }
+  if (!sheet) { container.innerHTML = '<p style="color:#8c8c8c;">Select a sub sheet to edit.</p>'; return; }
 
   const availablePlayers = state.squad.filter(p => game.selectedSquad.includes(p.id) && p.primaryPos !== 'GK');
   const assignedIds = new Set();
@@ -627,7 +715,7 @@ function renderBuilder() {
   let html = `
     <div class="toolbar">
       <button class="btn btn-secondary btn-sm" onclick="switchView('games')">← Back to Game</button>
-      <span style="color:#889;font-size:13px;">${game.name} → ${sheet.quarterLabel}</span>
+      <span style="color:#8c8c8c;font-size:13px;">${game.name} → ${sheet.quarterLabel}</span>
     </div>
     <div class="builder-layout">
       <div class="builder-main">
@@ -710,13 +798,13 @@ function renderGroupPanel(group, gi, availablePlayers, sheet) {
       <select onchange="changeRotationType(${gi},this.value)">
         ${rotTypes.map(rt => `<option value="${rt}" ${group.rotationType===rt?'selected':''}>${rt}</option>`).join('')}
       </select>
-      <span style="color:#889;font-size:11px;">1st Rot:</span>
+      <span style="color:#8c8c8c;font-size:11px;">1st Rot:</span>
       <input type="number" value="${group.firstRotationMin || ''}" onchange="updateGroup(${gi},'firstRotationMin',parseInt(this.value)||0)" min="0" max="15" style="width:50px;">
-      <span style="color:#889;font-size:11px;">Timing:</span>
+      <span style="color:#8c8c8c;font-size:11px;">Timing:</span>
       <input type="text" value="${group.timing || ''}" onchange="updateGroup(${gi},'timing',this.value)" placeholder="e.g. 4 on 4 off" style="width:130px;">
     </div>
     <div class="players-row">
-      <span style="color:#4c4;font-size:11px;width:60px;">STARTERS:</span>`;
+      <span style="color:#2a9d3a;font-size:11px;width:60px;">STARTERS:</span>`;
 
   for (let si = 0; si < starters.length; si++) {
     const s = starters[si];
@@ -726,12 +814,12 @@ function renderGroupPanel(group, gi, availablePlayers, sheet) {
   }
 
   html += `</div><div class="players-row">
-    <span style="color:#f84;font-size:11px;width:60px;">INTER:</span>`;
+    <span style="color:#f4a259;font-size:11px;width:60px;">INTER:</span>`;
   const intExcl = allThisGroup.filter(id => id !== thisInterchange);
   html += `<select onchange="updateInterchange(${gi},parseInt(this.value)||0)">${playerOptions(thisInterchange, intExcl)}</select>`;
   html += `</div>
     <div class="config-row">
-      <span style="color:#889;font-size:11px;">Notes:</span>
+      <span style="color:#8c8c8c;font-size:11px;">Notes:</span>
       <input type="text" value="${group.positionNotes || ''}" onchange="updateGroup(${gi},'positionNotes',this.value)" placeholder="Position notes..." style="width:300px;">
     </div>
     <div class="rotation-desc">${generateRotationDesc(group)}</div>
@@ -829,7 +917,7 @@ function generateRotationDesc(group) {
 
   const starters = group.starters.filter(s => s.playerId);
   const inter = group.interchange.playerId;
-  if (starters.length === 0 || !inter) return '<span style="color:#666;">Assign players to generate rotation</span>';
+  if (starters.length === 0 || !inter) return '<span style="color:#8c8c8c;">Assign players to generate rotation</span>';
 
   const intName = getPlayerName(inter);
 
@@ -864,7 +952,7 @@ function renderPreview() {
   const output = document.getElementById('preview-output');
   const sheetSel = document.getElementById('preview-sheet-select');
 
-  if (!game) { output.innerHTML = '<p style="color:#889;">Select a game to preview.</p>'; return; }
+  if (!game) { output.innerHTML = '<p style="color:#8c8c8c;">Select a game to preview.</p>'; return; }
 
   sheetSel.innerHTML = '<option value="">All sheets</option>' +
     game.subSheets.map(s => `<option value="${s.id}">${s.quarterLabel} - ${s.formationName || 'No formation'}</option>`).join('');
@@ -880,6 +968,24 @@ function renderPreview() {
   output.innerHTML = sheets.map(s => renderSubSheetOutput(s, game)).join('');
   // Equalize row heights within each sheet
   requestAnimationFrame(() => equalizeRowHeights());
+}
+
+function ensureHtml2Canvas(cb) {
+  if (window.html2canvas) return cb();
+  const sc = document.createElement('script');
+  sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  sc.onload = () => cb();
+  sc.onerror = () => alert('Could not load the image tool — it needs an internet connection. Use Print instead.');
+  document.head.appendChild(sc);
+}
+function shareImage() {
+  const node = document.querySelector('#preview-output');
+  if (!node) { alert('Build the rotation first.'); return; }
+  ensureHtml2Canvas(() => {
+    html2canvas(node, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      .then(canvas => { const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = 'rotation-sheet.png'; a.click(); })
+      .catch(e => alert('Image export failed: ' + e.message));
+  });
 }
 
 function equalizeRowHeights() {
@@ -899,6 +1005,14 @@ function equalizeRowHeights() {
   });
 }
 
+function fmtNZDate(dateStr) {
+  try {
+    const d = dateStr ? new Date(dateStr + 'T00:00:00') : new Date();
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-NZ', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch (e) { return ''; }
+}
+
 function renderSubSheetOutput(sheet, game) {
   const getPlayerName = (id) => {
     const p = state.squad.find(p => p.id === id);
@@ -906,48 +1020,71 @@ function renderSubSheetOutput(sheet, game) {
   };
 
   const maxStarters = 4; // Always 4 columns for starters
+  const colSpanAll = maxStarters + 5;
+  const sectionLabels = { STR: 'STRIKERS', MF: 'MIDFIELD', DEF: 'DEFENDERS' };
+
+  // Derive masthead / meta context
+  const matchTitle = game.name || 'ROTATION SHEET';
+  const dateLabel = fmtNZDate(game.date);
+  const formation = sheet.formationName || 'NO FORMATION';
+  const gkPair = `${game.gk1 || 'DIXON'} / ${game.gk2 || 'RUETSCH'}`;
 
   let html = `<div class="sub-sheet-output">
-    <div class="sheet-header">
-      <span class="formation-name">${sheet.formationName || 'NO FORMATION'}</span>
-      <span class="take-off-note">TAKE THE SAME PERSON OFF EACH TIME</span>
+    <div class="doc-masthead">
+      <div class="mh-left">
+        <span class="mh-kicker">Rotation Sheet</span>
+        <span class="mh-title">${matchTitle}</span>
+      </div>
+      <div class="mh-right">
+        <div class="mh-item"><span class="mh-eyebrow">Quarter</span><span class="mh-value">${sheet.quarterLabel || '—'}</span></div>
+        <div class="mh-item"><span class="mh-eyebrow">Date</span><span class="mh-value">${dateLabel || '—'}</span></div>
+        <div class="mh-item"><span class="mh-eyebrow">Formation</span><span class="mh-value">${formation}</span></div>
+      </div>
     </div>
+
+    <div class="doc-meta">
+      <div class="meta-cell"><span class="meta-label">Formation</span><span class="meta-value">${formation}</span></div>
+      <div class="meta-cell"><span class="meta-label">Goalkeepers</span><span class="meta-value">${gkPair}</span></div>
+      <div class="meta-cell"><span class="meta-label">Quarter</span><span class="meta-value">${sheet.quarterLabel || '—'}</span></div>
+      <div class="meta-cell"><span class="meta-label">Key Rule</span><span class="meta-value">Take the same person off each time</span></div>
+    </div>
+
+    <div class="doc-tablewrap">
     <table class="rotation-table">
       <colgroup>
+        <col style="width:90px;">
+        <col style="width:128px;">
+        <col style="width:128px;">
+        <col style="width:128px;">
+        <col style="width:128px;">
+        <col style="width:120px;">
         <col style="width:80px;">
-        <col style="width:130px;">
-        <col style="width:130px;">
-        <col style="width:130px;">
-        <col style="width:130px;">
-        <col style="width:110px;">
-        <col style="width:70px;">
         <col>
         <col style="width:120px;">
       </colgroup>
       <thead><tr>
         <th class="col-pos">POS</th>
-        <th class="col-start" colspan="${maxStarters}">START</th>
-        <th class="col-interchange">INTERCHANGE</th>
-        <th class="col-1st-rot">1st ROTATION</th>
-        <th class="col-rotation">ROTATION</th>
-        <th class="col-timing">TIMING</th>
+        <th class="col-start" colspan="${maxStarters}">Start</th>
+        <th class="col-interchange">Interchange</th>
+        <th class="col-1st-rot">1st Rot</th>
+        <th class="col-rotation">Rotation</th>
+        <th class="col-timing">Timing</th>
       </tr></thead>
       <tbody>`;
 
   let lastSection = '';
 
   sheet.groups.forEach((group, gi) => {
-    // Section spacer
-    if (group.section !== lastSection && lastSection !== '') {
-      html += `<tr class="section-spacer"><td colspan="${maxStarters + 5}"></td></tr>`;
+    // Section header row
+    if (group.section !== lastSection) {
+      html += `<tr class="section-head"><td colspan="${colSpanAll}"><span class="sec-label">${sectionLabels[group.section] || group.section}</span></td></tr>`;
+      lastSection = group.section;
     }
-    lastSection = group.section;
 
-    // Spacer before each row
-    html += `<tr class="spacer"><td colspan="${maxStarters + 5}"></td></tr>`;
+    const zebra = gi % 2 === 1 ? ' zebra' : '';
 
     // Main row
-    html += `<tr class="data-row">`;
+    html += `<tr class="data-row${zebra}">`;
     html += `<td class="cell-pos">${group.posLabel}</td>`;
 
     // Starter cells
@@ -955,19 +1092,19 @@ function renderSubSheetOutput(sheet, game) {
     for (let i = 0; i < maxStarters; i++) {
       if (i < starters.length && starters[i].playerId) {
         const name = getPlayerName(starters[i].playerId);
-        const tag = starters[i].posTag ? ` <span class="pos-tag">${starters[i].posTag}</span>` : '';
-        html += `<td class="cell-starter">${name}${tag}</td>`;
+        const tag = starters[i].posTag ? `<span class="pos-tag">${starters[i].posTag}</span>` : '';
+        html += `<td class="cell-starter"><span class="starter-name">${name}</span>${tag}</td>`;
       } else {
-        html += `<td class="cell-starter-empty"></td>`;
+        html += `<td class="cell-starter-empty">—</td>`;
       }
     }
 
     // Interchange
     const interName = group.interchange?.playerId ? getPlayerName(group.interchange.playerId) : '';
-    html += `<td class="cell-interchange section-${group.section.toLowerCase()}">${interName}</td>`;
+    html += `<td class="cell-interchange">${interName ? `<span class="inter-pill">${interName}</span>` : ''}</td>`;
 
     // 1st rotation
-    html += `<td class="cell-1st-rot">${group.firstRotationMin || ''}</td>`;
+    html += `<td class="cell-1st-rot">${group.firstRotationMin ? `<span class="min-chip">${group.firstRotationMin}'</span>` : ''}</td>`;
 
     // Rotation description
     html += `<td class="cell-rotation">${generateRotationDesc(group)}</td>`;
@@ -978,7 +1115,7 @@ function renderSubSheetOutput(sheet, game) {
 
     // Position notes row
     if (group.positionNotes) {
-      html += `<tr class="pos-notes-row">
+      html += `<tr class="pos-notes-row${zebra}">
         <td></td>
         <td colspan="${maxStarters + 4}" class="notes-text">${group.positionNotes}</td>
       </tr>`;
@@ -986,20 +1123,26 @@ function renderSubSheetOutput(sheet, game) {
   });
 
   // GK section
-  html += `<tr class="section-spacer"><td colspan="${maxStarters + 5}"></td></tr>`;
-  html += `<tr class="spacer"><td colspan="${maxStarters + 5}"></td></tr>`;
-  html += `<tr class="data-row">
+  const gkName = `${game.gk1 || 'DIXON'} or ${game.gk2 || 'RUETSCH'}`;
+  html += `<tr class="section-head"><td colspan="${colSpanAll}"><span class="sec-label">Goalkeeper</span></td></tr>`;
+  html += `<tr class="data-row gk-row">
     <td class="cell-pos">GK</td>
-    <td class="cell-gk-start" colspan="${maxStarters}">${game.gk1 || 'DIXON'} or ${game.gk2 || 'RUETSCH'}</td>
-    <td style="background:#9bc2e6; border: 1.5px solid #000;"></td>
-    <td class="cell-1st-rot">15</td>
-    <td class="cell-rotation">${game.gk1 || 'DIXON'} or ${game.gk2 || 'RUETSCH'} Full 1/4</td>
+    <td class="cell-gk-start" colspan="${maxStarters}"><span class="starter-name">${gkName}</span></td>
+    <td class="cell-interchange"></td>
+    <td class="cell-1st-rot"><span class="min-chip">15'</span></td>
+    <td class="cell-rotation">${gkName} — full quarter</td>
     <td class="cell-timing">15 on</td>
   </tr>`;
 
-  html += `<tr class="spacer"><td colspan="${maxStarters + 5}"></td></tr>`;
   html += `</tbody></table>`;
-  html += `<div class="quarter-label">${sheet.quarterLabel}</div>`;
+  html += `</div>`;
+
+  // FOOTER
+  const teamName = game.teamName || 'Performance Programme';
+  html += `<div class="doc-footer">
+    <div class="ft-left">${teamName} <span class="ft-accent">· Rotation Sheet</span></div>
+    <div class="ft-right">Generated ${fmtNZDate()} · Private &amp; Confidential</div>
+  </div>`;
   html += `</div>`;
   return html;
 }
@@ -1010,8 +1153,6 @@ function renderSubSheetOutput(sheet, game) {
 loadState();
 renderRoster();
 if (state.ui.currentView) switchView(state.ui.currentView);
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>

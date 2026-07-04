@@ -1,0 +1,17 @@
+{
+  "name": "Hockey Tools",
+  "short_name": "Hockey",
+  "description": "Squad Selection & Session Timer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#d4a843",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111'/><text x='50' y='62' font-size='50' text-anchor='middle' fill='%23d4a843' font-family='sans-serif' font-weight='900'>H</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
