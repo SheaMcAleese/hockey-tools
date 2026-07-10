@@ -4,105 +4,152 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#d4a843">
+<meta name="theme-color" content="#0a0a0d">
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>Opposition Scout | HNZ</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', -apple-system, Arial, sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; }
+
+/* ============================================
+   PALETTE — black & gold chrome, per-team accent
+   ============================================ */
+:root {
+  --bg: #0a0a0d;
+  --surface: #131318;
+  --surface-2: #1a1a21;
+  --surface-3: #22222c;
+  --border: #2a2a34;
+  --border-lite: #34343f;
+  --gold: #d8b24a;
+  --gold-bright: #ecc767;
+  --gold-dim: #9a8038;
+  --text: #f5f5f7;
+  --text-2: #c6c6cf;
+  --muted: #8b8b98;
+  --faint: #5b5b67;
+  --danger: #e0574a;
+  --green: #55b25b;
+  /* country accent — reassigned per team by applyTeamTheme() */
+  --accent: #d8b24a;
+  --accent-ink: #0a0a0d;
+  --accent-soft: rgba(216,178,74,.13);
+  --radius: 12px;
+  --shadow: 0 6px 24px rgba(0,0,0,.45);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--accent); color: var(--accent-ink); }
 
 /* ============================================
    NAV
    ============================================ */
-nav { background: #16213e; display: flex; align-items: center; padding: 0 20px; border-bottom: 2px solid #0f3460; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
-nav .logo { font-weight: 900; font-size: 18px; padding: 14px 0; margin-right: 30px; color: #d4a843; letter-spacing: 1px; }
-nav button { background: none; border: none; color: #8899aa; font-size: 14px; padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
-nav button:hover { color: #fff; }
-nav button.active { color: #fff; border-bottom-color: #d4a843; }
+nav { position: sticky; top: 0; z-index: 500; background: rgba(12,12,16,.86); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; padding: 0 22px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+nav .inner { display: flex; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+nav .logo { font-weight: 900; font-size: 16px; padding: 15px 0; margin-right: 26px; color: var(--gold); letter-spacing: 2px; display: flex; align-items: center; gap: 9px; }
+nav .logo::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); transition: background .35s, box-shadow .35s; }
+nav button { background: none; border: none; color: var(--muted); font-size: 13.5px; font-weight: 600; padding: 15px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .18s, border-color .18s; }
+nav button:hover { color: var(--text); }
+nav button.active { color: var(--text); border-bottom-color: var(--accent); }
 
-.view { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
-.view.active { display: block; }
+.view { display: none; padding: 26px 24px 60px; max-width: 1200px; margin: 0 auto; }
+.view.active { display: block; animation: viewfade .35s ease; }
+@keyframes viewfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-h2 { font-size: 22px; margin-bottom: 16px; color: #d4a843; }
-.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .2s; }
-.btn-primary { background: #d4a843; color: #000; }
-.btn-primary:hover { background: #e6bc5a; }
-.btn-secondary { background: #0f3460; color: #fff; }
-.btn-secondary:hover { background: #1a4a8a; }
-.btn-danger { background: #722; color: #fff; }
-.btn-danger:hover { background: #933; }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
-input, select, textarea { padding: 6px 10px; border: 1px solid #334; border-radius: 4px; background: #0d1b2a; color: #fff; font-size: 13px; font-family: inherit; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: #d4a843; }
+h2 { font-size: 22px; margin-bottom: 16px; color: var(--text); letter-spacing: .3px; }
+.btn { padding: 9px 17px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; letter-spacing: .3px; transition: transform .12s, background .18s, box-shadow .18s; }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #1a1405; box-shadow: 0 2px 10px rgba(216,178,74,.25); }
+.btn-primary:hover { box-shadow: 0 4px 16px rgba(216,178,74,.4); }
+.btn-secondary { background: var(--surface-3); color: var(--text); border: 1px solid var(--border-lite); }
+.btn-secondary:hover { background: #2c2c37; }
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid rgba(224,87,74,.4); }
+.btn-danger:hover { background: rgba(224,87,74,.14); }
+.btn-sm { padding: 6px 11px; font-size: 12px; border-radius: 7px; }
+input, select, textarea { padding: 8px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit; transition: border-color .18s, box-shadow .18s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 textarea { resize: vertical; min-height: 100px; width: 100%; }
-label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
-.toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; letter-spacing: .3px; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+
+/* ============================================
+   TEAM HERO — shows the current opponent
+   ============================================ */
+.team-hero { display: flex; align-items: center; gap: 18px; padding: 20px 22px; margin-bottom: 18px; border-radius: var(--radius); background:
+     linear-gradient(120deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%), var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); box-shadow: var(--shadow); transition: border-color .35s; }
+.team-hero-flag { font-size: 46px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+.team-hero-main { flex: 1; min-width: 0; }
+.team-hero-name { font-size: 27px; font-weight: 900; letter-spacing: .5px; color: var(--text); line-height: 1.05; }
+.team-hero-sub { font-size: 12.5px; color: var(--muted); margin-top: 5px; letter-spacing: .4px; text-transform: uppercase; }
+.team-hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 800; letter-spacing: 1px; }
 
 /* ============================================
    TEAM SELECTOR TABS
    ============================================ */
-.team-tabs { display: flex; gap: 0; margin-bottom: 20px; background: #0d1b2a; border-radius: 6px; overflow: hidden; border: 1px solid #334; }
-.team-tab { flex: 1; padding: 12px 0; text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #667; transition: all .2s; letter-spacing: 1px; text-transform: uppercase; }
-.team-tab:hover { color: #aaa; background: #16213e; }
-.team-tab.active { background: #d4a843; color: #000; }
-.team-tab + .team-tab { border-left: 1px solid #334; }
+.team-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.team-tab { flex: 1; min-width: 120px; padding: 12px 14px; text-align: center; font-size: 13.5px; font-weight: 800; cursor: pointer; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--muted); transition: all .2s; letter-spacing: .5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.team-tab .flag { font-size: 18px; }
+.team-tab:hover { color: var(--text); border-color: var(--border-lite); background: var(--surface-2); }
+.team-tab.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 40%, transparent); }
 
 /* ============================================
    PDF-STYLE SCOUTING PANELS
    ============================================ */
-.page-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #2a2a2a; border-bottom: 2px solid #555; margin-bottom: 24px; border-radius: 4px 4px 0 0; }
-.page-bar-left { font-size: 13px; font-weight: 700; color: #ccc; letter-spacing: 1px; text-transform: uppercase; }
-.page-bar-right { font-size: 12px; color: #888; letter-spacing: 1px; }
+.page-bar { display: flex; justify-content: space-between; align-items: center; padding: 11px 16px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); margin-bottom: 22px; border-radius: 10px; transition: border-color .35s; }
+.page-bar-left { font-size: 12.5px; font-weight: 800; color: var(--text-2); letter-spacing: 1px; text-transform: uppercase; }
+.page-bar-right { font-size: 11.5px; color: var(--muted); letter-spacing: 1px; }
 
-.doc-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 6px; }
-.doc-subtitle { font-size: 14px; color: #888; font-style: italic; margin-bottom: 24px; line-height: 1.5; }
+.doc-title { font-size: 26px; font-weight: 900; color: var(--text); margin-bottom: 6px; letter-spacing: .3px; }
+.doc-title::after { content: ''; display: block; width: 46px; height: 3px; border-radius: 2px; background: var(--accent); margin-top: 10px; transition: background .35s; }
+.doc-subtitle { font-size: 13.5px; color: var(--muted); margin: 14px 0 22px; line-height: 1.6; }
 
-.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.info-box { background: #2a2a2a; border-radius: 4px; padding: 14px 16px; }
-.info-box-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #999; text-transform: uppercase; margin-bottom: 6px; }
-.info-box textarea, .info-box input { background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 600; width: 100%; resize: none; min-height: 40px; padding: 0; }
-.info-box textarea:focus, .info-box input:focus { outline: none; }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.info-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; transition: border-color .18s; }
+.info-box:focus-within { border-color: var(--accent); }
+.info-box-label { font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px; color: var(--gold); text-transform: uppercase; margin-bottom: 7px; }
+.info-box textarea, .info-box input { background: transparent; border: none; color: var(--text); font-size: 14px; font-weight: 600; width: 100%; resize: none; min-height: 40px; padding: 0; }
+.info-box textarea:focus, .info-box input:focus { outline: none; box-shadow: none; }
 
-.scout-panel { background: #2a2a2a; border-left: 3px solid #555; border-radius: 0 4px 4px 0; padding: 16px 20px; margin-bottom: 14px; }
-.scout-panel.accent-green { border-left-color: #4a8c3f; }
-.scout-panel.accent-red { border-left-color: #e74c3c; }
-.scout-panel.accent-gold { border-left-color: #d4a843; }
-.scout-panel-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #ccc; text-transform: uppercase; margin-bottom: 8px; }
-.scout-panel textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 60px; line-height: 1.7; font-style: italic; padding: 0; resize: none; }
-.scout-panel textarea:focus { outline: none; color: #fff; font-style: normal; }
-.scout-panel textarea::placeholder { color: #666; font-style: italic; }
+.scout-panel { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border-lite); border-radius: 10px; padding: 15px 20px; margin-bottom: 12px; transition: border-color .18s; }
+.scout-panel:focus-within { border-left-color: var(--accent); }
+.scout-panel.accent-green { border-left-color: var(--green); }
+.scout-panel.accent-red { border-left-color: var(--danger); }
+.scout-panel.accent-gold { border-left-color: var(--gold); }
+.scout-panel-label { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--text-2); text-transform: uppercase; margin-bottom: 8px; }
+.scout-panel textarea { background: transparent; border: none; color: var(--text-2); font-size: 13.5px; width: 100%; min-height: 60px; line-height: 1.7; padding: 0; resize: none; }
+.scout-panel textarea:focus { outline: none; box-shadow: none; color: var(--text); }
+.scout-panel textarea::placeholder { color: var(--faint); }
 
-.threat-card { display: flex; gap: 0; margin-bottom: 14px; border-radius: 4px; overflow: hidden; }
-.threat-num { background: #c0616b; color: #fff; font-size: 28px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 70px; padding: 20px 0; }
-.threat-body { background: #2a2a2a; flex: 1; padding: 16px 20px; }
-.threat-body input { background: transparent; border: none; color: #ccc; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 100%; margin-bottom: 6px; padding: 0; }
-.threat-body input:focus { outline: none; color: #fff; }
-.threat-body textarea { background: transparent; border: none; color: #bbb; font-size: 13px; width: 100%; min-height: 50px; line-height: 1.7; font-style: italic; padding: 0; resize: none; }
-.threat-body textarea:focus { outline: none; color: #fff; font-style: normal; }
+.threat-card { display: flex; gap: 0; margin-bottom: 12px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.threat-num { background: var(--accent); color: var(--accent-ink); font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 66px; padding: 20px 0; transition: background .35s; }
+.threat-body { background: var(--surface); flex: 1; padding: 15px 20px; }
+.threat-body input { background: transparent; border: none; color: var(--text); font-size: 13px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; width: 100%; margin-bottom: 6px; padding: 0; }
+.threat-body input:focus { outline: none; box-shadow: none; }
+.threat-body textarea { background: transparent; border: none; color: var(--text-2); font-size: 13.5px; width: 100%; min-height: 50px; line-height: 1.7; padding: 0; resize: none; }
+.threat-body textarea:focus { outline: none; box-shadow: none; color: var(--text); }
 
 .sv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 
-.log-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-.log-table th { background: #8faab8; color: #1a1a2e; padding: 10px 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-align: left; }
-.log-table td { padding: 8px 12px; background: #2a2a2a; border-bottom: 2px solid #1a1a2e; vertical-align: middle; }
-.log-table td input, .log-table td textarea { background: transparent; border: none; color: #ccc; font-size: 12px; width: 100%; padding: 0; resize: none; min-height: 36px; }
-.log-table td input:focus, .log-table td textarea:focus { outline: none; color: #fff; }
+.log-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.log-table th { background: var(--surface-3); color: var(--gold); padding: 11px 12px; font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; text-align: left; }
+.log-table td { padding: 9px 12px; background: var(--surface); border-top: 1px solid var(--border); vertical-align: middle; }
+.log-table td input, .log-table td textarea { background: transparent; border: none; color: var(--text-2); font-size: 12.5px; width: 100%; padding: 0; resize: none; min-height: 36px; }
+.log-table td input:focus, .log-table td textarea:focus { outline: none; box-shadow: none; color: var(--text); }
 
-.section-tabs { display: flex; gap: 0; margin-bottom: 20px; background: #1e1e1e; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
-.section-tab { flex: 1; padding: 10px 6px; text-align: center; font-size: 11px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #667; transition: all .2s; letter-spacing: .5px; text-transform: uppercase; }
-.section-tab:hover { color: #ccc; background: #2a2a2a; }
-.section-tab.active { background: #2a2a2a; color: #d4a843; border-bottom: 2px solid #d4a843; }
-.section-tab + .section-tab { border-left: 1px solid #333; }
+.section-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--surface); border-radius: 10px; padding: 4px; border: 1px solid var(--border); }
+.section-tab { flex: 1; padding: 9px 6px; text-align: center; font-size: 11px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: all .18s; letter-spacing: .3px; border-radius: 7px; }
+.section-tab:hover { color: var(--text); background: var(--surface-2); }
+.section-tab.active { background: var(--surface-3); color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
 .sec { display: none; }
 .sec.active { display: block; }
 
-.doc-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; margin-top: 24px; border-top: 1px solid #333; }
-.doc-footer .page-num { font-size: 11px; color: #555; }
-.doc-footer .brand { font-size: 11px; color: #555; letter-spacing: 2px; text-transform: uppercase; }
+.doc-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 4px 0; margin-top: 26px; border-top: 1px solid var(--border); }
+.doc-footer .page-num { font-size: 11px; color: var(--faint); }
+.doc-footer .brand { font-size: 11px; color: var(--faint); letter-spacing: 2px; text-transform: uppercase; }
 
-.section { background: #16213e; border: 1px solid #334; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
-.section h3 { color: #d4a843; margin-bottom: 12px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+.section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
+.section h3 { color: var(--gold); margin-bottom: 12px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
 
 /* ============================================
    EXPANDABLE TEXT
@@ -110,107 +157,146 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 .expandable-wrap { position: relative; }
 .expandable-wrap textarea { overflow: hidden; transition: max-height .3s ease; }
 .expandable-wrap.collapsed textarea { max-height: 5.6em; }
-.expandable-toggle { display: none; background: none; border: none; color: #d4a843; font-size: 11px; font-weight: 700; cursor: pointer; padding: 4px 0; letter-spacing: .5px; }
+.expandable-toggle { display: none; background: none; border: none; color: var(--gold); font-size: 11px; font-weight: 700; cursor: pointer; padding: 4px 0; letter-spacing: .5px; }
 .expandable-wrap.collapsed .expandable-toggle,
 .expandable-wrap.expanded .expandable-toggle { display: inline-block; }
 
 /* ============================================
    VIDEO BUTTON
    ============================================ */
-.video-link-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #d4a843; border: none; color: #000; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all .2s; letter-spacing: .5px; }
-.video-link-btn:hover { background: #e6bc5a; }
+.video-link-btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); border: none; color: #1a1405; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; text-decoration: none; transition: box-shadow .2s, transform .12s; letter-spacing: .5px; box-shadow: 0 2px 10px rgba(216,178,74,.25); }
+.video-link-btn:hover { box-shadow: 0 4px 16px rgba(216,178,74,.4); }
+.video-link-btn:active { transform: translateY(1px); }
 .video-link-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
 /* ============================================
    USER ID MODAL
    ============================================ */
-.user-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.user-modal { background: #16213e; border: 1px solid #334; border-radius: 8px; padding: 32px; max-width: 360px; width: 90%; }
-.user-modal h3 { color: #d4a843; margin-bottom: 16px; }
-.user-modal input { width: 100%; margin-bottom: 12px; padding: 10px; }
-.user-modal .btn { width: 100%; padding: 10px; }
+.user-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; animation: viewfade .25s ease; }
+.user-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 32px; max-width: 360px; width: 90%; box-shadow: var(--shadow); }
+.user-modal h3 { color: var(--text); margin-bottom: 16px; }
+.user-modal input { width: 100%; margin-bottom: 12px; padding: 11px; }
+.user-modal .btn { width: 100%; padding: 12px; }
 
 /* ============================================
    PLAYER SCOUTING CARDS
    ============================================ */
 .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
-.player-card { background: #2a2a2a; border-radius: 6px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; }
-.player-card-header { position: relative; background: #1e1e1e; display: flex; align-items: center; justify-content: center; min-height: 180px; cursor: pointer; }
+.player-card { background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; transition: border-color .18s, transform .18s, box-shadow .18s; }
+.player-card:hover { border-color: var(--border-lite); transform: translateY(-2px); box-shadow: var(--shadow); }
+.player-card-header { position: relative; background: var(--surface-2); display: flex; align-items: center; justify-content: center; min-height: 180px; cursor: pointer; border-bottom: 1px solid var(--border); }
 .player-card-header img { width: 100%; height: 180px; object-fit: cover; }
-.player-card-header .upload-placeholder { text-align: center; padding: 20px; color: #555; }
-.player-card-header .upload-placeholder svg { width: 48px; height: 48px; fill: #444; margin-bottom: 8px; }
+.player-card-header .upload-placeholder { text-align: center; padding: 20px; color: var(--faint); }
+.player-card-header .upload-placeholder svg { width: 46px; height: 46px; fill: var(--border-lite); margin-bottom: 8px; }
 .player-card-header .upload-placeholder div { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
 .player-card-body { padding: 14px 16px; flex: 1; }
-.player-card-body input { background: transparent; border: none; border-bottom: 1px solid #444; color: #fff; font-size: 14px; font-weight: 700; width: 100%; padding: 4px 0; margin-bottom: 8px; border-radius: 0; }
-.player-card-body input:focus { outline: none; border-bottom-color: #d4a843; }
+.player-card-body input { background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text); font-size: 14px; font-weight: 800; width: 100%; padding: 5px 0; margin-bottom: 8px; border-radius: 0; }
+.player-card-body input:focus { outline: none; box-shadow: none; border-bottom-color: var(--accent); }
 .player-card-body .player-meta { display: flex; gap: 8px; margin-bottom: 10px; }
-.player-card-body .player-meta input { font-size: 12px; font-weight: 600; color: #aaa; flex: 1; }
-.player-card-body label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #888; text-transform: uppercase; margin-bottom: 2px; margin-top: 6px; }
-.player-card-body textarea { background: transparent; border: 1px solid #333; color: #bbb; font-size: 12px; width: 100%; min-height: 50px; line-height: 1.6; padding: 6px 8px; border-radius: 3px; resize: vertical; }
-.player-card-body textarea:focus { outline: none; border-color: #d4a843; color: #fff; }
-.player-card-actions { display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid #333; }
-.player-posted-by { font-size: 9px; color: #556; padding: 4px 16px; }
+.player-card-body .player-meta input { font-size: 12px; font-weight: 600; color: var(--text-2); flex: 1; }
+.player-card-body label { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; margin-top: 8px; }
+.player-card-body textarea { background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); font-size: 12px; width: 100%; min-height: 50px; line-height: 1.6; padding: 7px 9px; border-radius: 7px; resize: vertical; }
+.player-card-body textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); color: var(--text); }
+.player-card-actions { display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid var(--border); }
+.player-posted-by { font-size: 9px; color: var(--faint); padding: 6px 16px; letter-spacing: .5px; }
 
 /* ============================================
    LINKIFIED URLS
    ============================================ */
-.linkify-links { padding: 2px 0 0; }
-.linkify-links a { display: inline-block; font-size: 11px; color: #3498db; text-decoration: none; margin-right: 10px; word-break: break-all; }
-.linkify-links a:hover { text-decoration: underline; color: #5dade2; }
-.video-placeholder { font-size: 11px; color: #556; font-style: italic; margin-top: 4px; }
+.linkify-links { padding: 4px 0 0; }
+.linkify-links a { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--accent); text-decoration: none; margin-right: 10px; word-break: break-all; }
+.linkify-links a::before { content: '\1F517'; font-size: 9px; opacity: .7; }
+.linkify-links a:hover { text-decoration: underline; }
+.video-placeholder { font-size: 11px; color: var(--faint); font-style: italic; margin-top: 4px; }
 
 /* ============================================
    AUTH LOGIN SCREEN
    ============================================ */
-.auth-screen { position: fixed; inset: 0; background: #1a1a2e; display: flex; align-items: center; justify-content: center; z-index: 10000; }
-.auth-card { background: #16213e; border: 1px solid #334; border-radius: 8px; padding: 40px; max-width: 400px; width: 90%; text-align: center; }
-.auth-card h2 { color: #d4a843; margin-bottom: 8px; font-size: 24px; letter-spacing: 2px; }
-.auth-card .auth-subtitle { color: #889; font-size: 13px; margin-bottom: 24px; }
-.auth-card input { width: 100%; margin-bottom: 12px; padding: 12px; }
-.auth-card .btn { width: 100%; padding: 12px; font-size: 14px; }
-.auth-card .auth-toggle { color: #3498db; font-size: 12px; cursor: pointer; margin-top: 16px; display: inline-block; border: none; background: none; }
-.auth-card .auth-toggle:hover { text-decoration: underline; }
-.auth-error { color: #e74c3c; font-size: 12px; margin-bottom: 12px; min-height: 16px; }
+.auth-screen { position: fixed; inset: 0; background:
+     radial-gradient(1100px 620px at 50% -8%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 60%), var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
+.auth-card { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--gold); border-radius: 16px; padding: 40px 36px; max-width: 400px; width: 100%; text-align: center; box-shadow: var(--shadow); }
+.auth-card h2 { color: var(--gold); margin-bottom: 8px; font-size: 23px; letter-spacing: 2.5px; }
+.auth-card .auth-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 26px; letter-spacing: .5px; }
+.auth-card input { width: 100%; margin-bottom: 12px; padding: 13px; text-align: center; }
+.auth-card .btn { width: 100%; padding: 13px; font-size: 14px; }
+.auth-card .auth-toggle { color: var(--muted); font-size: 12px; cursor: pointer; margin-top: 18px; display: inline-block; border: none; background: none; transition: color .18s; }
+.auth-card .auth-toggle:hover { color: var(--gold); text-decoration: underline; }
+.auth-error { color: var(--danger); font-size: 12px; margin-bottom: 12px; min-height: 16px; }
 
 /* ============================================
    AI EXECUTIVE BRIEFING
    ============================================ */
-.ai-card { background: #16213e; border: 2px solid #d4a843; border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; }
+.ai-card { background:
+     linear-gradient(180deg, color-mix(in srgb, var(--gold) 8%, transparent), transparent 40%), var(--surface); border: 1px solid var(--gold-dim); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; }
 .ai-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.ai-card-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #d4a843; text-transform: uppercase; }
-.ai-card-time { font-size: 10px; color: #667; }
-.ai-card-body { font-size: 13px; color: #ccc; line-height: 1.8; }
-.ai-card-body h2, .ai-card-body h3, .ai-card-body h4 { color: #d4a843; margin: 14px 0 6px; font-size: 14px; letter-spacing: 1px; }
-.ai-card-body strong { color: #fff; }
+.ai-card-title { font-size: 12.5px; font-weight: 800; letter-spacing: 1.5px; color: var(--gold); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.ai-card-title::before { content: '\2726'; color: var(--gold); }
+.ai-card-time { font-size: 10px; color: var(--faint); }
+.ai-card-body { font-size: 13px; color: var(--text-2); line-height: 1.8; }
+.ai-card-body h2, .ai-card-body h3, .ai-card-body h4 { color: var(--gold); margin: 14px 0 6px; font-size: 14px; letter-spacing: .5px; }
+.ai-card-body strong { color: var(--text); }
 .ai-card-body .ai-bullet { padding-left: 18px; margin: 3px 0; position: relative; }
-.ai-card-body .ai-bullet::before { content: '\2022'; position: absolute; left: 4px; color: #d4a843; }
-.ai-card-empty { color: #667; font-size: 12px; font-style: italic; margin-bottom: 12px; }
-.ai-loading { display: flex; align-items: center; gap: 12px; padding: 16px 0; color: #d4a843; font-size: 13px; font-weight: 600; }
+.ai-card-body .ai-bullet::before { content: '\2022'; position: absolute; left: 4px; color: var(--gold); }
+.ai-card-empty { color: var(--muted); font-size: 12px; font-style: italic; margin-bottom: 12px; }
+.ai-loading { display: flex; align-items: center; gap: 12px; padding: 16px 0; color: var(--gold); font-size: 13px; font-weight: 600; }
 @keyframes aispin { to { transform: rotate(360deg); } }
-.ai-spinner { width: 22px; height: 22px; border: 3px solid #334; border-top-color: #d4a843; border-radius: 50%; animation: aispin .8s linear infinite; flex-shrink: 0; }
+.ai-spinner { width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: aispin .8s linear infinite; flex-shrink: 0; }
 
 /* ============================================
    TACTICAL BOARD
    ============================================ */
 .tactical-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-top: 16px; }
-.tactical-item { background: #2a2a2a; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
-.tactical-canvas-wrap { position: relative; background: #111; cursor: crosshair; touch-action: none; }
+.tactical-item { background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.tactical-canvas-wrap { position: relative; background: #050507; cursor: crosshair; touch-action: none; }
 .tactical-canvas-wrap img { display: block; width: 100%; }
 .tactical-canvas-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.tactical-toolbar { display: flex; gap: 6px; padding: 10px 12px; background: #1e1e1e; align-items: center; flex-wrap: wrap; }
-.color-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #555; cursor: pointer; transition: border-color .2s; }
-.color-btn.active { border-color: #fff; box-shadow: 0 0 6px rgba(255,255,255,.3); }
+.tactical-toolbar { display: flex; gap: 7px; padding: 10px 12px; background: var(--surface-2); align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+.color-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border-lite); cursor: pointer; transition: transform .12s, border-color .2s; }
+.color-btn:hover { transform: scale(1.1); }
+.color-btn.active { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,.4); }
 .color-btn[data-color="red"] { background: #e74c3c; }
 .color-btn[data-color="blue"] { background: #3498db; }
-.color-btn[data-color="yellow"] { background: #d4a843; }
+.color-btn[data-color="yellow"] { background: var(--gold); }
 .color-btn[data-color="white"] { background: #fff; }
-.tactical-item-footer { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid #333; }
-.tactical-item-footer input { background: transparent; border: none; color: #ccc; font-size: 13px; font-weight: 600; flex: 1; padding: 4px 0; }
-.tactical-item-footer input:focus { outline: none; color: #fff; }
-.tactical-upload-zone { border: 2px dashed #444; border-radius: 6px; padding: 40px 20px; text-align: center; cursor: pointer; transition: border-color .2s; }
-.tactical-upload-zone:hover { border-color: #d4a843; }
-.tactical-upload-zone svg { width: 40px; height: 40px; fill: #555; margin-bottom: 8px; }
-.tactical-upload-zone div { font-size: 12px; color: #667; font-weight: 600; letter-spacing: .5px; }
+.tactical-item-footer { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid var(--border); }
+.tactical-item-footer input { background: transparent; border: none; color: var(--text-2); font-size: 13px; font-weight: 600; flex: 1; padding: 4px 0; }
+.tactical-item-footer input:focus { outline: none; box-shadow: none; color: var(--text); }
+.tactical-upload-zone { border: 2px dashed var(--border-lite); border-radius: var(--radius); padding: 40px 20px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+.tactical-upload-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
+.tactical-upload-zone svg { width: 38px; height: 38px; fill: var(--muted); margin-bottom: 8px; }
+.tactical-upload-zone div { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .5px; }
+
+/* ============================================
+   COMPLETION BAR (in hero)
+   ============================================ */
+.hero-progress { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; margin-top: 10px; max-width: 340px; }
+.hero-progress-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width .5s ease, background .35s; }
+.hero-progress-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--muted); margin-top: 6px; text-transform: uppercase; }
+.hero-progress-label b { color: var(--accent); }
+
+/* ============================================
+   SECTION PREV / NEXT
+   ============================================ */
+.section-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--border); }
+.section-nav .btn[disabled] { opacity: .35; cursor: default; pointer-events: none; }
+.section-nav-label { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; flex: 1; }
+
+/* ============================================
+   PLAYER NUMBER BADGE
+   ============================================ */
+.player-num-badge { position: absolute; top: 10px; left: 10px; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.45); transition: background .35s; }
+
+/* ============================================
+   TOASTS
+   ============================================ */
+#toast-wrap { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 11000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: max-content; max-width: 92vw; }
+.toast { padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; letter-spacing: .2px; box-shadow: var(--shadow); border: 1px solid var(--border-lite); background: var(--surface-3); color: var(--text); display: flex; align-items: center; gap: 9px; animation: toastin .3s ease; }
+.toast::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+.toast.ok::before { background: var(--green); }
+.toast.warn::before { background: var(--danger); }
+.toast.leaving { animation: toastout .3s ease forwards; }
+@keyframes toastin { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes toastout { to { opacity: 0; transform: translateY(12px); } }
 
 @media print {
   body { background: #1e1e1e !important; }
@@ -223,13 +309,20 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 }
 
 @media (max-width: 768px) {
-  nav { padding: 0 10px; }
-  nav .logo { font-size: 14px; margin-right: 10px; }
-  nav button { font-size: 12px; padding: 10px 8px; }
-  .view { padding: 12px; }
+  nav { padding: 0 12px; }
+  nav .logo { font-size: 13px; letter-spacing: 1px; margin-right: 12px; }
+  nav button { font-size: 12px; padding: 12px 9px; }
+  .view { padding: 14px; }
   .sv-grid { grid-template-columns: 1fr; }
   .info-grid { grid-template-columns: 1fr 1fr; }
   .threat-num { min-width: 50px; font-size: 22px; }
+  /* Stack the hero so the opponent name + subtitle get full width */
+  .team-hero { flex-wrap: wrap; gap: 12px 14px; padding: 16px; }
+  .team-hero-flag { font-size: 40px; }
+  .team-hero-main { flex: 1 1 auto; min-width: 0; }
+  .team-hero-name { font-size: 22px; }
+  .team-hero-sub { white-space: normal; }
+  .team-hero > div:last-child { flex-basis: 100%; justify-content: flex-start; }
   .section-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .section-tabs::-webkit-scrollbar { display: none; }
   .section-tab { min-width: 0; flex: 0 0 auto; font-size: 10px; letter-spacing: 0; padding: 10px 12px; white-space: nowrap; }
@@ -253,17 +346,21 @@ label { font-size: 13px; color: #99a; display: block; margin-bottom: 4px; }
 </div>
 
 <nav id="main-nav">
-  <span class="logo">OPPOSITION SCOUT</span>
-  <span id="sync-badge" style="font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:3px;margin-right:auto;color:#667;">...</span>
-  <button class="active" onclick="showView('scout')">Scouting</button>
-  <button onclick="showView('live')">Live Mode</button>
-  <button onclick="showView('data')">Data</button>
-  <button onclick="handleSignOut()" style="color:#e74c3c;margin-left:8px;">Logout</button>
+  <div class="inner">
+    <span class="logo">OPPOSITION SCOUT</span>
+    <span id="sync-badge" style="font-size:10px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:999px;margin-right:auto;color:var(--muted);border:1px solid var(--border);">...</span>
+    <button class="active" onclick="showView('scout')">Scouting</button>
+    <button onclick="showView('live')">Live Mode</button>
+    <button onclick="showView('data')">Data</button>
+    <button onclick="handleSignOut()" style="color:var(--danger);margin-left:6px;">Logout</button>
+  </div>
 </nav>
 
 <div id="view-scout" class="view active"></div>
 <div id="view-live" class="view"></div>
 <div id="view-data" class="view"></div>
+
+<div id="toast-wrap"></div>
 
 <script>
 const STORE = 'hockeyOppoScoutV4';
@@ -316,6 +413,68 @@ let data = { teams: [], currentTeamIdx: 0, currentSection: 0 };
 let currentUser = null;
 let currentRole = 'contributor'; // 'admin', 'coach', or 'contributor'
 let currentAuthUid = null;
+
+/* ============================================
+   COUNTRY ACCENT THEMING
+   Each opponent gets its national colour; black & gold stays the frame.
+   ============================================ */
+const COUNTRY_THEME = {
+  netherlands: { c: '#F26B1F', ink: '#180a00', flag: '🇳🇱', short: 'NED' },
+  holland:     { c: '#F26B1F', ink: '#180a00', flag: '🇳🇱', short: 'NED' },
+  argentina:   { c: '#6CACE4', ink: '#062338', flag: '🇦🇷', short: 'ARG' },
+  japan:       { c: '#C8102E', ink: '#ffffff', flag: '🇯🇵', short: 'JPN' },
+  australia:   { c: '#0B7A3B', ink: '#ffffff', flag: '🇦🇺', short: 'AUS' },
+  germany:     { c: '#111111', ink: '#ffffff', flag: '🇩🇪', short: 'GER' },
+  belgium:     { c: '#C8102E', ink: '#ffffff', flag: '🇧🇪', short: 'BEL' },
+  india:       { c: '#FF8A2B', ink: '#180a00', flag: '🇮🇳', short: 'IND' },
+  england:     { c: '#E63946', ink: '#ffffff', flag: '🏴', short: 'ENG' },
+  spain:       { c: '#E0402A', ink: '#ffffff', flag: '🇪🇸', short: 'ESP' },
+  france:      { c: '#3A6BC4', ink: '#ffffff', flag: '🇫🇷', short: 'FRA' },
+  'new zealand': { c: '#111111', ink: '#ffffff', flag: '🇳🇿', short: 'NZL' }
+};
+function teamTheme(t) {
+  const s = ((t && (t.country || t.name)) || '').toLowerCase();
+  for (const k in COUNTRY_THEME) { if (s.indexOf(k) !== -1) return COUNTRY_THEME[k]; }
+  return { c: '#d8b24a', ink: '#0a0a0d', flag: '🏑', short: (t && t.name ? t.name.slice(0,3).toUpperCase() : '—') };
+}
+function applyTeamTheme(t) {
+  const th = teamTheme(t);
+  const r = document.documentElement.style;
+  r.setProperty('--accent', th.c);
+  r.setProperty('--accent-ink', th.ink);
+  r.setProperty('--accent-soft', th.c + '22');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', '#0a0a0d');
+}
+
+/* ---- Toast notifications (replace jarring alert() popups) ---- */
+function toast(msg, type) {
+  const wrap = document.getElementById('toast-wrap');
+  if (!wrap) { return; }
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(function() {
+    el.classList.add('leaving');
+    setTimeout(function() { el.remove(); }, 300);
+  }, 2600);
+}
+
+/* ---- How complete is a team's scouting report? (0–100) ---- */
+const COMPLETION_FIELDS = ['playingIdentity','strengthsTop3','vulnerabilitiesTop3',
+  'defensiveFormation','pressTriggers','defensiveBlock','setPieceDefence','transitionLosingPossession',
+  'buildUpPattern','attackTransition','dangerousZones','setPieceAttack','keyAttackingPlayers',
+  'ourAttackingPriority','ourDefensivePriority','setPieceStrategy','psychologicalEdge'];
+function teamCompletion(t) {
+  if (!t) return 0;
+  let done = 0, total = COMPLETION_FIELDS.length + 3; // + threats, players, tactical
+  COMPLETION_FIELDS.forEach(function(k) { if ((t[k] || '').trim()) done++; });
+  if (t.threats && t.threats.some(function(x) { return (x.title || '').trim() || (x.description || '').trim(); })) done++;
+  if (t.players && t.players.length) done++;
+  if (t.tacticalImages && t.tacticalImages.length) done++;
+  return Math.round(done / total * 100);
+}
 
 /* ---- Drawing state ---- */
 let drawingState = {};
@@ -393,13 +552,24 @@ async function handleAuth() {
         errEl.textContent = '';
         if (!email) { errEl.textContent = 'Please enter your email.'; return; }
         try {
-          const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: 'https://sheamcaleese.github.io/hockey-tools/hockey-opposition-scout.html' } });
+          const { error } = await sb.auth.signInWithOtp({
+            email,
+            options: {
+              emailRedirectTo: window.location.origin + window.location.pathname,
+              // 'Sign In' only emails existing accounts; 'Sign Up' creates a new one.
+              shouldCreateUser: authMode === 'signup'
+            }
+          });
           if (error) throw error;
-          errEl.style.color = '#4caf50';
-          errEl.textContent = 'Magic link sent! Check your email inbox.';
+          errEl.style.color = 'var(--green)';
+          errEl.textContent = authMode === 'signup'
+            ? 'Account link sent! Check your email to finish signing up.'
+            : 'Magic link sent! Check your email inbox.';
         } catch(e) {
-          errEl.style.color = '#e74c3c';
-          errEl.textContent = e.message || 'Error sending magic link.';
+          errEl.style.color = 'var(--danger)';
+          errEl.textContent = (e && /not.*(found|exist)|signups? not allowed/i.test(e.message||''))
+            ? 'No account for that email. Tap "Need an account? Sign Up".'
+            : (e.message || 'Error sending magic link.');
         }
       }
 
@@ -450,8 +620,12 @@ function isCoachOrAdmin() {
    ============================================ */
 let _syncTimer = null;
 let _isSyncing = false;
+function safeSetStore() {
+  try { localStorage.setItem(STORE, JSON.stringify(data)); return true; }
+  catch (e) { console.warn('Local save failed (storage full?) — cloud sync still active:', e); return false; }
+}
 function save() {
-  localStorage.setItem(STORE, JSON.stringify(data));
+  safeSetStore();
   clearTimeout(_syncTimer);
   _syncTimer = setTimeout(syncToSupabase, 800);
   updateSyncBadge('saving');
@@ -490,10 +664,19 @@ function subscribeToRealtime() {
     .subscribe();
 }
 
+function isEditingScout() {
+  const a = document.activeElement;
+  const scout = document.getElementById('view-scout');
+  return a && scout && scout.contains(a) && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT');
+}
+
 function handleRealtimeUpdate(payload) {
   if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
     const row = payload.new;
     const idx = data.teams.findIndex(function(t) { return t.id === row.id; });
+    // Don't clobber the team a user is mid-edit on — their local edits would be lost.
+    // Their own changes still sync out; they'll pick up remote changes on next switch/reload.
+    if (idx >= 0 && idx === data.currentTeamIdx && isEditingScout()) return;
     if (idx >= 0) {
       // Capture current DOM values into data without triggering save/sync
       captureDOMValues();
@@ -551,10 +734,11 @@ async function syncInsertTeam(team) {
 function updateSyncBadge(state) {
   const el = document.getElementById('sync-badge');
   if (!el) return;
-  if (state === 'synced') { el.textContent = 'Synced'; el.style.color = '#4a8c3f'; }
-  else if (state === 'saving') { el.textContent = 'Saving...'; el.style.color = '#d4a843'; }
-  else if (state === 'offline') { el.textContent = 'Offline'; el.style.color = '#e74c3c'; }
-  else if (state === 'loading') { el.textContent = 'Loading...'; el.style.color = '#3498db'; }
+  const dot = '● ';
+  if (state === 'synced') { el.textContent = dot + 'Synced'; el.style.color = 'var(--green)'; el.style.borderColor = 'color-mix(in srgb, var(--green) 40%, transparent)'; }
+  else if (state === 'saving') { el.textContent = dot + 'Saving…'; el.style.color = 'var(--gold)'; el.style.borderColor = 'var(--gold-dim)'; }
+  else if (state === 'offline') { el.textContent = dot + 'Offline'; el.style.color = 'var(--danger)'; el.style.borderColor = 'color-mix(in srgb, var(--danger) 40%, transparent)'; }
+  else if (state === 'loading') { el.textContent = dot + 'Loading…'; el.style.color = 'var(--muted)'; el.style.borderColor = 'var(--border)'; }
 }
 
 /* ============================================
@@ -666,17 +850,28 @@ function renderScout() {
     return;
   }
 
+  applyTeamTheme(t);
+  const th = teamTheme(t);
+  const pct = teamCompletion(t);
+  const heroSub = [t.competition, t.worldRanking ? 'World Rank ' + esc(t.worldRanking) : '', 'Pool A'].filter(Boolean).join('  ·  ');
   el.innerHTML = `
-    <div class="toolbar no-print" style="justify-content:space-between;">
-      <h2 style="margin:0;">Opponent Scouting Report</h2>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-primary" onclick="addNewTeam()">+ Add Team</button>
-        <button class="btn btn-secondary" onclick="printScout()">Print Report</button>
-      </div>
+    <div class="team-tabs no-print">
+      ${data.teams.map((tm,i) => `<button class="team-tab ${i===data.currentTeamIdx?'active':''}" onclick="switchTeam(${i})"><span class="flag">${teamTheme(tm).flag}</span>${esc(tm.name)}</button>`).join('')}
     </div>
 
-    <div class="team-tabs no-print">
-      ${data.teams.map((tm,i) => `<button class="team-tab ${i===data.currentTeamIdx?'active':''}" onclick="switchTeam(${i})">${esc(tm.name)}</button>`).join('')}
+    <div class="team-hero no-print">
+      <div class="team-hero-flag">${th.flag}</div>
+      <div class="team-hero-main">
+        <div class="team-hero-name">${esc(t.name)}</div>
+        <div class="team-hero-sub">${heroSub}</div>
+        <div class="hero-progress" title="How much of this report is filled in"><div class="hero-progress-fill" style="width:${pct}%"></div></div>
+        <div class="hero-progress-label"><b>${pct}%</b> scouted${t.lastEditedBy ? '  ·  updated ' + esc(t.lastEditedBy) : ''}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+        <span class="team-hero-badge">${th.short}</span>
+        <button class="btn btn-secondary" onclick="addNewTeam()">+ Team</button>
+        <button class="btn btn-secondary" onclick="printScout()">Print</button>
+      </div>
     </div>
 
     <div class="section-tabs no-print">
@@ -692,14 +887,24 @@ function renderScout() {
     ${renderGameplan(t)}
     ${renderLog(t)}
 
+    <div class="section-nav no-print">
+      <button class="btn btn-secondary" onclick="switchSection(${data.currentSection - 1})" ${data.currentSection === 0 ? 'disabled' : ''}>← Prev</button>
+      <span class="section-nav-label">${SECTIONS[data.currentSection].label} · ${data.currentSection + 1} of ${SECTIONS.length}</span>
+      <button class="btn btn-secondary" onclick="switchSection(${data.currentSection + 1})" ${data.currentSection === SECTIONS.length - 1 ? 'disabled' : ''}>Next →</button>
+    </div>
+
     <div class="doc-footer">
       <span class="page-num">${data.currentSection + 1} / ${SECTIONS.length}</span>
       <span class="brand">HNZ | BLACK STICKS MEN</span>
     </div>`;
 }
 
-function switchTeam(idx) { autoSave(); data.currentTeamIdx = idx; save(); renderScout(); }
-function switchSection(idx) { autoSave(); data.currentSection = idx; save(); renderScout(); }
+function switchTeam(idx) { autoSave(); data.currentTeamIdx = idx; save(); renderScout(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function switchSection(idx) {
+  if (idx < 0 || idx >= SECTIONS.length) return;
+  autoSave(); data.currentSection = idx; save(); renderScout();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 function renderOverview(t) {
   return `<div class="sec ${data.currentSection===0?'active':''}" id="sec-overview">
@@ -771,6 +976,7 @@ function renderPlayers(t) {
   const cards = t.players.map((p,i) => `
     <div class="player-card">
       <div class="player-card-header" onclick="uploadPlayerHeadshot(${i})">
+        ${p.number ? `<div class="player-num-badge">${esc(p.number)}</div>` : ''}
         ${p.headshot
           ? `<img src="${p.headshot}" alt="${esc(p.name)}">`
           : `<div class="upload-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><div>Tap to add headshot</div></div>`
@@ -808,7 +1014,7 @@ function addPlayer() {
   save(); renderScout();
 }
 function deletePlayer(i) {
-  if (!canEdit(ct().players[i])) return alert('You can only delete entries you created.');
+  if (!canEdit(ct().players[i])) return toast('You can only delete entries you created.', 'warn');
   if (!confirm('Are you sure you want to remove this player?')) return;
   autoSave(); ct().players.splice(i,1); save(); renderScout();
 }
@@ -885,7 +1091,7 @@ function uploadTacticalImage() {
   inp.click();
 }
 function deleteTactical(i) {
-  if (!canEdit(ct().tacticalImages[i])) return alert('You can only delete entries you created.');
+  if (!canEdit(ct().tacticalImages[i])) return toast('You can only delete entries you created.', 'warn');
   if (!confirm('Are you sure you want to delete this tactical image?')) return;
   autoSave(); ct().tacticalImages.splice(i,1); save(); renderScout();
 }
@@ -1127,7 +1333,7 @@ function autoSave() {
 }
 
 function addLogEntry() { autoSave(); ct().log.push({ dateTournament:'', result:'', observation:'', action:'', postedBy: postedByStamp(), createdByUid: currentAuthUid }); save(); renderScout(); }
-function deleteLogEntry(i) { if (!canEdit(ct().log[i])) return alert('You can only delete entries you created.'); if (!confirm('Are you sure you want to delete this log entry?')) return; autoSave(); ct().log.splice(i,1); save(); renderScout(); }
+function deleteLogEntry(i) { if (!canEdit(ct().log[i])) return toast('You can only delete entries you created.', 'warn'); if (!confirm('Are you sure you want to delete this log entry?')) return; autoSave(); ct().log.splice(i,1); save(); renderScout(); }
 function addNewTeam() { const n = prompt('Team name:'); if (!n) return; autoSave(); const t = blankTeam(n.trim(),n.trim(),'Hockey World Cup'); data.teams.push(t); data.currentTeamIdx = data.teams.length-1; data.currentSection = 0; save(); syncInsertTeam(t); renderScout(); }
 
 function printScout() {
@@ -1150,14 +1356,14 @@ function renderLive() {
     <h2>Live Scouting Mode</h2>
     <div class="section"><h3>Match Context</h3>
       <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;min-width:160px;"><label>Team</label><select id="live-team">${opts}</select></div>
+        <div style="display:flex;flex-direction:column;min-width:160px;"><label>Team</label><select id="live-team" onchange="applyTeamTheme(data.teams[this.value])">${opts}</select></div>
         <div style="display:flex;flex-direction:column;min-width:140px;"><label>Date</label><input type="date" id="live-date" value="${new Date().toISOString().split('T')[0]}"></div>
         <div style="display:flex;flex-direction:column;flex:1;min-width:160px;"><label>Competition</label><input type="text" id="live-comp" placeholder="e.g. FIH Pro League"></div>
       </div>
     </div>
     <div class="section"><h3>Quick Tags</h3>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;" id="live-tags-wrap">
-        ${LIVE_TAGS.map(t=>`<div style="padding:6px 12px;border:1px solid #334;border-radius:4px;background:#0d1b2a;color:#889;font-size:12px;font-weight:600;cursor:pointer;" data-ltag="${t}" onclick="toggleLiveTag(this)">${t}</div>`).join('')}
+        ${LIVE_TAGS.map(t=>`<div style="padding:7px 13px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);color:var(--text-2);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;" data-ltag="${t}" onclick="toggleLiveTag(this)">${t}</div>`).join('')}
       </div>
       <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;">
         <div style="display:flex;flex-direction:column;width:80px;"><label>Min</label><input type="number" id="live-min" placeholder="15" min="0" max="120"></div>
@@ -1177,14 +1383,14 @@ function renderLive() {
 
 function toggleLiveTag(el) {
   const tag = el.dataset.ltag;
-  if (liveTags.has(tag)) { liveTags.delete(tag); el.style.background='#0d1b2a'; el.style.color='#889'; el.style.borderColor='#334'; }
-  else { liveTags.add(tag); el.style.background='#d4a843'; el.style.color='#000'; el.style.borderColor='#d4a843'; }
+  if (liveTags.has(tag)) { liveTags.delete(tag); el.style.background='var(--surface-2)'; el.style.color='var(--text-2)'; el.style.borderColor='var(--border)'; }
+  else { liveTags.add(tag); el.style.background='var(--accent)'; el.style.color='var(--accent-ink)'; el.style.borderColor='var(--accent)'; }
 }
 function insertLiveMin() { const m=document.getElementById('live-min').value; if(!m)return; const ta=document.getElementById('live-notes'); ta.value+=`[${m}'] `; ta.focus(); }
 
 function addLiveEntry() {
   const text = document.getElementById('live-notes').value.trim();
-  if (!text) return alert('Write an observation.');
+  if (!text) return toast('Write an observation first.', 'warn');
   const tags = Array.from(liveTags); if (tags.length===0) tags.push('General');
   liveFeed.push({ id:uid(), tags, text, time:new Date().toLocaleTimeString() });
   document.getElementById('live-notes').value = '';
@@ -1194,21 +1400,22 @@ function addLiveEntry() {
 function renderLiveFeed() {
   const el = document.getElementById('live-feed'); if(!el)return;
   if (liveFeed.length===0) { el.innerHTML='<div style="color:#667;font-size:12px;">No observations yet.</div>'; return; }
-  el.innerHTML = liveFeed.map(e=>`<div style="background:#0d1b2a;border-left:3px solid #d4a843;padding:10px 14px;border-radius:0 4px 4px 0;margin-bottom:8px;">
-    <div>${e.tags.map(t=>`<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;background:#d4a843;color:#000;margin-right:4px;">${esc(t)}</span>`).join('')}</div>
-    <div style="font-size:11px;color:#667;margin:4px 0;">${e.time}</div>
-    <div style="font-size:13px;color:#ccc;line-height:1.5;">${esc(e.text)}</div>
+  el.innerHTML = liveFeed.map(e=>`<div style="background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--accent);padding:11px 14px;border-radius:8px;margin-bottom:8px;">
+    <div>${e.tags.map(t=>`<span style="display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--accent);color:var(--accent-ink);margin-right:4px;">${esc(t)}</span>`).join('')}</div>
+    <div style="font-size:11px;color:var(--faint);margin:6px 0;">${e.time}</div>
+    <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${esc(e.text)}</div>
   </div>`).join('');
 }
 
 function processLiveFeed() {
   const idx = parseInt(document.getElementById('live-team').value);
-  if (liveFeed.length===0) return alert('No entries.');
+  if (liveFeed.length===0) return toast('No observations to process yet.', 'warn');
   const t = data.teams[idx]; if(!t.log) t.log=[];
   const d = document.getElementById('live-date').value, c = document.getElementById('live-comp').value;
+  const n = liveFeed.length;
   liveFeed.forEach(e => { t.log.push({ dateTournament:`${d} ${c}`.trim(), result:'', observation:`[${e.tags.join(', ')}] ${e.text}`, action:'', postedBy: postedByStamp(), createdByUid: currentAuthUid }); });
   save();
-  alert(`${liveFeed.length} entries added to ${t.name}'s scouting log.`);
+  toast(`${n} ${n === 1 ? 'observation' : 'observations'} added to ${t.name}'s log.`, 'ok');
   liveFeed=[]; liveTags.clear(); renderLiveFeed();
 }
 
@@ -1222,16 +1429,25 @@ function renderData() {
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
       <div class="section"><h3>Export</h3><p style="color:#889;font-size:12px;margin-bottom:12px;">Download all scouting data as JSON.</p><button class="btn btn-primary" onclick="exportData()">Export All</button></div>
       <div class="section"><h3>Import</h3><input type="file" id="import-file" accept=".json" style="margin-bottom:8px;"><button class="btn btn-primary" onclick="importData()">Import</button></div>
-      <div class="section"><h3>Storage</h3><p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p><p style="color:#ccc;margin-bottom:4px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p><p style="color:#ccc;margin-bottom:12px;">Supabase: <strong style="color:${sbOnline?'#4a8c3f':'#e74c3c'};">${sbOnline?'Connected':'Offline'}</strong></p><button class="btn btn-secondary" onclick="forceSync()" style="margin-bottom:8px;">Force Sync</button><br><button class="btn btn-danger" onclick="clearAllData()">Clear All</button></div>
+      <div class="section"><h3>Storage</h3><p style="color:#ccc;margin-bottom:4px;">Teams: <strong style="color:#d4a843;">${data.teams.length}</strong></p><p style="color:#ccc;margin-bottom:4px;">Size: <strong style="color:#d4a843;">${size} KB</strong></p><p style="color:#ccc;margin-bottom:12px;">Supabase: <strong style="color:${sbOnline?'#4a8c3f':'#e74c3c'};">${sbOnline?'Connected':'Offline'}</strong></p><button class="btn btn-secondary" onclick="forceSync()" style="margin-bottom:8px;">Force Sync</button>${isCoachOrAdmin() ? '<br><button class="btn btn-danger" onclick="clearAllData()">Clear All</button>' : ''}</div>
       <div class="section"><h3>Your Identity</h3><p style="color:#ccc;margin-bottom:4px;">Logged in as: <strong style="color:#d4a843;">${currentUser ? esc(currentUser.name) + ' (' + esc(currentUser.initials) + ')' : 'Not set'}</strong></p><p style="color:#ccc;margin-bottom:12px;">Role: <strong style="color:#d4a843;text-transform:capitalize;">${esc(currentRole)}</strong></p><button class="btn btn-secondary" onclick="promptUserIdentity(function(){renderData();})">Change Name</button></div>
-      <div class="section"><h3>Manage Teams</h3>${data.teams.map((t,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334;"><span style="font-size:13px;">${esc(t.name)}</span><button class="btn btn-danger btn-sm" onclick="deleteTeam(${i})">Delete</button></div>`).join('')}<button class="btn btn-primary btn-sm" onclick="addNewTeam()" style="margin-top:12px;">+ Add Team</button></div>
+      <div class="section"><h3>Manage Teams</h3>${data.teams.map((t,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><span style="font-size:13px;display:flex;align-items:center;gap:8px;">${teamTheme(t).flag} ${esc(t.name)} <span style="color:var(--muted);font-size:11px;">${teamCompletion(t)}%</span></span>${isCoachOrAdmin() ? `<button class="btn btn-danger btn-sm" onclick="deleteTeam(${i})">Delete</button>` : ''}</div>`).join('')}<button class="btn btn-primary btn-sm" onclick="addNewTeam()" style="margin-top:12px;">+ Add Team</button></div>
     </div>`;
 }
 
-function exportData() { autoSave(); const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`oppo-scout-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); }
-function importData() { const f=document.getElementById('import-file').files[0]; if(!f)return alert('Select a file.'); const r=new FileReader(); r.onload=async function(e){try{const d=JSON.parse(e.target.result);if(d.teams){data=d;data.currentTeamIdx=0;data.currentSection=0;save();await syncToSupabase();alert('Imported & synced.');showView('scout');}else alert('Invalid.');}catch(e){alert('Error: '+e.message);}}; r.readAsText(f); }
-async function clearAllData() { if(!confirm('Delete ALL data?'))return; if(!confirm('Sure?'))return; for(const t of data.teams) await syncDeleteTeam(t.id); localStorage.removeItem(STORE); data={teams:[],currentTeamIdx:0,currentSection:0}; await load(); showView('scout'); }
-function deleteTeam(i) { if(!confirm('Are you sure you want to delete '+data.teams[i].name+'? This cannot be undone.'))return; const tid=data.teams[i].id; data.teams.splice(i,1); if(data.currentTeamIdx>=data.teams.length)data.currentTeamIdx=Math.max(0,data.teams.length-1); save(); syncDeleteTeam(tid); if(data.teams.length===0)boot(); else renderData(); }
+function exportData() { autoSave(); const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`oppo-scout-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); toast('Scouting data exported.', 'ok'); }
+function importData() { const f=document.getElementById('import-file').files[0]; if(!f)return toast('Choose a file to import first.','warn'); const r=new FileReader(); r.onload=async function(e){try{const d=JSON.parse(e.target.result);if(d.teams){data=d;data.currentTeamIdx=0;data.currentSection=0;save();await syncToSupabase();toast('Data imported & synced.','ok');showView('scout');}else toast('That file has no scouting data.','warn');}catch(e){toast('Import failed: '+e.message,'warn');}}; r.readAsText(f); }
+async function clearAllData() {
+  if (!isCoachOrAdmin()) return toast('Only coaches can clear all data.', 'warn');
+  const typed = prompt('This deletes EVERY team’s scouting data for everyone — this cannot be undone.\n\nType DELETE to confirm:');
+  if ((typed || '').trim().toUpperCase() !== 'DELETE') return toast('Cancelled — nothing was deleted.');
+  for(const t of data.teams) await syncDeleteTeam(t.id); localStorage.removeItem(STORE); data={teams:[],currentTeamIdx:0,currentSection:0}; await load(); showView('scout'); toast('All data cleared.', 'ok');
+}
+function deleteTeam(i) {
+  if (!isCoachOrAdmin()) return toast('Only coaches can delete a team.', 'warn');
+  if(!confirm('Are you sure you want to delete '+data.teams[i].name+'? This cannot be undone.'))return;
+  const tid=data.teams[i].id; data.teams.splice(i,1); if(data.currentTeamIdx>=data.teams.length)data.currentTeamIdx=Math.max(0,data.teams.length-1); save(); syncDeleteTeam(tid); toast('Team deleted.', 'ok'); if(data.teams.length===0)boot(); else renderData();
+}
 
 /* ---- Expandable text toggle ---- */
 function toggleExpand(btn) {
@@ -1318,6 +1534,7 @@ async function forceSync() {
   updateSyncBadge('saving');
   await syncToSupabase();
   renderData();
+  toast(sbOnline ? 'Synced to cloud.' : 'Sync failed — you are offline.', sbOnline ? 'ok' : 'warn');
 }
 
 /* ---- Lightweight Markdown renderer ---- */
