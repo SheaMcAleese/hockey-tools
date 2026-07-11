@@ -371,7 +371,18 @@ const USER_STORE = 'hockeyScoutUser';
    ============================================ */
 const SB_URL = 'https://rqqjqoyjaiphsfhyyvka.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcWpxb3lqYWlwaHNmaHl5dmthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTEyMTksImV4cCI6MjA4OTQyNzIxOX0.kIZI3gNv3kfaWOsZhQ6k2B1Me4Q-zZMaaIcQTHD3Tuc';
-const sb = supabase.createClient(SB_URL, SB_KEY);
+const sb = supabase.createClient(SB_URL, SB_KEY, {
+  auth: {
+    // Implicit flow: session token arrives in the URL fragment, so the magic
+    // link completes in ANY browser that opens it (incl. in-app mail browsers).
+    // PKCE (the v2 default) needs a verifier stored in the SAME browser that
+    // requested the link, which breaks when phones open links in an in-app webview.
+    flowType: 'implicit',
+    detectSessionInUrl: true,
+    persistSession: true,
+    autoRefreshToken: true
+  }
+});
 let sbOnline = true;
 
 function blankTeamData() {
