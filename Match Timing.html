@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- Home-screen app -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Match Timing">
+<meta name="theme-color" content="#0C3B24">
+
+<title>Match Timing</title>
+<meta name="description" content="Set off pitch and push back times and the whole warm-up sequence pulls through, with live countdown alarms and one-tap calendar export.">
+
+<link rel="manifest" href="match-timing.webmanifest">
+<link rel="apple-touch-icon" href="match-timing-icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('match-timing-sw.js').catch(function (err) {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+</script>
+
+<style>
+  :root {
+    /* Base layers (dark-first) */
+    --bs-green-deep:  #0C3B24;
+    --bs-dark:        #141608;
+    --bs-dark-well:   #10140F;
+    --bs-panel:       #2A3327;
+    --bs-panel-soft:  #1c231a;
+
+    /* Gold thread */
+    --bs-gold:        #C9A24B;
+    --bs-gold-light:  #E7CB86;
+
+    /* Text */
+    --bs-text:        #EAEDE6;
+    --bs-muted:       #8E978A;
+    --bs-muted-2:     #727C6C;
+
+    /* Signals: status only */
+    --bs-signal-good: #3FBF87;
+    --bs-signal-warn: #E4A93E;
+    --bs-signal-red:  #E05650;
+
+    /* Type: Oswald if present, graceful condensed fallback (works fully offline) */
+    --bs-font-head: 'Oswald', 'Bebas Neue', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+    --bs-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+
+    --bs-radius: 6px;
+    --bs-border: 1px solid var(--bs-panel);
+    --gold: var(--bs-gold); /* alias for shared partials */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { background: var(--bs-dark); color: var(--bs-text); }
+  body {
+    font: 400 15px/1.6 var(--bs-font-body);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+             max(24px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  /* --- Quality partials --------------------------------------- */
+  :focus-visible { outline: 2px solid var(--bs-gold); outline-offset: 3px; border-radius: 2px; }
+  :focus:not(:focus-visible) { outline: none; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important; scroll-behavior: auto !important;
+    }
+  }
+
+  /* --- Masthead ----------------------------------------------- */
+  .masthead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 6px 4px 16px; }
+  .masthead h1 {
+    font: 700 clamp(24px, 6.5vw, 34px)/1 var(--bs-font-head);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .masthead h1 .dot { color: var(--bs-gold); }
+  .brandline { font: 700 11px/1.2 var(--bs-font-head); letter-spacing: .16em; text-transform: uppercase; color: var(--bs-muted); }
+
+  /* --- Cards -------------------------------------------------- */
+  .card {
+    background: var(--bs-panel-soft);
+    border: var(--bs-border);
+    border-radius: var(--bs-radius);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .eyebrow { font: 700 11px/1.2 var(--bs-font-head); letter-spacing: .14em; text-transform: uppercase; color: var(--bs-gold); margin-bottom: 12px; }
+
+  /* --- Time inputs -------------------------------------------- */
+  .pb-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+  .pb-label { font: 600 13px/1.2 var(--bs-font-head); letter-spacing: .10em; text-transform: uppercase; color: var(--bs-muted); flex: 0 0 84px; }
+  .pb-row.key .pb-label { color: var(--bs-gold-light); }
+  input[type="time"] {
+    font: 600 clamp(28px, 8vw, 36px)/1 var(--bs-font-head); letter-spacing: .01em;
+    background: var(--bs-dark-well); color: var(--bs-text);
+    border: 1px solid var(--bs-panel); border-radius: var(--bs-radius);
+    padding: 8px 14px; flex: 1 1 auto; min-width: 150px;
+    color-scheme: dark;
+  }
+  .pb-row.key input[type="time"] { border-color: rgba(201,162,75,.45); }
+
+  .gap-chip {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 4px;
+    font: 700 11px/1.2 var(--bs-font-head); letter-spacing: .10em; text-transform: uppercase;
+    color: var(--bs-gold-light); background: rgba(201,162,75,.10);
+    border: 1px solid rgba(201,162,75,.30); border-radius: 20px; padding: 8px 14px;
+  }
+  .gap-chip.warn { color: var(--bs-signal-red); background: rgba(224,86,80,.12); border-color: rgba(224,86,80,.40); }
+  .gap-chip.muted { color: var(--bs-muted); background: transparent; border-color: var(--bs-panel); }
+  .gap-chip svg { width: 14px; height: 14px; flex: 0 0 auto; }
+
+  /* --- Buttons ------------------------------------------------ */
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  button {
+    font: 600 13px/1.2 var(--bs-font-head); letter-spacing: .08em; text-transform: uppercase;
+    background: var(--bs-panel); color: var(--bs-text);
+    border: 1px solid var(--bs-panel); border-radius: var(--bs-radius);
+    padding: 14px 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .15s ease, border-color .15s ease, transform .05s ease;
+    min-height: 48px;
+  }
+  button:active { transform: translateY(1px); }
+  button:hover { border-color: var(--bs-gold); }
+  button.primary { background: var(--bs-gold); color: var(--bs-dark); border-color: var(--bs-gold); }
+  button.primary.armed { background: var(--bs-signal-good); border-color: var(--bs-signal-good); color: var(--bs-dark); }
+  button svg { width: 16px; height: 16px; flex: 0 0 auto; }
+
+  /* --- Live panel --------------------------------------------- */
+  .live {
+    background: var(--bs-green-deep);
+    border: 1px solid #16543a;
+    border-radius: var(--bs-radius);
+    padding: 20px; margin-bottom: 14px; position: relative; overflow: hidden;
+  }
+  .live .now-clock { font: 400 12px/1.2 var(--bs-font-head); letter-spacing: .14em; text-transform: uppercase; color: var(--bs-gold-light); }
+  .live .next-label { font: 600 12px/1.2 var(--bs-font-head); letter-spacing: .12em; text-transform: uppercase; color: var(--bs-muted); margin-top: 6px; }
+  .live .next-name { font: 700 clamp(26px, 8vw, 40px)/1.05 var(--bs-font-head); text-transform: uppercase; letter-spacing: .02em; margin: 2px 0 4px; }
+  .live .countdown { font: 600 clamp(40px, 15vw, 68px)/1 var(--bs-font-head); letter-spacing: .01em; color: var(--bs-gold); font-variant-numeric: tabular-nums; }
+  .live .current { font: 400 13px/1.4 var(--bs-font-body); color: var(--bs-muted); margin-top: 8px; }
+  .live.push .countdown { color: var(--bs-signal-good); }
+
+  .progress { height: 6px; background: rgba(255,255,255,.10); border-radius: 3px; margin-top: 14px; overflow: hidden; }
+  .progress > span { display: block; height: 100%; background: var(--bs-gold); width: 0%; transition: width .5s linear; }
+
+  /* --- Timeline ----------------------------------------------- */
+  .tl-head { display: flex; align-items: center; justify-content: space-between; margin: 4px 4px 10px; }
+  .tl-head .eyebrow { margin: 0; }
+  .tl-head .gear { background: none; border: none; min-height: auto; padding: 6px; color: var(--bs-muted); }
+  .tl-head .gear:hover { color: var(--bs-gold); }
+
+  ul.timeline { list-style: none; position: relative; }
+  ul.timeline::before {
+    content: ""; position: absolute; left: 62px; top: 12px; bottom: 12px; width: 2px; background: var(--bs-panel);
+  }
+  li.stage {
+    display: grid; grid-template-columns: 54px 22px 1fr; align-items: center; gap: 8px;
+    padding: 11px 4px; position: relative;
+  }
+  li.stage .time { font: 600 17px/1 var(--bs-font-head); letter-spacing: .02em; text-align: right; color: var(--bs-text); font-variant-numeric: tabular-nums; }
+  li.stage .marker { width: 14px; height: 14px; border-radius: 50%; background: var(--bs-dark); border: 2px solid var(--bs-muted-2); justify-self: center; z-index: 1; }
+  li.stage .name { font: 400 16px/1.3 var(--bs-font-body); color: var(--bs-text); }
+  li.stage .name .sub { display: block; font: 400 12px/1.3 var(--bs-font-body); color: var(--bs-muted); text-transform: none; letter-spacing: 0; margin-top: 2px; }
+  li.stage.past .time, li.stage.past .name { color: var(--bs-muted-2); }
+  li.stage.past .marker { background: var(--bs-muted-2); border-color: var(--bs-muted-2); }
+  li.stage.current { background: rgba(201,162,75,.10); border-radius: var(--bs-radius); }
+  li.stage.current .marker { background: var(--bs-gold); border-color: var(--bs-gold); box-shadow: 0 0 0 4px rgba(201,162,75,.20); }
+  li.stage.current .name { color: var(--bs-gold-light); font-weight: 600; }
+  li.stage.offpitch .time { color: var(--bs-gold-light); }
+  li.stage.offpitch .marker { border-color: var(--bs-gold-light); }
+  li.stage.offpitch .name { font-weight: 600; }
+  li.stage.push .time { color: var(--bs-gold); }
+  li.stage.push .name { font: 700 17px/1.2 var(--bs-font-head); text-transform: uppercase; letter-spacing: .06em; color: var(--bs-gold); }
+  li.stage.push .marker { background: var(--bs-gold); border-color: var(--bs-gold); }
+  .tagline { font: 700 11px/1.2 var(--bs-font-head); letter-spacing: .22em; text-transform: uppercase; color: var(--bs-muted); text-align: center; padding: 12px 0 2px; }
+
+  .empty-state { text-align: center; padding: 30px 20px; color: var(--bs-muted); }
+  .empty-state strong { display: block; margin-bottom: 6px; color: var(--bs-text); font: 600 15px/1.4 var(--bs-font-head); letter-spacing: .04em; text-transform: uppercase; }
+
+  /* --- Settings editor ---------------------------------------- */
+  .editor { display: none; }
+  .editor.open { display: block; }
+  .editor .row { display: grid; grid-template-columns: 1fr 74px 26px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--bs-panel); }
+  .editor .row:last-of-type { border-bottom: none; }
+  .editor input[type="text"] {
+    font: 400 15px/1.3 var(--bs-font-body); background: var(--bs-dark-well); color: var(--bs-text);
+    border: 1px solid var(--bs-panel); border-radius: 4px; padding: 8px 10px; width: 100%;
+  }
+  .editor input[type="number"] {
+    font: 600 15px/1.2 var(--bs-font-head); background: var(--bs-dark-well); color: var(--bs-text);
+    border: 1px solid var(--bs-panel); border-radius: 4px; padding: 8px 6px; width: 100%; text-align: center;
+    color-scheme: dark;
+  }
+  .editor .del { background: none; border: none; color: var(--bs-muted-2); min-height: auto; padding: 4px; font-size: 18px; }
+  .editor .del:hover { color: var(--bs-signal-red); }
+  .editor .hint { font: 400 12px/1.5 var(--bs-font-body); color: var(--bs-muted); margin: 4px 0 12px; }
+  .editor .col-head { display: grid; grid-template-columns: 1fr 74px 26px; gap: 8px; font: 700 10px/1.2 var(--bs-font-head); letter-spacing: .12em; text-transform: uppercase; color: var(--bs-muted-2); padding-bottom: 6px; }
+  .editor .ed-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .editor .ed-actions button { flex: 1 1 120px; }
+  button.ghost { background: none; border: 1px solid var(--bs-panel); }
+  button.subtle { font-size: 12px; padding: 10px; min-height: 40px; }
+
+  /* --- Flash overlay & toast ---------------------------------- */
+  #flash {
+    position: fixed; inset: 0; background: var(--bs-gold); z-index: 800;
+    opacity: 0; pointer-events: none; display: grid; place-items: center;
+  }
+  #flash.on { animation: flash 1.1s ease; }
+  #flash .flash-text { font: 700 clamp(28px, 10vw, 60px)/1 var(--bs-font-head); text-transform: uppercase; letter-spacing: .04em; color: var(--bs-dark); text-align: center; padding: 20px; }
+  @keyframes flash { 0%,100% { opacity: 0; } 15%,60% { opacity: .96; } }
+  @media (prefers-reduced-motion: reduce) {
+    #flash.on { animation: none; opacity: .96; transition: opacity 1.1s step-end; }
+  }
+
+  .toast {
+    position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    max-width: 90vw; padding: 13px 18px; border-radius: 8px;
+    font: 500 14px/1.4 var(--bs-font-body); background: #222; color: #fff;
+    box-shadow: 0 6px 24px rgba(0,0,0,.35); border-left: 4px solid var(--bs-muted); z-index: 1000;
+    opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { border-left-color: var(--bs-signal-good); }
+  .toast.error { border-left-color: var(--bs-signal-red); }
+
+  .hint-inline { font: 400 12px/1.5 var(--bs-font-body); color: var(--bs-muted); margin-top: 12px; }
+  .hint-inline b { color: var(--bs-gold-light); font-weight: 600; }
+
+  /* --- Print (clean sheet of the sequence to pin up) ---------- */
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; color: #111; max-width: 100%; }
+    .actions, .live, .editor, .tl-head .gear, #flash, .toast, .hint-inline, .gap-chip, button { display: none !important; }
+    .card { border-color: #ccc; background: #fff; }
+    .masthead h1, .eyebrow, li.stage .time, li.stage .name, .tagline { color: #111 !important; }
+    li.stage.push .time, li.stage.push .name, .masthead h1 .dot, .eyebrow { color: #8a6d1f !important; }
+    ul.timeline::before, li.stage .marker { background: #999; border-color: #999; }
+    .page-break { break-before: page; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="masthead">
+    <h1>Match Timing<span class="dot">.</span></h1>
+    <span class="brandline">Black&nbsp;Sticks</span>
+  </header>
+
+  <!-- Time inputs -->
+  <section class="card">
+    <div class="eyebrow">Your two times</div>
+    <div class="pb-row key">
+      <label class="pb-label" for="offpitch">Off&nbsp;pitch</label>
+      <input type="time" id="offpitch" aria-label="Off pitch time">
+    </div>
+    <div class="pb-row key">
+      <label class="pb-label" for="pushback">Push&nbsp;back</label>
+      <input type="time" id="pushback" aria-label="Push back time">
+    </div>
+    <div class="gap-chip muted" id="gapChip" role="status">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span id="gapText">Set both times</span>
+    </div>
+
+    <div class="actions">
+      <button id="armBtn" class="primary" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="armLabel">Arm alarms</span>
+      </button>
+      <button id="icsBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Add to Calendar
+      </button>
+      <button id="copyBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy times
+      </button>
+      <button id="testBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Test alarm
+      </button>
+    </div>
+    <p class="hint-inline" id="armHint">Set <b>off pitch</b> and <b>push back</b>, the warm-up fills in around them. <b>In-app alarms</b> beep + flash while this stays open (screen kept awake). For alarms in your pocket, tap <b>Add to Calendar</b>.</p>
+  </section>
+
+  <!-- Live countdown -->
+  <section class="live" id="livePanel" hidden aria-live="polite">
+    <div class="now-clock" id="nowClock">--:--</div>
+    <div class="next-label">Next up</div>
+    <div class="next-name" id="nextName">-</div>
+    <div class="countdown" id="countdown">--:--</div>
+    <div class="current" id="currentStage"></div>
+    <div class="progress"><span id="progressBar"></span></div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="card">
+    <div class="tl-head">
+      <div class="eyebrow">The Sequence</div>
+      <button class="gear" id="gearBtn" type="button" aria-label="Edit timings" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+
+    <ul class="timeline" id="timeline"></ul>
+
+    <div class="empty-state" id="emptyState">
+      <strong>Set off pitch + push back</strong>
+      The full warm-up sequence pulls through automatically.
+    </div>
+
+    <div class="tagline">Walk&nbsp;Towards&nbsp;Pressure</div>
+
+    <!-- Editor -->
+    <div class="editor" id="editor">
+      <p class="hint">Minutes <b>before off pitch</b> for each warm-up stage. Off pitch and push back are your two inputs above. Edit once, it remembers.</p>
+      <div class="col-head"><span>Warm-up stage</span><span style="text-align:center">Before&nbsp;off</span><span></span></div>
+      <div id="editorRows"></div>
+      <div class="ed-actions">
+        <button class="ghost subtle" id="addStageBtn" type="button">+ Add stage</button>
+        <button class="ghost subtle" id="resetBtn" type="button">Reset defaults</button>
+        <button class="primary subtle" id="saveStagesBtn" type="button">Save</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="flash" aria-hidden="true"><div class="flash-text" id="flashText"></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Defaults: warm-up stages, minutes BEFORE OFF PITCH ----------
+     (Off pitch 2 min before push back reproduces the official MATCH TIMING
+      card exactly; widen the anthem gap by setting a later push back.) */
+  var DEFAULT_STAGES = [
+    { name: "Ready",             before: 28 },
+    { name: "Physical Warm Up",  before: 26 },
+    { name: "Technical",         before: 16 },
+    { name: "Outlet / 7 Yard",   before: 13 },
+    { name: "PCA / Mini Game",   before: 9  },
+    { name: "Attack v Defence",  before: 4  }
+  ];
+
+  var KEY_PB = "bsmt_pushback_v2";
+  var KEY_OFF = "bsmt_offpitch_v2";
+  var KEY_STAGES = "bsmt_stages_v2";
+  var KEY_STAGES_BAK = "bsmt_stages_v2_bak";
+
+  /* ---------- Durable storage (localStorage + shadow backup) ---------- */
+  function saveStages(s) {
+    var json = JSON.stringify(s);
+    try { localStorage.setItem(KEY_STAGES, json); localStorage.setItem(KEY_STAGES_BAK, json); } catch (e) {}
+  }
+  function loadStages() {
+    var raw;
+    try { raw = localStorage.getItem(KEY_STAGES) || localStorage.getItem(KEY_STAGES_BAK); } catch (e) {}
+    if (raw) {
+      try { var p = JSON.parse(raw); if (Array.isArray(p) && p.length) return p; } catch (e) {}
+    }
+    return DEFAULT_STAGES.map(function (s) { return { name: s.name, before: s.before }; });
+  }
+  function savePB(v)  { try { localStorage.setItem(KEY_PB, v);  } catch (e) {} }
+  function loadPB()   { try { return localStorage.getItem(KEY_PB)  || ""; } catch (e) { return ""; } }
+  function saveOff(v) { try { localStorage.setItem(KEY_OFF, v); } catch (e) {} }
+  function loadOff()  { try { return localStorage.getItem(KEY_OFF) || ""; } catch (e) { return ""; } }
+
+  /* ---------- State ---------- */
+  var stages = loadStages();
+  var pushBackStr = loadPB();
+  var offPitchStr = loadOff();
+  var armed = false;
+  var firedKeys = {};
+  var audioCtx = null;
+  var wakeLock = null;
+  var tickTimer = null;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var pbInput = $("pushback");
+  var offInput = $("offpitch");
+  var livePanel = $("livePanel");
+  var timelineEl = $("timeline");
+  var emptyState = $("emptyState");
+
+  pbInput.value = pushBackStr;
+  offInput.value = offPitchStr;
+
+  /* ---------- Time helpers ---------- */
+  function toDate(str) {
+    if (!str) return null;
+    var parts = str.split(":");
+    if (parts.length < 2) return null;
+    var d = new Date();
+    d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+    return d;
+  }
+  function pushBackDate() { return toDate(pushBackStr); }
+  function offPitchDate() { return toDate(offPitchStr); }
+  function shiftStr(str, deltaMin) {
+    var d = toDate(str); if (!d) return "";
+    d = new Date(d.getTime() + deltaMin * 60000);
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+  }
+  function fmtClock(d) {
+    if (!d) return "--:--";
+    var h = d.getHours(), m = d.getMinutes();
+    var ampm = h >= 12 ? "pm" : "am";
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return h12 + "." + (m < 10 ? "0" + m : m) + ampm;
+  }
+  function fmtCountdown(ms) {
+    if (ms < 0) ms = 0;
+    var total = Math.round(ms / 1000);
+    var mm = Math.floor(total / 60);
+    var ss = total % 60;
+    return mm + ":" + (ss < 10 ? "0" + ss : ss);
+  }
+
+  /* ---------- Build the merged event list ----------
+     Warm-up stages anchor to OFF PITCH; push back is its own anchor. */
+  function buildEvents() {
+    var off = offPitchDate(), pb = pushBackDate();
+    var events = [];
+    if (off) {
+      stages.forEach(function (s) {
+        events.push({ name: s.name, time: new Date(off.getTime() - s.before * 60000), kind: "stage" });
+      });
+      events.push({ name: "Off Pitch", time: off, kind: "offpitch" });
+    }
+    if (pb) events.push({ name: "PUSH BACK", time: pb, kind: "push" });
+    events.sort(function (a, b) { return a.time.getTime() - b.time.getTime(); });
+    return events;
+  }
+  function gapMinutes() {
+    var off = offPitchDate(), pb = pushBackDate();
+    if (!off || !pb) return null;
+    return Math.round((pb.getTime() - off.getTime()) / 60000);
+  }
+
+  /* ---------- Gap chip ---------- */
+  function renderGap() {
+    var chip = $("gapChip"), txt = $("gapText");
+    var g = gapMinutes();
+    chip.className = "gap-chip";
+    if (g === null) { chip.className += " muted"; txt.textContent = "Set both times"; return; }
+    if (g < 0) { chip.className += " warn"; txt.textContent = "Push back is before off pitch"; return; }
+    txt.textContent = g + " min for anthems / walk-out";
+  }
+
+  /* ---------- Timeline ---------- */
+  function renderTimeline() {
+    var events = buildEvents();
+    timelineEl.innerHTML = "";
+    if (!events.length) { emptyState.style.display = "block"; timelineEl.style.display = "none"; return; }
+    emptyState.style.display = "none";
+    timelineEl.style.display = "block";
+
+    var now = Date.now();
+    var currentIdx = -1;
+    events.forEach(function (ev, i) { if (ev.time.getTime() <= now) currentIdx = i; });
+    var g = gapMinutes();
+
+    events.forEach(function (ev, i) {
+      var li = document.createElement("li");
+      li.className = "stage" + (ev.kind === "push" ? " push" : ev.kind === "offpitch" ? " offpitch" : "");
+      if (i < currentIdx) li.className += " past";
+      if (i === currentIdx) li.className += " current";
+
+      var time = document.createElement("span");
+      time.className = "time"; time.textContent = fmtClock(ev.time);
+
+      var marker = document.createElement("span");
+      marker.className = "marker";
+
+      var name = document.createElement("span");
+      name.className = "name"; name.textContent = ev.name;
+      if (ev.kind === "offpitch" && g !== null && g > 0) {
+        var sub = document.createElement("span");
+        sub.className = "sub"; sub.textContent = "then anthems / walk-out (" + g + "m)";
+        name.appendChild(sub);
+      }
+
+      li.appendChild(time); li.appendChild(marker); li.appendChild(name);
+      timelineEl.appendChild(li);
+    });
+  }
+
+  /* ---------- Live panel + alarm loop ---------- */
+  function updateLive() {
+    var events = buildEvents();
+    if (!events.length) { livePanel.hidden = true; return; }
+    livePanel.hidden = false;
+
+    var now = Date.now();
+    $("nowClock").textContent = "Now  " + fmtClock(new Date(now));
+
+    var next = null, nextIdx = -1;
+    for (var i = 0; i < events.length; i++) {
+      if (events[i].time.getTime() > now) { next = events[i]; nextIdx = i; break; }
+    }
+    var currentName = "";
+    for (var j = 0; j < events.length; j++) {
+      if (events[j].time.getTime() <= now) currentName = events[j].name;
+    }
+
+    livePanel.classList.toggle("push", !!(next && next.kind === "push"));
+
+    if (next) {
+      var ms = next.time.getTime() - now;
+      $("nextName").textContent = next.name;
+      $("countdown").textContent = fmtCountdown(ms);
+      $("currentStage").textContent = currentName ? "Now: " + currentName : "Warm-up not started";
+
+      var first = events[0].time.getTime();
+      var last = events[events.length - 1].time.getTime();
+      var span = last - first;
+      var pct = span > 0 ? Math.max(0, Math.min(100, ((now - first) / span) * 100)) : 0;
+      $("progressBar").style.width = pct + "%";
+    } else {
+      $("nextName").textContent = "Match underway";
+      $("countdown").textContent = "GO";
+      $("currentStage").textContent = currentName ? "Last: " + currentName : "";
+      $("progressBar").style.width = "100%";
+    }
+
+    if (armed) {
+      for (var k = 0; k < events.length; k++) {
+        var st = events[k].time.getTime();
+        var delta = now - st;
+        var key = st + "|" + events[k].name;
+        if (delta >= 0 && delta < 1500 && !firedKeys[key]) {
+          firedKeys[key] = true;
+          fireAlarm(events[k]);
+        }
+      }
+    }
+  }
+
+  function tick() { updateLive(); renderTimeline(); renderGap(); }
+  function startTicking() { if (tickTimer) return; tick(); tickTimer = setInterval(tick, 1000); }
+
+  /* ---------- Alarm output ---------- */
+  function beep(times, big) {
+    if (!audioCtx) return;
+    var t0 = audioCtx.currentTime;
+    for (var i = 0; i < times; i++) {
+      var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.type = "sine"; osc.frequency.value = big ? 660 : 880;
+      var start = t0 + i * 0.28;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.55, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(start); osc.stop(start + 0.24);
+    }
+  }
+  function vibrate(p) { if (navigator.vibrate) { try { navigator.vibrate(p); } catch (e) {} } }
+  function flash(text) {
+    var el = $("flash");
+    $("flashText").textContent = text;
+    el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+    setTimeout(function () { el.classList.remove("on"); }, 1200);
+  }
+  function fireAlarm(ev) {
+    var big = ev.kind === "push";
+    beep(big ? 4 : 2, big);
+    vibrate(big ? [200, 100, 200, 100, 400] : [180, 90, 180]);
+    flash(ev.name);
+  }
+
+  /* ---------- Audio unlock + wake lock ---------- */
+  function unlockAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      g.gain.value = 0.0001; o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + 0.02);
+    } catch (e) {}
+  }
+  async function requestWakeLock() {
+    try { if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); } catch (e) {}
+  }
+  function releaseWakeLock() { if (wakeLock) { try { wakeLock.release(); } catch (e) {} wakeLock = null; } }
+  document.addEventListener("visibilitychange", function () {
+    if (armed && document.visibilityState === "visible" && !wakeLock) requestWakeLock();
+  });
+
+  /* ---------- Arm toggle ---------- */
+  function setArmed(on) {
+    armed = on;
+    var btn = $("armBtn");
+    if (on && !buildEvents().length) {
+      toast("Set your times first", "error"); armed = false;
+      btn.classList.remove("armed"); $("armLabel").textContent = "Arm alarms";
+      btn.setAttribute("aria-pressed", "false"); return;
+    }
+    btn.classList.toggle("armed", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    $("armLabel").textContent = on ? "Alarms armed" : "Arm alarms";
+    if (on) {
+      firedKeys = {};
+      unlockAudio(); requestWakeLock(); startTicking();
+      toast("Alarms armed. Keep this open on the sideline", "success");
+    } else {
+      releaseWakeLock(); toast("Alarms off");
+    }
+  }
+
+  /* ---------- Calendar (.ics) export ---------- */
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function icsStamp(d) {
+    return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "T" +
+           pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  }
+  function buildICS() {
+    var events = buildEvents();
+    if (!events.length) return null;
+    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Black Sticks//Match Timing//EN", "CALSCALE:GREGORIAN"];
+    var stampBase = icsStamp(new Date());
+    events.forEach(function (ev, i) {
+      var isPush = ev.kind === "push";
+      lines.push("BEGIN:VEVENT");
+      lines.push("UID:bsmt-" + stampBase + "-" + i + "@blacksticks");
+      lines.push("DTSTAMP:" + stampBase);
+      lines.push("DTSTART:" + icsStamp(ev.time));      // floating local time, fires at wall clock
+      lines.push("DURATION:PT2M");
+      lines.push("SUMMARY:" + (isPush ? "PUSH BACK" : ev.name + (ev.kind === "offpitch" ? "" : " (warm-up)")));
+      lines.push("BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:PT0S", "DESCRIPTION:" + ev.name, "END:VALARM");
+      lines.push("END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    return lines.join("\r\n");
+  }
+  function downloadICS() {
+    var ics = buildICS();
+    if (!ics) { toast("Set your times first", "error"); return; }
+    var blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var label = (pushBackStr || offPitchStr).replace(":", "");
+    a.href = url; a.download = "match-timing-" + label + ".ics";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    toast("Calendar file ready. Open it to add the alarms", "success");
+  }
+
+  /* ---------- Copy times ---------- */
+  function copyTimes() {
+    var events = buildEvents();
+    if (!events.length) { toast("Set your times first", "error"); return; }
+    var text = "MATCH TIMING\n";
+    events.forEach(function (ev) { text += fmtClock(ev.time) + "  " + ev.name + "\n"; });
+    var g = gapMinutes();
+    if (g !== null && g > 0) text += "(" + g + " min anthems / walk-out)\n";
+    text += "Walk towards pressure.";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast("Times copied", "success"); },
+        function () { fallbackCopy(text); });
+    } else { fallbackCopy(text); }
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("Times copied", "success"); }
+    catch (e) { toast("Could not copy", "error"); }
+    document.body.removeChild(ta);
+  }
+
+  /* ---------- Editor ---------- */
+  function renderEditor() {
+    var wrap = $("editorRows");
+    wrap.innerHTML = "";
+    stages.forEach(function (s, i) {
+      var row = document.createElement("div");
+      row.className = "row";
+
+      var nameIn = document.createElement("input");
+      nameIn.type = "text"; nameIn.value = s.name; nameIn.setAttribute("aria-label", "Stage name");
+      nameIn.addEventListener("input", function () { stages[i].name = nameIn.value; });
+
+      var numIn = document.createElement("input");
+      numIn.type = "number"; numIn.value = s.before; numIn.min = "0"; numIn.max = "180";
+      numIn.setAttribute("aria-label", "Minutes before off pitch for " + s.name);
+      numIn.addEventListener("input", function () { stages[i].before = parseInt(numIn.value, 10) || 0; });
+
+      var del = document.createElement("button");
+      del.className = "del"; del.type = "button"; del.textContent = "×";
+      del.setAttribute("aria-label", "Remove " + s.name);
+      del.addEventListener("click", function () { stages.splice(i, 1); renderEditor(); });
+
+      row.appendChild(nameIn); row.appendChild(numIn); row.appendChild(del);
+      wrap.appendChild(row);
+    });
+  }
+  function toggleEditor() {
+    var ed = $("editor");
+    var open = ed.classList.toggle("open");
+    $("gearBtn").setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) renderEditor();
+  }
+
+  /* ---------- Toast ---------- */
+  var toastTimer = null;
+  function toast(msg, kind) {
+    var el = $("toast");
+    el.textContent = msg;
+    el.className = "toast show" + (kind ? " " + kind : "");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.className = "toast"; }, 2600);
+  }
+
+  /* ---------- Events ---------- */
+  offInput.addEventListener("input", function () {
+    offPitchStr = offInput.value; saveOff(offPitchStr);
+    // convenience: if push back still blank, seed it 2 min after off pitch (the card standard)
+    if (offPitchStr && !pushBackStr) { pushBackStr = shiftStr(offPitchStr, 2); pbInput.value = pushBackStr; savePB(pushBackStr); }
+    firedKeys = {}; tick();
+  });
+  pbInput.addEventListener("input", function () {
+    pushBackStr = pbInput.value; savePB(pushBackStr);
+    // convenience: if off pitch still blank, seed it 2 min before push back
+    if (pushBackStr && !offPitchStr) { offPitchStr = shiftStr(pushBackStr, -2); offInput.value = offPitchStr; saveOff(offPitchStr); }
+    firedKeys = {}; tick();
+  });
+  $("armBtn").addEventListener("click", function () { setArmed(!armed); });
+  $("icsBtn").addEventListener("click", downloadICS);
+  $("copyBtn").addEventListener("click", copyTimes);
+  $("testBtn").addEventListener("click", function () {
+    unlockAudio(); fireAlarm({ name: "Test alarm", kind: "stage" }); toast("That's your alarm");
+  });
+  $("gearBtn").addEventListener("click", toggleEditor);
+  $("addStageBtn").addEventListener("click", function () { stages.push({ name: "New stage", before: 0 }); renderEditor(); });
+  $("resetBtn").addEventListener("click", function () {
+    stages = DEFAULT_STAGES.map(function (s) { return { name: s.name, before: s.before }; });
+    renderEditor(); saveStages(stages); tick(); toast("Defaults restored", "success");
+  });
+  $("saveStagesBtn").addEventListener("click", function () {
+    stages = stages.filter(function (s) { return s.name && s.name.trim(); });
+    saveStages(stages); firedKeys = {}; tick();
+    $("editor").classList.remove("open"); $("gearBtn").setAttribute("aria-expanded", "false");
+    toast("Timings saved", "success");
+  });
+
+  /* ---------- Go ---------- */
+  startTicking();
+})();
+</script>
+</body>
+</html>

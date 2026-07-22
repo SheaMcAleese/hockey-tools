@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match Day — Black Sticks</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Black Sticks design system — 09 - AI Coaching Brain/DESIGN.md */
+:root{
+  --bs-green-deep:#0C3B24; --bs-dark:#141608; --bs-dark-well:#10140F; --bs-panel:#2A3327;
+  --bs-gold:#C9A24B; --bs-gold-light:#E7CB86;
+  --bs-text:#EAEDE6; --bs-muted:#8E978A; --bs-muted-2:#727C6C;
+  --head:'Oswald','Arial Narrow',sans-serif; --body:'Inter','Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:linear-gradient(150deg,var(--bs-green-deep) 0%,var(--bs-dark-well) 70%);color:var(--bs-text);font-family:var(--body);padding:26px 20px 60px}
+.wrap{max-width:900px;margin:0 auto}
+.kick{font:600 13px var(--head);letter-spacing:.24em;color:var(--bs-gold);text-transform:uppercase}
+h1{font:700 44px/1 var(--head);letter-spacing:.03em;text-transform:uppercase;margin-top:8px}
+.date{font:400 15px var(--body);color:var(--bs-muted);margin-top:8px}
+.rule{width:220px;height:1px;background:var(--bs-gold);margin:20px 0 24px;opacity:.85}
+
+.opps{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
+.opp{flex:1;min-width:150px;background:rgba(20,22,8,.55);border:1px solid var(--bs-panel);border-radius:12px;padding:16px 12px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.opp .fl{font-size:40px;line-height:1}
+.opp .nm{font:600 17px var(--head);letter-spacing:.08em;text-transform:uppercase;margin-top:8px}
+.opp.sel{border-color:var(--bs-gold);background:rgba(201,162,75,.12)}
+.opp .md{font:600 10px var(--head);letter-spacing:.14em;color:var(--bs-muted);text-transform:uppercase;margin-top:4px}
+.opp.sel .md{color:var(--bs-gold-light)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.tool{display:block;background:var(--bs-panel);border:1px solid transparent;border-radius:14px;padding:22px 22px 20px;text-decoration:none;color:var(--bs-text);position:relative;-webkit-tap-highlight-color:transparent}
+.tool:active{border-color:var(--bs-gold)}
+.tool .ic{font-size:30px;line-height:1}
+.tool h3{font:600 21px var(--head);letter-spacing:.07em;text-transform:uppercase;margin-top:10px}
+.tool p{font:400 13px/1.5 var(--body);color:var(--bs-muted);margin-top:6px}
+.tool.big{grid-column:1 / -1;background:var(--bs-gold);color:var(--bs-dark)}
+.tool.big h3{font-size:26px}
+.tool.big p{color:rgba(20,22,8,.75);font-weight:600}
+.tool.unset{border:1px dashed var(--bs-muted-2);background:rgba(20,22,8,.4)}
+.tool.unset h3{color:var(--bs-muted)}
+.tool .setlnk{position:absolute;top:12px;right:14px;font-size:12px;color:var(--bs-muted-2);background:none;border:none;cursor:pointer;padding:4px}
+.tool .setlnk:hover{color:var(--bs-gold)}
+
+.check{margin-top:30px;background:rgba(20,22,8,.55);border:1px solid var(--bs-panel);border-radius:12px;padding:18px 22px}
+.check h4{font:600 13px var(--head);letter-spacing:.18em;color:var(--bs-gold);text-transform:uppercase;margin-bottom:10px}
+.check label{display:flex;align-items:center;gap:10px;font-size:14px;padding:7px 0;color:var(--bs-text);cursor:pointer;border-top:1px dashed rgba(42,51,39,.9)}
+.check label:first-of-type{border-top:none}
+.check input{width:19px;height:19px;accent-color:var(--bs-gold)}
+.check label.done span{color:var(--bs-muted-2);text-decoration:line-through}
+.check .reset{margin-top:10px;background:none;border:1px solid var(--bs-panel);color:var(--bs-muted);border-radius:7px;padding:6px 12px;font:600 11px var(--body);cursor:pointer}
+
+.footnote{margin-top:26px;font:400 12px/1.6 var(--body);color:var(--bs-muted-2)}
+.footnote b{color:var(--bs-muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">Black Sticks · World Cup 2026</div>
+  <h1>Match Day</h1>
+  <div class="date" id="today"></div>
+  <div class="rule"></div>
+
+  <div class="opps" id="opps"></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="check">
+    <h4>Before push-back</h4>
+    <div id="checks"></div>
+    <button class="reset" onclick="hub.resetChecks()">Reset for next game</button>
+  </div>
+
+  <div class="footnote">
+    <b>Links:</b> tap &#9998; on any tile to point it at the right URL — saved on this device. The opponent deck tiles want the deck's hosted URL if you put one up; otherwise AirDrop the exported deck to the iPad and open it from Files (the tile then just reminds you).<br>
+    <b>Offline:</b> open this page once on venue wifi and it keeps working with no internet. Add to Home Screen from Safari's share menu for one-tap access on the bench.
+    <div style="margin-top:14px;letter-spacing:.14em;text-transform:uppercase;font-size:10.5px;color:var(--bs-muted-2);">Match Day Hub · v2 — 22 Jul 2026</div>
+  </div>
+</div>
+
+<script>
+const KEY='bsHubV1';
+const OPPS=[['🇯🇵','JAPAN'],['🇦🇷','ARGENTINA'],['🇳🇱','NETHERLANDS']];
+const TOOLS=[
+  {id:'sub',  ic:'📋', nm:'Sub Sheet',       p:'Rotations, live clock, line-up card, GPS stamps', url:'./index.html', fixed:true},
+  {id:'time', ic:'⏰', nm:'Match Timing',     p:'Off pitch + push back → full warm-up with countdown alarms', url:'https://sheamcaleese.github.io/hockey-tools/Match%20Timing.html', fixed:true},
+  {id:'deck', ic:'🥅', nm:'PC Deck',         p:'The opponent’s corner attack + how we defend it', perOpp:true},
+  {id:'gps',  ic:'📡', nm:'GPS Stamper',     p:'Manager’s phone backup — quarter start/stop stamps'},
+  {id:'shed', ic:'🛖', nm:'Shed Wall',       p:'The one-liners on the big screen'},
+  {id:'plan', ic:'📈', nm:'Load Planner',    p:'The week’s plan — log actuals after the game'},
+  {id:'trak', ic:'🗓', nm:'WC Tracker',      p:'Schedule, standings, the tournament picture'}
+];
+const CHECKS=['Sub sheet game created — structures + rotation units set','Match Timing set — off pitch + push back, alarms armed','PC deck reviewed with the unit (Test the Unit once)','GPS Stamper phone charged and open','Line-up card read in the huddle plan','Backup taken since last edit'];
+
+const hub={
+  state:{sel:0,links:{},decks:{},checks:[]},
+  load(){ try{const r=localStorage.getItem(KEY); if(r) Object.assign(this.state,JSON.parse(r));}catch(e){} },
+  save(){ try{localStorage.setItem(KEY,JSON.stringify(this.state));}catch(e){} },
+  esc(s){return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')},
+
+  renderOpps(){
+    document.getElementById('opps').innerHTML=OPPS.map((o,i)=>
+      `<div class="opp ${i===this.state.sel?'sel':''}" onclick="hub.selOpp(${i})">
+        <div class="fl">${o[0]}</div><div class="nm">${o[1]}</div>
+        <div class="md">${i===this.state.sel?'TODAY’S OPPONENT':'&nbsp;'}</div>
+      </div>`).join('');
+  },
+  selOpp(i){ this.state.sel=i; this.save(); this.renderOpps(); this.renderGrid(); },
+
+  toolUrl(t){
+    if(t.fixed) return t.url;
+    if(t.perOpp) return this.state.decks[OPPS[this.state.sel][1]]||'';
+    return this.state.links[t.id]||'';
+  },
+  renderGrid(){
+    const opp=OPPS[this.state.sel];
+    document.getElementById('grid').innerHTML=TOOLS.map(t=>{
+      const url=this.toolUrl(t);
+      const nm=t.perOpp?opp[1]+' PC DECK':t.nm;
+      const p=t.perOpp&&!url?'No hosted link set — AirDrop the exported deck and open it from Files, or tap ✎ to add a URL':t.p;
+      const cls='tool'+(t.id==='sub'?' big':'')+(url?'':' unset');
+      const edit=t.fixed?'':`<button class="setlnk" onclick="hub.setLink(event,'${t.id}')">✎</button>`;
+      const open=url?`href="${this.esc(url)}" target="_blank" rel="noopener"`:'href="javascript:void(0)"';
+      return `<a class="${cls}" ${open}>${edit}<div class="ic">${t.ic}</div><h3>${t.perOpp?opp[0]+' ':''}${this.esc(nm)}</h3><p>${this.esc(p)}</p></a>`;
+    }).join('');
+  },
+  setLink(ev,id){
+    ev.preventDefault(); ev.stopPropagation();
+    const t=TOOLS.find(x=>x.id===id);
+    if(t.perOpp){
+      const team=OPPS[this.state.sel][1];
+      const cur=this.state.decks[team]||'';
+      const v=prompt('Hosted URL for the '+team+' PC deck (leave blank to clear):',cur);
+      if(v===null) return;
+      if(v.trim()) this.state.decks[team]=v.trim(); else delete this.state.decks[team];
+    } else {
+      const cur=this.state.links[id]||'';
+      const v=prompt('URL for '+t.nm+' (leave blank to clear):',cur);
+      if(v===null) return;
+      if(v.trim()) this.state.links[id]=v.trim(); else delete this.state.links[id];
+    }
+    this.save(); this.renderGrid();
+  },
+
+  renderChecks(){
+    document.getElementById('checks').innerHTML=CHECKS.map((c,i)=>{
+      const on=this.state.checks.includes(i);
+      return `<label class="${on?'done':''}"><input type="checkbox" ${on?'checked':''} onchange="hub.tickCheck(${i},this.checked)"><span>${c}</span></label>`;
+    }).join('');
+  },
+  tickCheck(i,on){
+    this.state.checks=this.state.checks.filter(x=>x!==i);
+    if(on) this.state.checks.push(i);
+    this.save(); this.renderChecks();
+  },
+  resetChecks(){ this.state.checks=[]; this.save(); this.renderChecks(); },
+
+  init(){
+    this.load();
+    const d=new Date();
+    document.getElementById('today').textContent=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]+' '+d.getDate()+' '+['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()]+' '+d.getFullYear();
+    this.renderOpps(); this.renderGrid(); this.renderChecks();
+    if('serviceWorker' in navigator){ try{navigator.serviceWorker.register('./sw.js');}catch(e){} }
+  }
+};
+hub.init();
+</script>
+</body>
+</html>

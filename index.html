@@ -6,7 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#d4a843">
-<link rel="manifest" href="manifest.json">
 <title>Hockey Tools</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,39 +25,54 @@ a.card small { font-size: 13px; color: #888; }
 </head>
 <body>
 <h1>HOCKEY TOOLS</h1>
-<p>Squad management, training & match day tools</p>
+<p>Squad management, training &amp; match day tools</p>
 <div class="cards">
-  <a class="card" href="hockey-squad-selection.html">
-    <div class="card-icon">&#9917;</div>
-    <h2>Squad Selection</h2>
-    <small>Squad management, match selection, formations & team sheets</small>
-  </a>
-  <a class="card" href="hockey-session-timer.html">
-    <div class="card-icon">&#9201;</div>
-    <h2>Session Timer</h2>
-    <small>Training & pre-match warmup timers with audio alerts</small>
-  </a>
-  <a class="card" href="hockey-training-plan.html">
+  <a class="card" href="Black%20Sticks%20Sub%20Sheet%20v3.html">
     <div class="card-icon">&#128203;</div>
-    <h2>Training Plan</h2>
-    <small>Build training sessions with schedules, RPE & match play teams</small>
+    <h2>Black Sticks Sub Sheet</h2>
+    <small>Quarter-by-quarter rotations, live clock, bench board &mdash; match day runs on the iPad Netlify app</small>
   </a>
-  <a class="card" href="hockey-rotation.html">
+  <a class="card" href="Match%20Timing.html">
+    <div class="card-icon">&#9200;</div>
+    <h2>Match Timing</h2>
+    <small>Set off pitch &amp; push back &mdash; the whole warm-up sequence pulls through with live countdown alarms &amp; calendar export</small>
+  </a>
+  <a class="card" href="ELV8%20Rotation%20Builder.html">
     <div class="card-icon">&#128260;</div>
-    <h2>Rotation Generator</h2>
-    <small>Sub sheets, rotation cycles & interchange planning</small>
+    <h2>Rotation Builder</h2>
+    <small>Build line rotations, then run them live in bench mode &mdash; stoppages, sub alerts, cards, real minutes</small>
   </a>
-  <a class="card" href="hockey-matchup.html">
-    <div class="card-icon">&#9876;</div>
-    <h2>Match Lineup</h2>
-    <small>Two-team match day lineup on one pitch with drag & drop</small>
+  <a class="card" href="GPS%20Stamper%20-%20Phone%20(Netlify)/index.html">
+    <div class="card-icon">&#128225;</div>
+    <h2>GPS Stamper</h2>
+    <small>Phone backup timer &mdash; one big button to stamp quarter and drill start/finish, offline, CSV export</small>
   </a>
   <a class="card" href="hockey-opposition-scout.html">
     <div class="card-icon">&#127759;</div>
     <h2>Opposition Scout</h2>
-    <small>Opponent scouting reports, threat analysis & game plans for World Cup prep</small>
+    <small>Opponent scouting reports, threat analysis &amp; game plans for World Cup prep</small>
   </a>
-  <a class="card" href="hockey-player-reviews.html">
+  <a class="card" href="ELV8%20Suite/training-load-planner.html">
+    <div class="card-icon">&#128200;</div>
+    <h2>Training Load Planner</h2>
+    <small>Session RPE, weekly load, ACWR, monotony &amp; strain across the block</small>
+  </a>
+  <a class="card" href="ELV8%20Suite/squad-selection.html">
+    <div class="card-icon">&#9917;</div>
+    <h2>Squad Selection</h2>
+    <small>Squad management, match selection, formations &amp; team sheets</small>
+  </a>
+  <a class="card" href="ELV8%20Suite/session-timer.html">
+    <div class="card-icon">&#9201;</div>
+    <h2>Session Timer</h2>
+    <small>Training &amp; pre-match warmup timers with audio alerts</small>
+  </a>
+  <a class="card" href="ELV8%20Suite/match-lineup.html">
+    <div class="card-icon">&#9876;</div>
+    <h2>Match Lineup</h2>
+    <small>Two-team match day lineup on one pitch with drag &amp; drop</small>
+  </a>
+  <a class="card" href="ELV8%20Suite/player-reviews.html">
     <div class="card-icon">&#128100;</div>
     <h2>Player Reviews</h2>
     <small>Individual player performance reviews and development tracking</small>
@@ -66,14 +80,14 @@ a.card small { font-size: 13px; color: #888; }
 </div>
 <div class="status" id="status"></div>
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(() => {
-    document.getElementById('status').textContent = 'Offline ready';
-    document.getElementById('status').className = 'status online';
-  });
+function setStatus(){
+  var s=document.getElementById('status');
+  if(navigator.onLine){ s.textContent='Online'; s.className='status online'; }
+  else { s.textContent='Offline mode'; s.className='status offline'; }
 }
-window.addEventListener('online', () => { document.getElementById('status').textContent = 'Online'; document.getElementById('status').className = 'status online'; });
-window.addEventListener('offline', () => { document.getElementById('status').textContent = 'Offline mode'; document.getElementById('status').className = 'status offline'; });
+window.addEventListener('online', setStatus);
+window.addEventListener('offline', setStatus);
+setStatus();
 </script>
 </body>
 </html>
